@@ -1,0 +1,6 @@
+Experiment_Code	Group	Description
+Exp026921	0	ctr_0h_R1_injection_2.raw
+Exp026986	2	PLX_2h_R1_injection_1.raw
+Exp026993	6	PLX_6h_R1_injection_1.raw
+Exp026999	24	PLX_24h_R1_injection_1.raw
+Exp027006	48	PLX_48h_R1_injection_3.raw

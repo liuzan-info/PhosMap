@@ -1,0 +1,6 @@
+Experiment_Code	Group	Description
+Exp027012	0	ctr_0h_R1_IMAC_1.raw
+Exp027020	2	PLX_2h_R1_IMAC_1.raw
+Exp027028	6	PLX_6h_R1_IMAC_1.raw
+Exp027036	24	PLX_24h_R1_IMAC_1.raw
+Exp027044	48	PLX_48h_R1_IMAC_2.raw

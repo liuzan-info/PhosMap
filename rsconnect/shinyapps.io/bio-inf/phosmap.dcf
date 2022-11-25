@@ -1,0 +1,13 @@
+name: phosmap
+title: phosmap
+username:
+account: bio-inf
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7695322
+bundleId: 6553375
+url: https://bio-inf.shinyapps.io/phosmap/
+when: 1669366576.9122
+lastSyncTime: 1669366576.91223
+asMultiple: FALSE
+asStatic: FALSE

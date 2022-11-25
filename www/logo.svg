@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 5689 2767" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(5.55556,0,0,5.55556,0,0)">
+        <g transform="matrix(1.08165,0,0,1.08165,-65.963,-75.5531)">
+            <g transform="matrix(0.947421,0,0,1,-13.4369,28)">
+                <path d="M142.97,106.593C214.988,124.027 203.038,116.541 272.004,155.697C338.58,193.496 393.99,308.148 396.349,317.02C405.643,351.964 444.856,404.384 513.677,402.743C566.185,401.49 617.83,355.942 656.745,324.854C702.837,288.033 759.065,268.968 817.509,282.984C852.853,291.461 853.716,290.354 888.518,309.988C918.517,326.913 969.873,375.997 1011.32,430.324" style="fill:none;stroke:rgb(45,164,236);stroke-width:118.64px;"/>
+            </g>
+            <g transform="matrix(1.11567,0,0,1.07091,84.1343,25.388)">
+                <g transform="matrix(0.807229,0,0,0.807229,-266.193,-26.2169)">
+                    <circle cx="580" cy="279" r="166" style="fill:url(#_Linear1);"/>
+                </g>
+                <g transform="matrix(1,0,0,1,0,2)">
+                    <text x="143px" y="267px" style="font-family:'Arial-BoldMT', 'Arial', sans-serif;font-weight:700;font-size:191.258px;fill:rgb(51,51,51);">P</text>
+                </g>
+            </g>
+            <g transform="matrix(0.749672,0.661809,-0.655031,0.741994,664.283,-236.163)">
+                <text x="493px" y="379px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:153.403px;fill:rgb(242,242,242);">A</text>
+            </g>
+            <g transform="matrix(0.662753,0.748838,-0.748838,0.662753,823.444,-175.433)">
+                <text x="493px" y="379px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:153.403px;fill:rgb(242,242,242);">P</text>
+            </g>
+            <g transform="matrix(0.926055,-0.00137512,0.00137512,0.926055,213.892,14.9944)">
+                <text x="493px" y="379px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:153.403px;fill:rgb(242,242,242);">M</text>
+            </g>
+            <g transform="matrix(0.849007,-0.446946,0.446946,0.849007,29.1405,304.249)">
+                <text x="493px" y="379px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:153.403px;fill:rgb(242,242,242);">S</text>
+            </g>
+            <g transform="matrix(0.798168,-0.469583,0.469583,0.798168,-38.0186,398.869)">
+                <text x="493px" y="379px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:153.403px;fill:rgb(242,242,242);">O</text>
+            </g>
+            <g transform="matrix(0.812359,0.444582,-0.444582,0.812359,129.497,-89.3376)">
+                <text x="493px" y="379px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:153.403px;fill:rgb(242,242,242);">H</text>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(332,0,0,332,414,113)"><stop offset="0" style="stop-color:rgb(251,190,67);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(235,235,235);stop-opacity:1"/></linearGradient>
+    </defs>
+</svg>
