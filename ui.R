@@ -1073,7 +1073,7 @@ ui <- renderUI(
                 fileInput(
                   inputId = "analysisupload11",
                   label = NULL,
-                  accept = ".csv"
+                  accept = ".txt"
                 ),
                 uiOutput("viewanalysisyourdesign"),
                 hr(style = "border-style: dashed;border-color: grey;"),
