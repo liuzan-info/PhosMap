@@ -1,1 +1,3 @@
 # PhosMap
+
+## How to install
