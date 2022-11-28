@@ -21,8 +21,7 @@ library(survminer)
 library(survival)
 library(zip)
 library(stringr)
-library(readr)  # 处理max
-library(dplyr)  # 处理max
+library(dplyr)
 library(DT)
 library(png)
 library(svglite)
@@ -30,8 +29,8 @@ library(ggplotify)
 library(shinyWidgets)
 library(bslib)
 library(PhosMap)
-library(qpdf)# 李佳澳加入用于合并pdf
-library(uwot)# 李佳澳加入用于绘制umap
+library(qpdf)
+library(uwot)
 
 
 ui <- renderUI(
