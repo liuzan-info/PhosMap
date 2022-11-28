@@ -1,6 +1,0 @@
-Exp_no	Status
-Exp027012	success
-Exp027020	success
-Exp027028	success
-Exp027036	success
-Exp027044	success
