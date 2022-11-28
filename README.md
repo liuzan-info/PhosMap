@@ -47,7 +47,7 @@ This tool is developed with R, so if you want to run it locally, you may do some
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
 
 ## Friendly suggestion
-1. Open NAguideR with Chrome.
+1. Open PhosMap with Chrome.
 2. The minimum operating system specifications are: RAM 8GB, Hard drive 100 GB.
 
 ## Reporting issues
