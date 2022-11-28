@@ -15,16 +15,7 @@ sapply(list.files(path2), function(x){source(paste0(path2, x))})
 
 
 server<-shinyServer(function(input, output, session){
-  showModal(modalDialog(
-    title = "Welcome",
-    size = "l",
-    h4("Welcome to PhosMap!"),
-    h4("PhosMap is in the development stage, so if you have any question and suggestion, please contact us."),
-    h4("Thank you!"),
-    h5("This server is single-thread and of low-level hardware[only 1 GB memory]. The local version is highly recommended."),
-    easyClose = T,
-    footer = modalButton("OK")
-  ))
+  
   options(shiny.maxRequestSize=1000*1024^2)
   userID <- "_phosmap"
   maxdemopreloc <- paste0("tmp/", userID, "/maxquant/demo/")
@@ -816,7 +807,7 @@ server<-shinyServer(function(input, output, session){
         if(controllabel == "no control") {
           controllabel = NA
         }
-        data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling2(phospho_data_topX, df2,
+        data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling(phospho_data_topX, df2,
                                                                                           "examplefile/maxquant/phosphorylation_exp_design_info.txt", "examplefile/maxquant/phosphorylation_exp_design_info.txt",
                                                                                           control_label = controllabel,
                                                                                           pair_flag = FALSE)
@@ -1203,7 +1194,7 @@ server<-shinyServer(function(input, output, session){
       if(controllabel == "no control") {
         controllabel = NA
       }
-      data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling2(phospho_data_topX, profiling_data,
+      data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling(phospho_data_topX, profiling_data,
                                                                                         phosphorylation_exp_design_info_file_path, profiling_exp_design_info_file_path,
                                                                                         control_label = controllabel,
                                                                                         pair_flag = FALSE)
@@ -1712,7 +1703,7 @@ server<-shinyServer(function(input, output, session){
         if(controllabel == "no control") {
           controllabel = NA
         }
-        data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling2(phospho_data_topX, df2,
+        data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling(phospho_data_topX, df2,
                                                                                           input$updesign$datapath, input$upusermaxprodesign$datapath,
                                                                                           control_label = controllabel,
                                                                                           pair_flag = FALSE)
@@ -2391,7 +2382,7 @@ server<-shinyServer(function(input, output, session){
       if(controllabel == "no control") {
         controllabel = NA
       }
-      data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling2(phospho_data_topX, profiling_data,
+      data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling(phospho_data_topX, profiling_data,
                                                                                         phosphorylation_exp_design_info_file_path, profiling_exp_design_info_file_path,
                                                                                         control_label = controllabel,
                                                                                         pair_flag = FALSE)
