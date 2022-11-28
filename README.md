@@ -1,16 +1,12 @@
 # PhosMap
----
 A Webserver for Comprehensive Analysis of Quantitative Phosphoproteomics
 <img src="www/main.svg" width = 70%>
 ## Brief Description
----
 PhosMap is a user-friendly webserver that enables users to accomplish one-stop phosphoproteomics data analysis, including data preprocessing and six analysis modules (dimension reduction analysis, differential expression analysis, time course analysis, kinase activity prediction, phosphorylation motif enrichment analysis and survival analysis).The online version can be linked from here: https://bio-inf.shinyapps.io/phosmap/.
 
 ## How to install
----
 There are two different ways to launch PhosMap:
 ### 1. Docker-based installation
----
 We provide a docker image with PhosMap: https://hub.docker.com/r/liuzandh/phosmap
 
 Pull the docker image of PhosMap:
@@ -30,7 +26,6 @@ docker run -p 5907:8787 -e PASSWORD=123456 liuzandh/phosmap:test
 Next, open 127.0.0.1:5907 in the local browser or remotely access ip:5907 (you should ensure that the machine can be accessed remotely).
 
 ### 2. R-based installation
----
 This tool is developed with R, so if you want to run it locally, you may do some preparatory work:
 - [1] **Install R.** You can download R from here: https://www.r-project.org/.
 - [2] **Install RStudio.** You can download RStudio from here: https://www.rstudio.com/.
@@ -52,7 +47,6 @@ This tool is developed with R, so if you want to run it locally, you may do some
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
 
 ## Friendly suggestion
----
 1. Open NAguideR with Chrome.
 2. The minimum operating system specifications are: RAM 8GB, Hard drive 100 GB.
 
