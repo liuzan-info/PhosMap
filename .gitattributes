@@ -1,3 +1,0 @@
-PhosMap_datasets/motif_library/README.md filter=lfs diff=lfs merge=lfs -text
-PhosMap_datasets/motif_library/refseq filter=lfs diff=lfs merge=lfs -text
-PhosMap_datasets/motif_library/uniprot filter=lfs diff=lfs merge=lfs -text
