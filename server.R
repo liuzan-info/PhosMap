@@ -3114,7 +3114,8 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$limmaphbt, {
-      ph <- pheatmap(limma()[[1]],
+      if(nrow(limma()[[1]] > 0)) {
+        ph <- pheatmap(limma()[[1]],
                      scale = input$limmaphscale,
                      cluster_rows = input$limmaphcluster,
                      cluster_cols = FALSE,
@@ -3123,8 +3124,9 @@ server<-shinyServer(function(input, output, session){
                      show_rownames = input$limmaphrowname,
                      clustering_distance_rows = input$limmaphdistance,
                      clustering_method = input$limmaphclusmethod
-      )
-      dev.off()
+                     )
+        dev.off()
+      }
       output$limmaph <- renderPlot(ph)
     }
   )
@@ -3387,7 +3389,8 @@ server<-shinyServer(function(input, output, session){
   observeEvent(input$anovabt, {output$anovaresult <- renderDataTable(anova()[[3]])})
   observeEvent(
     input$anovaphbt, {
-      ph <- pheatmap(anova()[[1]],
+      if(nrow(anova()[[1]] > 0)) {
+        ph <- pheatmap(anova()[[1]],
                      scale = input$anovaphscale,
                      cluster_rows = input$anovaphcluster,
                      cluster_cols = FALSE,
@@ -3395,8 +3398,9 @@ server<-shinyServer(function(input, output, session){
                      show_rownames = input$anovaphrowname,
                      clustering_distance_rows = input$anovaphdistance,
                      clustering_method = input$anovaphclusmethod
-      )
-      dev.off()
+                     )
+        dev.off()
+      } 
       output$anovaph <- renderPlot(ph)
       output$anovaphdlbt <- downloadHandler(
         filename = function(){paste("anovaph_result", userID,".pdf",sep="")},
@@ -3461,12 +3465,14 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$samphbt, {
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("samph"),
-        uiOutput('samphdl')
-      ))
+      if(nrow(sam()[[3]]) > 0) {
+        showModal(modalDialog(
+          title = "Heatmap",
+          size = "l",
+          plotOutput("samph"),
+          uiOutput('samphdl')
+        ))
+      }
     }
   )
   
@@ -3918,7 +3924,8 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$kseaanalysisbt2, {
-      ksea_value_cluster <- ksea2()[[1]]
+      if(nrow(ksea_value_cluster) > 0) {
+        ksea_value_cluster <- ksea2()[[1]]
       annotation_col <- ksea2()[[2]]
       breaks <- ksea2()[[3]]
       color <- ksea2()[[4]]
@@ -4004,6 +4011,7 @@ server<-shinyServer(function(input, output, session){
       }
       output$kseastep2df <- renderDataTable(ksea_value_cluster)
       updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
+      }
     }
   )
   
@@ -4079,8 +4087,8 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$survivalplotbt1, {
-      
-      fit_km <- surplots()[[3]]
+      if(length(surplots()[[2]] > 0)) {
+        fit_km <- surplots()[[3]]
       feature <- isolate(input$survivalsig)
       fit_km[feature] <- as.numeric(surplots()[[4]][feature, ])
       
@@ -4124,6 +4132,8 @@ server<-shinyServer(function(input, output, session){
                                                      palette = c(lowcol, highcol),
                                                      xlab = "Survival time"
       )})
+      }
+      
     }
   )
   

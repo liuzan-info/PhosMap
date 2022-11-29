@@ -1132,7 +1132,7 @@ ui <- renderUI(
                 column(12, h4("t-SNE:")),
                 column(6, textInput("tsnemain", "main", "t-SNE")),
                 column(6,numericInput("tsneseed", "random seed", 42)),
-                column(6, numericInput('tsneperplexity','perplexity',10,min = 1,step = 1)),
+                column(6, numericInput('tsneperplexity','perplexity',3,min = 1,step = 1)),
                 column(12, h4("UMAP:")),
                 column(6, textInput("umapmain", "main", "Simple UMAP")),
                 column(6, numericInput('umapneighbors','neighbors',15,min = 1,step = 1)),
@@ -1384,7 +1384,7 @@ ui <- renderUI(
                 "",
                 heading = "ANOVA Parameters Setting",
                 status = "info",
-                column(6, numericInput("anovafc", h5("FC threshold:"), 20, max = 10, min = 1, step = 0.5)),
+                column(6, numericInput("anovafc", h5("FC threshold:"), 20, min = 1, step = 0.5)),
                 column(
                   6,
                   selectInput("anovaadjust", h5("p-values adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"), selected = "BH")
@@ -1748,8 +1748,8 @@ ui <- renderUI(
         h4("Q1: Where does the example data come from? "),
         h5("WiDr colorectal cancer cells harbouring the BRAF(V600E) mutation after treatment using vemurafenibin a time course of 0, 2, 6, 24, and 48 hour(Ressa,et al.,2018). The raw files were deposited in ProteomeXchange Consortium(PXD007740).
            You can click follow buttons to download example data."),
-        downloadButton("maxexampledl", "maxquant data", icon = icon("download")),
-        downloadButton("masexampledl", "firmiana data", icon = icon("download")),
+        # downloadButton("maxexampledl", "maxquant data", icon = icon("download")),
+        # downloadButton("masexampledl", "firmiana data", icon = icon("download")),
         hr(),
         h4("Q2: When I encounter a bug, how do I contact the author? "),
         h5("Please click the github icon to submit issue, we will reply to you as soon as possible."),
@@ -1762,7 +1762,23 @@ ui <- renderUI(
         hr(),
         h4("Q5: 实验设计文件的格式是？"),
         h5("点击下载按钮下载标准实验设计文件模板，其中'Experiment_Code' 和 ‘Group’列为必需项"),
-        downloadButton("designtemplate", "design file template", icon = icon("download"))
+        downloadButton("designtemplate", "design file template", icon = icon("download")),
+        hr(),
+        h4("Q6: 临床数据文件的格式是？"),
+        h5("点击下载按钮下载标准实验设计文件模板，其中'' 和 ''列为必需项"),
+        downloadButton("clinicaltemplate", "clinical data file template", icon = icon("download"))
+      ),
+      tabPanel(
+        "Download",
+        h2("Download", style="align: center;"),
+        hr(style = "border-color: grey;"),
+        h4("PhosMap_datasets.zip for local version:"),
+        downloadButton("dldatasets", "PhosMap_datasets.zip"),
+        h4("'Preprocessing' example data:"),
+        downloadButton("maxexampledl", "maxquant data"),
+        downloadButton("masexampledl", "firmiana data"),
+        h4("'Analysis' example data:"),
+        downloadButton("dlanalysisexample", "analysis data")
       ),
       nav_item(a(target="_blank",  href="https://github.com/ecnuzdd/PhosMap", icon("github"))),
       collapsible = TRUE
