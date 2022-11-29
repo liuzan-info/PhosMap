@@ -4374,10 +4374,15 @@ server<-shinyServer(function(input, output, session){
     })
   
   #######################################
-  #######           FAQ           #######
+  #######    FAQ and Download     #######
   #######################################
   output$designtemplate <- downloadHandler(
     filename = "design_file.txt",
     content = function(file) {file.copy("examplefile/FAQ/phosphorylation_exp_design_info.txt", file)}
+  )
+
+  output$dldatasets <- downloadHandler(
+    filename = "PhosMap_datasets.zip",
+    content = function(file) {file.copy("PhosMap_datasets.zip", file)}
   )
 })
