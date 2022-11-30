@@ -38,6 +38,7 @@ ui <- renderUI(
     shinyjs::useShinyjs(),
     useSweetAlert(),
     tags$head(
+      HTML("<title>PhosMap</title>"),
       tags$style(type = "text/css", "
     body {padding-top: 70px;}
                            #loadmessage {
@@ -1028,13 +1029,7 @@ ui <- renderUI(
                 h4("2. Phosphorylation data frame: "),
                 actionButton("viewanalysisexamdf", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
-                h4("3. Clinical data file[optional]: ",
-                   span(
-                     id = "spanclin",
-                     `data-toggle` = "tooltip",
-                     titile = "输入提示句",
-                     span(class = "glyphicon glyphicon-question-sign")
-                   )),
+                h4("3. Clinical data file[optional]: "),
                 actionButton("viewanalysisexamclin", "view", icon("eye"))
               ),
               
@@ -1048,13 +1043,7 @@ ui <- renderUI(
                 h4("2. Phosphorylation data frame: "),
                 actionButton("viewanalysispipedf", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
-                h4("3. Clinical data file[optional]: ",
-                   span(
-                     id = "spanclin",
-                     `data-toggle` = "tooltip",
-                     titile = "输入提示句",
-                     span(class = "glyphicon glyphicon-question-sign")
-                   )),
+                h4("3. Clinical data file[optional]: "),
                 conditionalPanel(
                   condition = "input.loaddatatype == true",
                   actionButton("viewanalysispipeclin", "view", icon("eye"))
@@ -1089,13 +1078,7 @@ ui <- renderUI(
                 ),
                 uiOutput("viewanalysisyourexpre"),
                 hr(style = "border-style: dashed;border-color: grey;"),
-                h4("3. Clinical data file[optional]: ",
-                   span(
-                     id = "spanclin", 
-                     `data-toggle` = "tooltip",
-                     titile = "输入提示句",
-                     span(class = "glyphicon glyphicon-question-sign")
-                   )),
+                h4("3. Clinical data file[optional]: "),
                 fileInput(
                   inputId = "analysisupload14",
                   label = NULL,

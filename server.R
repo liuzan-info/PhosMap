@@ -2839,8 +2839,10 @@ server<-shinyServer(function(input, output, session){
     phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
     phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
     # group information
-    group = paste('t', phosphorylation_experiment_design_file$Group, sep = '')
-    group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+    # group = paste('t', phosphorylation_experiment_design_file$Group, sep = '')
+    group = phosphorylation_experiment_design_file$Group
+    # group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+    group_levels = phosphorylation_groups_labels
     group = factor(group, levels = group_levels)
     # PCA
     expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -2920,8 +2922,10 @@ server<-shinyServer(function(input, output, session){
       phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
       phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
       # group information
-      group = paste('t', phosphorylation_experiment_design_file$Group, sep = '')
-      group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+      # group = paste('t', phosphorylation_experiment_design_file$Group, sep = '')
+      group = phosphorylation_experiment_design_file$Group
+      # group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+      group_levels = phosphorylation_groups_labels
       group = factor(group, levels = group_levels)
       set.seed(input$tsneseed)
       main = input$tsnemain
@@ -3059,7 +3063,7 @@ server<-shinyServer(function(input, output, session){
                            phosphorylation_experiment_design_file <- fileset()[[1]]
                            data_frame_normalization_with_control_no_pair <- fileset()[[2]]
                            expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$limmagroup1)+1,which(phosphorylation_experiment_design_file$Group==input$limmagroup2)+1)]
-                           phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==as.numeric(input$limmagroup1)),which(phosphorylation_experiment_design_file$Group==as.numeric(input$limmagroup2))),]
+                           phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==input$limmagroup1),which(phosphorylation_experiment_design_file$Group==input$limmagroup2)),]
                            # select phosphorylation sites with greater variation
                            expr_data_frame_var = apply(expr_data_frame, 1, function(x){
                              var(x[-1])
@@ -3194,7 +3198,7 @@ server<-shinyServer(function(input, output, session){
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$samgroup1)+1,which(phosphorylation_experiment_design_file$Group==input$samgroup2)+1)]
-    phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==as.numeric(input$samgroup1)),which(phosphorylation_experiment_design_file$Group==as.numeric(input$samgroup2))),]
+    phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==input$samgroup1),which(phosphorylation_experiment_design_file$Group==input$samgroup2)),]
     
     expr_data_frame_var = apply(expr_data_frame, 1, function(x){
       var(x[-1])
@@ -3760,9 +3764,11 @@ server<-shinyServer(function(input, output, session){
     ksea_value_cluster = ksea_regulons_activity_df_cluster[,-1]
     
     # annotation setting
-    group = paste('t', fileset()[[1]]$Group, sep = '')
+    # group = paste('t', fileset()[[1]]$Group, sep = '')
+    group = fileset()[[1]]$Group
     phosphorylation_groups_labels = names(table(fileset()[[1]]$Group))
-    group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+    # group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+    group_levels = phosphorylation_groups_labels
     group = factor(group, levels = group_levels)
     annotation_col = data.frame(
       group = group
@@ -3790,8 +3796,8 @@ server<-shinyServer(function(input, output, session){
     color = c(colors_1, colors_2, colors_3, colors_4, colors_5)
     color = color[which(!duplicated(color))]
     
-    length(breaks)
-    length(which(!duplicated(color)))
+    # length(breaks)
+    # length(which(!duplicated(color)))
     list(ksea_value_cluster,annotation_col,breaks,color)
   })
   observeEvent(
@@ -3859,13 +3865,15 @@ server<-shinyServer(function(input, output, session){
       expr_data_frame1 = data_frame_normalization_with_control_no_pair[,which(phosphorylation_experiment_design_file$Group==input$kseagroup1)+1]
       expr_data_frame2 = data_frame_normalization_with_control_no_pair[,which(phosphorylation_experiment_design_file$Group==input$kseagroup2)+1]
       
-      phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==as.numeric(input$kseagroup1)),which(phosphorylation_experiment_design_file$Group==as.numeric(input$kseagroup2))),]
+      phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==input$kseagroup1),which(phosphorylation_experiment_design_file$Group==input$kseagroup2)),]
       
       phosphorylation_groups_labels = unique(phosphorylation_experiment_design_file$Group)
       phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
       # group information
-      group = paste('t', phosphorylation_experiment_design_file$Group, sep = '')
-      group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+      # group = paste('t', phosphorylation_experiment_design_file$Group, sep = '')
+      # group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+      group = phosphorylation_experiment_design_file$Group
+      group_levels = phosphorylation_groups_labels
       group = factor(group, levels = group_levels)
       
       dfmean1 <- apply(expr_data_frame1, 1, mean)
@@ -3924,93 +3932,93 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$kseaanalysisbt2, {
+      ksea_value_cluster <- ksea2()[[1]]
       if(nrow(ksea_value_cluster) > 0) {
-        ksea_value_cluster <- ksea2()[[1]]
-      annotation_col <- ksea2()[[2]]
-      breaks <- ksea2()[[3]]
-      color <- ksea2()[[4]]
-      
-      if(nrow(ksea_value_cluster) < 37) {
-        output$kseastep2plotui <- renderUI({plotOutput("kseastep2plot")})
-        ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                      annotation_col = annotation_col,
-                      clustering_distance_rows = input$kseadistance,
-                      clustering_method = input$kseaclusmethod,
-                      show_rownames = T,
-                      cluster_cols = F,
-                      border_color = 'black',
-                      cellwidth = 15, cellheight = 15,
-                      breaks = breaks,
-                      color = color,
-                      fontsize_col = 10,
-                      fontsize_row = 10,
-                      legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                      legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                      main = input$kseamain)
-        dev.off()
-        output$kseastep2plot <- renderPlot(ph)
-      } else if(nrow(ksea_value_cluster) < 70) {
-        output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmid")})
-        ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                      annotation_col = annotation_col,
-                      clustering_distance_rows = input$kseadistance,
-                      clustering_method = input$kseaclusmethod,
-                      show_rownames = T,
-                      cluster_cols = F,
-                      border_color = 'black',
-                      cellwidth = 12, cellheight = 12,
-                      breaks = breaks,
-                      color = color,
-                      fontsize_col = 10,
-                      fontsize_row = 10,
-                      legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                      legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                      main = input$kseamain)
-        dev.off()
-        output$kseastep2plotmid <- renderPlot(ph)
-      } else if(nrow(ksea_value_cluster) < 100) {
-        output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmini")})
-        ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                      annotation_col = annotation_col,
-                      clustering_distance_rows = input$kseadistance,
-                      clustering_method = input$kseaclusmethod,
-                      show_rownames = T,
-                      cluster_cols = F,
-                      border_color = 'black',
-                      cellwidth = 12, cellheight = 12,
-                      breaks = breaks,
-                      color = color,
-                      fontsize_col = 10,
-                      fontsize_row = 10,
-                      
-                      legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                      legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                      main = input$kseamain)
-        dev.off()
-        output$kseastep2plotmini <- renderPlot(ph)
-      } else {
-        output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotxs")})
-        ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                      annotation_col = annotation_col,
-                      clustering_distance_rows = input$kseadistance,
-                      clustering_method = input$kseaclusmethod,
-                      show_rownames = T,
-                      cluster_cols = F,
-                      border_color = 'black',
-                      cellwidth = 12, cellheight = 12,
-                      breaks = breaks,
-                      color = color,
-                      fontsize_col = 10,
-                      fontsize_row = 10,
-                      
-                      legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                      legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                      main = input$kseamain)
-        dev.off()
-        output$kseastep2plotxs <- renderPlot(ph)
-      }
-      output$kseastep2df <- renderDataTable(ksea_value_cluster)
-      updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
+        annotation_col <- ksea2()[[2]]
+        breaks <- ksea2()[[3]]
+        color <- ksea2()[[4]]
+        
+        if(nrow(ksea_value_cluster) < 37) {
+          output$kseastep2plotui <- renderUI({plotOutput("kseastep2plot")})
+          ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                        annotation_col = annotation_col,
+                        clustering_distance_rows = input$kseadistance,
+                        clustering_method = input$kseaclusmethod,
+                        show_rownames = T,
+                        cluster_cols = F,
+                        border_color = 'black',
+                        cellwidth = 15, cellheight = 15,
+                        breaks = breaks,
+                        color = color,
+                        fontsize_col = 10,
+                        fontsize_row = 10,
+                        legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                        legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                        main = input$kseamain)
+          dev.off()
+          output$kseastep2plot <- renderPlot(ph)
+        } else if(nrow(ksea_value_cluster) < 70) {
+          output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmid")})
+          ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                        annotation_col = annotation_col,
+                        clustering_distance_rows = input$kseadistance,
+                        clustering_method = input$kseaclusmethod,
+                        show_rownames = T,
+                        cluster_cols = F,
+                        border_color = 'black',
+                        cellwidth = 12, cellheight = 12,
+                        breaks = breaks,
+                        color = color,
+                        fontsize_col = 10,
+                        fontsize_row = 10,
+                        legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                        legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                        main = input$kseamain)
+          dev.off()
+          output$kseastep2plotmid <- renderPlot(ph)
+        } else if(nrow(ksea_value_cluster) < 100) {
+          output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmini")})
+          ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                        annotation_col = annotation_col,
+                        clustering_distance_rows = input$kseadistance,
+                        clustering_method = input$kseaclusmethod,
+                        show_rownames = T,
+                        cluster_cols = F,
+                        border_color = 'black',
+                        cellwidth = 12, cellheight = 12,
+                        breaks = breaks,
+                        color = color,
+                        fontsize_col = 10,
+                        fontsize_row = 10,
+                        
+                        legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                        legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                        main = input$kseamain)
+          dev.off()
+          output$kseastep2plotmini <- renderPlot(ph)
+        } else {
+          output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotxs")})
+          ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                        annotation_col = annotation_col,
+                        clustering_distance_rows = input$kseadistance,
+                        clustering_method = input$kseaclusmethod,
+                        show_rownames = T,
+                        cluster_cols = F,
+                        border_color = 'black',
+                        cellwidth = 12, cellheight = 12,
+                        breaks = breaks,
+                        color = color,
+                        fontsize_col = 10,
+                        fontsize_row = 10,
+                        
+                        legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                        legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                        main = input$kseamain)
+          dev.off()
+          output$kseastep2plotxs <- renderPlot(ph)
+        }
+        output$kseastep2df <- renderDataTable(ksea_value_cluster)
+        updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
       }
     }
   )
