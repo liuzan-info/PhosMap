@@ -807,7 +807,7 @@ server<-shinyServer(function(input, output, session){
           controllabel = NA
         }
         data_frame_normalization_with_control_no_pair = normalize_phos_data_to_profiling(phospho_data_topX, df2,
-                                                                                          "examplefile/maxquant/phosphorylation_exp_design_info.txt", "examplefile/maxquant/phosphorylation_exp_design_info.txt",
+                                                                                          "examplefile/maxquant/phosphorylation_exp_design_info.txt", "examplefile/maxquant/profiling_exp_design_info.txt",
                                                                                           control_label = controllabel,
                                                                                           pair_flag = FALSE)
         data_frame_normalization_with_control_no_pair_for_motifanalysis <- cbind(phospho_data_topX_for_motifanalysis[c(1,2,3)], data_frame_normalization_with_control_no_pair[-1])
