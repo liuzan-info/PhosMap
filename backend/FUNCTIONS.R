@@ -1092,11 +1092,6 @@ get_motif_analysis_summary <- function(
   motif_result_list <- list()
   motif_result_list_index <- 0
   while(length(loop_foreground) >= min_sequence_count){
-    cat('\n')
-    cat(length(loop_foreground))
-    cat('\n')
-    cat(min_sequence_count)
-    cat("一轮")
     motif_result_loop_i <- seach_motif_pattern(
       loop_foreground,
       loop_background,
