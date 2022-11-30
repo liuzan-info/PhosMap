@@ -5,10 +5,10 @@ account: bio-inf
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7695322
-bundleId: 6567815
+bundleId: 6573510
 url: https://bio-inf.shinyapps.io/phosmap/
-when: 1669734394.50424
-lastSyncTime: 1669734394.50424
+when: 1669830470.97065
+lastSyncTime: 1669830470.97065
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: LICENSE|README.md

@@ -108,9 +108,9 @@ server<-shinyServer(function(input, output, session){
   
   output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
   
-  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
   
-  output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
+  output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
   
   output$viewednorm15_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
   
@@ -677,7 +677,6 @@ server<-shinyServer(function(input, output, session){
         )
       }
       else{
-        print("maxquant norm")
         newdata3out <- read.csv(paste0(maxdemopreloc, "DemoPreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxdemopreloc, "DemoPreQcForMotifAnalysis.csv"))
         
@@ -744,7 +743,7 @@ server<-shinyServer(function(input, output, session){
       }
       else{
         rawdata <- read.csv('examplefile/maxquant/proteinGroups.txt',header=T,sep='\t') 
-        filenames <- read.csv('examplefile/maxquant/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+        filenames <- read.csv('examplefile/maxquant/profiling_exp_design_info.txt',header = T,sep='\t')
         
         rawdata <- rawdata[-which(rawdata$Reverse=="+"),]
         rawdata <- rawdata[-which(rawdata$Potential.contaminant=="+"),]
@@ -2414,16 +2413,18 @@ server<-shinyServer(function(input, output, session){
     if(input$analysisdatatype==3){
       message <- "The example data is loaded"
       designfile = "examplefile/analysistools/phosphorylation_exp_design_info.txt"
-      profilingfile = "examplefile/analysistools/data_frame_normalization_with_control_no_pair.csv"
-      motiffile = "examplefile/analysistools/motifanalysis.csv"
+      # profilingfile = "examplefile/analysistools/data_frame_normalization_with_control_no_pair.csv"
+      # motiffile = "examplefile/analysistools/motifanalysis.csv"
       clinicalfile = "examplefile/analysistools/Clinical_for_Demo.csv"
-      # 需要修改！！！为正确的39组实验
-      summarydf = "examplefile/analysistools/data_frame_normalization_with_control_no_pair.csv"
+      summarydf = "examplefile/analysistools/PreNormBasedProSummary.csv"
       target1 <- read.csv(designfile, sep = "\t")
-      target2 <- read.csv(profilingfile, row.name=1)
-      target3 <- read.csv(motiffile)
+      # target2 <- read.csv(profilingfile, row.name=1)
+      # target3 <- read.csv(motiffile)
       target4 <- read.csv(clinicalfile)
       target5 <- read.csv(summarydf, row.name=1)
+      target2 <- target5[, c(-2, -3, -4)]
+      colnames(target2)[1] <- "ID"
+      target3 <- target5[, -1]
   
       output$viewedfileanalysisui <- renderUI(h4("1. Experimental design file:"))
       output$viewedfileanalysis <- renderDataTable(target1)
@@ -3095,13 +3096,6 @@ server<-shinyServer(function(input, output, session){
                            index_of_match_pv = match(symbol_of_deps, limma_results_df$ID)
                            limmaph_df = data.frame(limma_results_df[index_of_match_pv,]$logFC, expr_data_frame[index_of_match,])
                            colnames(limmaph_df)[1] <- "logFC"
-                           output$limmaresultforph <- renderDataTable(limmaph_df)
-                           output$limmaresultdl2 <- downloadHandler(
-                             filename = function(){paste("limma_result_forph", userID,".csv",sep="")},
-                             content = function(file){
-                               write.csv(limmaph_df,file,row.names = FALSE)
-                             }
-                           )
                            
                            group_test <- data.frame(as.character(phosphorylation_experiment_design_file[,2]), row.names = phosphorylation_experiment_design_file[,1])
                            colnames(group_test) <- "Group"
@@ -3459,8 +3453,6 @@ server<-shinyServer(function(input, output, session){
         size = "l",
         dataTableOutput("limmaresult"),
         div(downloadButton("limmaresultdl"), style = "display:flex; justify-content:center; align-item:center;"),
-        dataTableOutput("limmaresultforph"),
-        downloadButton("limmaresultdl2"),
         easyClose = T,
         footer = modalButton("OK")
       ))
@@ -4170,7 +4162,7 @@ server<-shinyServer(function(input, output, session){
       )
     }
   )
-  
+
   observeEvent(
     input$motifanalysisbt, {
       validate(
@@ -4182,7 +4174,7 @@ server<-shinyServer(function(input, output, session){
         ask_confirmation(
           inputId = "myconfirmation",
           title = "This step will take several hours.",
-          text = "To quickly present the case data, we used smaller background data and foreground data. Do you confirm run?"
+          text = "To quickly present the case data, we RANDOMLY sampled the original data to obtain smaller background data and foreground data. Do you confirm run?"
         )
       } else {
         ask_confirmation(
@@ -4219,7 +4211,9 @@ server<-shinyServer(function(input, output, session){
         foreground = as.vector(foreground_df$aligned_seq)
         background = as.vector(background_df$Aligned_Seq)
         if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
-          foreground <- foreground[sample(length(foreground), 1000)]
+          if(length(foreground) > 1000) {
+            foreground <- foreground[sample(length(foreground), 1000)]
+          }
           background <- background[sample(length(background), 10000)]
         }
         motifs_list = mea_based_on_background(foreground, AA_in_protein, background, motifx_pvalue)
@@ -4315,7 +4309,7 @@ server<-shinyServer(function(input, output, session){
       
       # Select motifs at least having 50 peptides
       # Assign quantitative values of peptides to their motif
-      foreground_value = fileset()[[3]][,-c(seq(1,6))]
+      foreground_value = fileset()[[3]][,-c(seq(1,3))]
       min_seqs = input$minseqs
       index_of_motifs = which(peptides_count>=min_seqs)
       if(length(index_of_motifs) > 0) {
@@ -4414,12 +4408,60 @@ server<-shinyServer(function(input, output, session){
   #######    FAQ and Download     #######
   #######################################
   output$designtemplate <- downloadHandler(
-    filename = "design_file.txt",
-    content = function(file) {file.copy("examplefile/FAQ/phosphorylation_exp_design_info.txt", file)}
+    filename = "design_file_template.txt",
+    content = function(file) {file.copy("examplefile/analysistools/phosphorylation_exp_design_info.txt", file)}
+  )
+  output$clinicaltemplate <- downloadHandler(
+    filename = "clinical_file_template.csv",
+    content = function(file) {file.copy("examplefile/analysistools/Clinical_for_Demo.csv", file)}
   )
 
   output$dldatasets <- downloadHandler(
     filename = "PhosMap_datasets.zip",
     content = function(file) {file.copy("PhosMap_datasets.zip", file)}
+  )
+
+  output$dlphosdesign <- downloadHandler(
+    filename = "experimental_design.txt",
+    content = function(file) {file.copy("examplefile/maxquant/phosphorylation_exp_design_info.txt", file)}
+  )
+  output$dlprodesign <- downloadHandler(
+    filename = "proteomics_design.txt",
+    content = function(file) {file.copy("examplefile/maxquant/profiling_exp_design_info.txt", file)}
+  )
+
+  output$maxexampledl1 <- downloadHandler(
+    filename = "Phospho (STY)Sites.txt",
+    content = function(file) {file.copy("examplefile/maxquant/Phospho (STY)Sites.txt", file)}
+  )
+  output$maxexampledl2 <- downloadHandler(
+    filename = "proteinGroups.txt",
+    content = function(file) {file.copy("examplefile/maxquant/proteinGroups.txt", file)}
+  )
+
+  output$masexampledl1 <- downloadHandler(
+    filename = "mascot_xml.zip",
+    content = function(file) {file.copy("examplefile/download/mascot_xml.zip", file)}
+  )
+  output$masexampledl2 <- downloadHandler(
+    filename = "phosphorylation_peptide_txt.zip",
+    content = function(file) {file.copy("examplefile/download/phosphorylation_peptide_txt.zip", file)}
+  )
+  output$masexampledl3 <- downloadHandler(
+    filename = "profiling_gene_txt.zip",
+    content = function(file) {file.copy("examplefile/download/profiling_gene_txt.zip", file)}
+  )
+
+  output$dlanalysisexample <- downloadHandler(
+    filename = "anaysis_demo.zip",
+    content = function(file) {file.copy("examplefile/download/anaysis_demo.zip", file)}
+  )
+  output$dlanalysisexamplefirmiana <- downloadHandler(
+    filename = "firmiana_mascot_39sample.zip",
+    content = function(file) {file.copy("mascot_39sample.zip", file)}
+  )
+  output$dlmotifkinase <- downloadHandler(
+    filename = "motif_kinase_relation.xlsx",
+    content = function(file) {file.copy("examplefile/download/motif_kinase_relation.xlsx", file)}
   )
 })

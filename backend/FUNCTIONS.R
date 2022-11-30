@@ -1058,7 +1058,6 @@ get_motifs_list <- function(foreground, background, center_vector, motifx_pvalue
   motifs_list_names <- NULL
   motifs_list_index <- 0
   center_vector_len <- length(center_vector)
-  cat("进入get_motifs_list 循环")
   for(i in seq_len(center_vector_len)){
     cat(center_vector_len)
     cat(i)
