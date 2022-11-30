@@ -4162,6 +4162,16 @@ server<-shinyServer(function(input, output, session){
   
   # Motif enrichment analysis
   observeEvent(
+    input$infoLink, {
+      updateTabsetPanel(
+        session,
+        "navbarpage",
+        selected = "Download"
+      )
+    }
+  )
+  
+  observeEvent(
     input$motifanalysisbt, {
       validate(
         need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
@@ -4171,12 +4181,14 @@ server<-shinyServer(function(input, output, session){
       if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
         ask_confirmation(
           inputId = "myconfirmation",
-          title = "This step will take several hours. To quickly present the case data, we used smaller background data and foreground data. Do you confirm run?"
+          title = "This step will take several hours.",
+          text = "To quickly present the case data, we used smaller background data and foreground data. Do you confirm run?"
         )
       } else {
         ask_confirmation(
           inputId = "myconfirmation",
-          title = "This step will take several hours. Do you confirm run? "
+          title = "This step will take several hours.",
+          text = "Do you confirm run? "
         )
       }
     }
@@ -4236,6 +4248,12 @@ server<-shinyServer(function(input, output, session){
         )
       })
       output$motifdfresult <- renderDataTable(datatable(rbind(motifres1()[[1]][["S"]], motifres1()[[1]][["T"]], motifres1()[[1]][["Y"]]), options = list(pageLength = 25)))
+      output$motifenrichdl <- downloadHandler(
+        filename = function(){paste("mearesult", userID,".csv",sep="")},
+        content = function(file){
+          write.csv(rbind(motifres1()[[1]][["S"]], motifres1()[[1]][["T"]], motifres1()[[1]][["Y"]]),file,row.names = FALSE)
+        }
+      )
     }
   )
   
@@ -4276,7 +4294,12 @@ server<-shinyServer(function(input, output, session){
         
       ))
       output$motifsites <- renderDataTable(result)
-      
+      output$motifsitesdl <- downloadHandler(
+        filename = function(){paste("motif_matched_sites", userID,".csv",sep="")},
+        content = function(file){
+          write.csv(result,file,row.names = FALSE)
+        }
+      )
     }
   )
   
@@ -4295,70 +4318,76 @@ server<-shinyServer(function(input, output, session){
       foreground_value = fileset()[[3]][,-c(seq(1,6))]
       min_seqs = input$minseqs
       index_of_motifs = which(peptides_count>=min_seqs)
-      motif_group_m_ratio_df = NULL
+      if(length(index_of_motifs) > 0) {
+        motif_group_m_ratio_df = NULL
       
-      group = paste('t', fileset()[[1]]$Group, sep = '')
-      phosphorylation_groups_labels = names(table(fileset()[[1]]$Group))
-      group_levels = paste('t', phosphorylation_groups_labels, sep = '')
-      group = factor(group, levels = group_levels)
-      
-      for(i in index_of_motifs){
-        motif = motifs[i]
-        aligned_peptides = motifres1()[[2]][[i]]
-        index_of_match = match(aligned_peptides, motifres1()[[4]]$aligned_seq)
-        motif_value = foreground_value[index_of_match,]
-        motif_value_colsum = colSums(motif_value)
-        motif_group_m = tapply(motif_value_colsum, group, mean) #group为118行的group时，下面程序跑不通
-        motif_group_m_ratio = motif_group_m/motif_group_m[1]
-        motif_group_m_ratio_df = rbind(motif_group_m_ratio_df, motif_group_m_ratio)
+        # group = paste('t', fileset()[[1]]$Group, sep = '')
+        group = fileset()[[1]]$Group
+        phosphorylation_groups_labels = names(table(fileset()[[1]]$Group))
+        # group_levels = paste('t', phosphorylation_groups_labels, sep = '')
+        group_levels = phosphorylation_groups_labels
+        group = factor(group, levels = group_levels)
+        
+        for(i in index_of_motifs){
+          motif = motifs[i]
+          aligned_peptides = motifres1()[[2]][[i]]
+          index_of_match = match(aligned_peptides, motifres1()[[4]]$aligned_seq)
+          motif_value = foreground_value[index_of_match,]
+          motif_value_colsum = colSums(motif_value)
+          motif_group_m = tapply(motif_value_colsum, group, mean)
+          motif_group_m_ratio = motif_group_m/motif_group_m[1]
+          motif_group_m_ratio_df = rbind(motif_group_m_ratio_df, motif_group_m_ratio)
+        }
+        rownames(motif_group_m_ratio_df) = motifs[index_of_motifs]
+        motif_group_m_ratio_df_mat = as.matrix(motif_group_m_ratio_df)
+        if(nrow(motif_group_m_ratio_df_mat) > 0) {
+          if(nrow(motif_group_m_ratio_df_mat) < 15){
+          ph = pheatmap(motif_group_m_ratio_df_mat, 
+                        scale = input$motifscale, 
+                        clustering_distance_cols = input$motifdistance,
+                        clustering_method = input$motifclusmethod,
+                        fontsize = 10,
+                        fontsize_row = 10, 
+                        show_rownames = T, 
+                        cluster_rows = T,
+                        fontsize_col = 12, 
+                        show_colnames = T,
+                        cluster_cols = F,
+                        cellwidth = 15, cellheight = 15,
+                        main = input$motifmain)
+          } else if(nrow(motif_group_m_ratio_df_mat) < 25) {
+            ph = pheatmap(motif_group_m_ratio_df_mat, 
+                          scale = input$motifscale, 
+                          clustering_distance_cols = input$motifdistance,
+                          clustering_method = input$motifclusmethod,
+                          fontsize = 8,
+                          fontsize_row = 8, 
+                          show_rownames = T, 
+                          cluster_rows = T,
+                          fontsize_col = 10, 
+                          show_colnames = T,
+                          cluster_cols = F,
+                          cellwidth = 12, cellheight = 12,
+                          main = input$motifmain)
+          } else {
+            ph = pheatmap(motif_group_m_ratio_df_mat, 
+                          scale = input$motifscale, 
+                          clustering_distance_cols = input$motifdistance,
+                          clustering_method = input$motifclusmethod,
+                          fontsize = 6,
+                          fontsize_row = 6, 
+                          show_rownames = T, 
+                          cluster_rows = T,
+                          fontsize_col = 8, 
+                          show_colnames = T,
+                          cluster_cols = F,
+                          cellwidth = 8, cellheight = 8,
+                          main = input$motifmain)
+          }
+          dev.off()
+        }
       }
-      rownames(motif_group_m_ratio_df) = motifs[index_of_motifs]
-      motif_group_m_ratio_df_mat = as.matrix(motif_group_m_ratio_df)
       
-      if(nrow(motif_group_m_ratio_df_mat) < 15){
-        ph = pheatmap(motif_group_m_ratio_df_mat, 
-                      scale = input$motifscale, 
-                      clustering_distance_cols = input$motifdistance,
-                      clustering_method = input$motifclusmethod,
-                      fontsize = 10,
-                      fontsize_row = 10, 
-                      show_rownames = T, 
-                      cluster_rows = T,
-                      fontsize_col = 12, 
-                      show_colnames = T,
-                      cluster_cols = F,
-                      cellwidth = 15, cellheight = 15,
-                      main = input$motifmain)
-      } else if(nrow(motif_group_m_ratio_df_mat) < 25) {
-        ph = pheatmap(motif_group_m_ratio_df_mat, 
-                      scale = input$motifscale, 
-                      clustering_distance_cols = input$motifdistance,
-                      clustering_method = input$motifclusmethod,
-                      fontsize = 8,
-                      fontsize_row = 8, 
-                      show_rownames = T, 
-                      cluster_rows = T,
-                      fontsize_col = 10, 
-                      show_colnames = T,
-                      cluster_cols = F,
-                      cellwidth = 12, cellheight = 12,
-                      main = input$motifmain)
-      } else {
-        ph = pheatmap(motif_group_m_ratio_df_mat, 
-                      scale = input$motifscale, 
-                      clustering_distance_cols = input$motifdistance,
-                      clustering_method = input$motifclusmethod,
-                      fontsize = 6,
-                      fontsize_row = 6, 
-                      show_rownames = T, 
-                      cluster_rows = T,
-                      fontsize_col = 8, 
-                      show_colnames = T,
-                      cluster_cols = F,
-                      cellwidth = 8, cellheight = 8,
-                      main = input$motifmain)
-      }
-      dev.off()
       showModal(modalDialog(
         title = "Heatmap",
         size = "l",

@@ -1595,7 +1595,10 @@ ui <- renderUI(
         tabPanel(
           "Motif Enrichment Analysis",
           h2("Motif Enrichment Analysis", class = "tooltitle"),
-          h4("This module is used to find and visualize enriched motifs.", class = "toolsubtitle"),
+          column(3, NULL),
+          column(6, h4("This module is used to find and visualize enriched motifs.", class = "toolsubtitle")),
+          column(3, actionLink("infoLink", "Motif-Kinase Relation", class = "btn-info")),
+          
           fluidRow(
             column(
               4,
@@ -1630,18 +1633,27 @@ ui <- renderUI(
                 column(12,div(actionButton('motifplotbt2','Plot', icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
               )
             ),
-            column(8, 
-                   column(
-                     12, 
-                     hidden(
-                       div(
-                         id = "motifenrichhidden1",
-                         hr(),
-                         h4("Motif enrichment analysis result:"),
-                         dataTableOutput("motifdfresult")
-                       )
-                     )
-                   )
+            column(
+              8,
+              hr(),
+              column(
+                11,
+                hidden(div(
+                  id = "motifenrichhidden1",
+                  h4("Motif enrichment analysis result:"),
+                  dataTableOutput("motifdfresult")
+                ))
+              ),
+              column(
+                1,
+                downloadBttn(
+                  outputId = "motifenrichdl",
+                  label = "",
+                  style = "material-flat",
+                  color = "default",
+                  size = "sm"
+                )
+              )
             )
             
           )
