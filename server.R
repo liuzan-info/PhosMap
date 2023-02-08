@@ -116,7 +116,6 @@ server<-shinyServer(function(input, output, session){
   
   output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
   
-  
   #######################################
   #######     import data ex      #######
   #######################################

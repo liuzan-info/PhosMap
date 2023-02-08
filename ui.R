@@ -39,6 +39,10 @@ ui <- renderUI(
     useSweetAlert(),
     tags$head(
       HTML("<title>PhosMap</title>"),
+      HTML('
+      <script type="text/javascript" src="popper.js"></script>
+      <script> window.start.init({Palette:"palette1"})</script>
+      '),
       tags$style(type = "text/css", "
     body {padding-top: 70px;}
                            #loadmessage {
