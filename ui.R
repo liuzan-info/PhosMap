@@ -1121,6 +1121,16 @@ ui <- renderUI(
                 status = "info",
                 column(12, h4("PCA:")),
                 column(6, textInput("pcamain", "main", "PCA")),
+                column(6, prettyToggle(
+                  inputId = "pcamean",
+                  label_on = "group mean", 
+                  icon_on = icon("check"),
+                  status_on = "info",
+                  status_off = "warning", 
+                  label_off = "group mean",
+                  icon_off = icon("xmark"),
+                  value = TRUE
+                )),
                 column(12, h4("t-SNE:")),
                 column(6, textInput("tsnemain", "main", "t-SNE")),
                 column(6,numericInput("tsneseed", "random seed", 42)),
@@ -1133,7 +1143,8 @@ ui <- renderUI(
             ),
             column(
               8,
-              column(6, plotOutput("pca2")),
+              column(5, plotOutput("pca2")),
+              column(1, NULL),
               column(5, plotOutput("pca1")),
               column(1, downloadBttn(
                 outputId = "pcaplotdl",

@@ -2844,15 +2844,38 @@ server<-shinyServer(function(input, output, session){
     # group_levels = paste('t', phosphorylation_groups_labels, sep = '')
     group_levels = phosphorylation_groups_labels
     group = factor(group, levels = group_levels)
-    # PCA
-    expr_data_frame = data_frame_normalization_with_control_no_pair
     
-    requireNamespace('stats')
-    requireNamespace('graphics')
-    expr_ID <- as.vector(expr_data_frame[,1])
-    expr_Valule <- log2(expr_data_frame[,-1]) # have to log
-    testDat <- t(expr_Valule) # row -> sample, col -> variable
-    pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+    if(input$pcamean == TRUE) {
+      # PCA
+      expr_data_frame = data_frame_normalization_with_control_no_pair
+      expr_ID = as.vector(expr_data_frame[,1])
+      expr_Valule = expr_data_frame[,-1]
+      expr_Valule_mean = NULL
+      expr_Valule_row = nrow(expr_Valule)
+      for(i in 1:expr_Valule_row){
+        x = as.vector(unlist(expr_Valule[i,]))
+        x_m = tapply(x, group, mean)
+        expr_Valule_mean = rbind(expr_Valule_mean, x_m)
+      }
+      colnames(expr_Valule_mean) = group_levels
+      expr_df = data.frame(expr_ID, expr_Valule_mean)
+      
+      expr_ID <- as.vector(expr_df[,1])
+      expr_Valule <- log2(expr_df[,-1]) # have to log
+      testDat <- t(expr_Valule) # row -> sample, col -> variable
+      pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+    } else {
+      # PCA
+      expr_data_frame = data_frame_normalization_with_control_no_pair
+      
+      requireNamespace('stats')
+      requireNamespace('graphics')
+      expr_ID <- as.vector(expr_data_frame[,1])
+      expr_Valule <- log2(expr_data_frame[,-1]) # have to log
+      testDat <- t(expr_Valule) # row -> sample, col -> variable
+      pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+    }
+    
     list(pca, group)
   })
   
@@ -2883,13 +2906,21 @@ server<-shinyServer(function(input, output, session){
       ylim <- c(floor(min(pca_predict_2d[,2]))-5, ceiling(max(pca_predict_2d[,2]))+5)
       xlab <- paste("PC1 (", PC1, "%)", sep = "")
       ylab <- paste("PC2 (", PC2, "%)", sep = "")
-      graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+      if(input$pcamean == TRUE) {
+        graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+      }else{
+        graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+      }
       legend("topright",title = "Group",inset = 0.01,
              legend = unique(group),pch=16,
              col = colors,bg='white')
       
       pdf(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''))
-      graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+      if(input$pcamean == TRUE) {
+        graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+      }else{
+        graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+      }
       legend("topright",title = "Group",inset = 0.01,
              legend = unique(group),pch=16,
              col = colors,bg='white')
