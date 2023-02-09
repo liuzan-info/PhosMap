@@ -1267,9 +1267,9 @@ server<-shinyServer(function(input, output, session){
             numericInput(
               "maxuserproNAthre",
               "minimum detection frequency:",
-              2,
+              1,
               min = 0,
-              max = 5,
+              # max = 5,
               step = 1
             ),
             bsTooltip(
@@ -2123,11 +2123,11 @@ server<-shinyServer(function(input, output, session){
               numericInput("usermasuscutoff", label = "US cutoff: ", value = 1),
               bsTooltip(
                 "usermasuscutoff", 
-                "xxxxx",
+                # "xxxxx",
                 placement = "right", 
                 options = list(container = "body")
               ),
-              numericInput("usermasproNAthre", label = "minimum detection frequency: ", value = 3),
+              numericInput("usermasproNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
               bsTooltip(
                 "usermasproNAthre",
                 "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",

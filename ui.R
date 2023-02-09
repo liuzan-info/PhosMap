@@ -447,7 +447,7 @@ ui <- renderUI(
                 status = "info",
                 conditionalPanel(
                   condition = "input.loaddatatype == true",
-                  numericInput("masphosNAthre", label = "minimum detection frequency: ", value = 3),
+                  numericInput("masphosNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
                 ),
                 bsTooltip(
                   "masphosNAthre",
@@ -458,7 +458,7 @@ ui <- renderUI(
                 ),
                 conditionalPanel(
                   condition = "input.loaddatatype == false",
-                  numericInput("usermasphosNAthre", label = "minimum detection frequency: ", value = 3),
+                  numericInput("usermasphosNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
                 ),
                 bsTooltip(
                   "usermasphosNAthre",
@@ -471,7 +471,7 @@ ui <- renderUI(
                 numericInputIcon(
                   inputId = "top",
                   label = "top",
-                  value = 90,
+                  value = 100,
                   step = 1,
                   max = 100,
                   min = 1,
@@ -528,7 +528,7 @@ ui <- renderUI(
                     wellPanel(
                       h5("Proteomics data preprocessing parameters", style = "color: grey;"),
                       numericInput("masuscutoff", label = "US cutoff: ", value = 1),
-                      numericInput("masproNAthre", label = "minimum detection frequency: ", value = 3),
+                      numericInput("masproNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
                       bsTooltip(
                         "masproNAthre",
                         "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
@@ -538,7 +538,7 @@ ui <- renderUI(
                       selectInput("mascotpronormmethod", label = "normalization method: ", choices = c("global", "median")),
                       selectInput("mascotproimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10")
                     ),
-                    selectInput("mascotcontrol", label = "control label: ", choices = c("0", "2", "6", "24", "48", "no control")),
+                    selectInput("mascotcontrol", label = "control label: ", choices = c("0", "6", "48", "no control")),
                     div(
                       class = "runbuttondiv",
                       actionButton(
@@ -739,7 +739,7 @@ ui <- renderUI(
                 numericInput(
                   "maxphosNAthre",
                   "minimum detection frequency:",
-                  3,
+                  1,
                   min = 0,
                   step = 1
                 ),
@@ -783,7 +783,7 @@ ui <- renderUI(
                 numericInputIcon(
                   inputId = "maxtop",
                   label = "top:",
-                  value = 90,
+                  value = 100,
                   step = 1,
                   max = 100,
                   min = 1,
@@ -853,7 +853,7 @@ ui <- renderUI(
                       numericInput(
                         "maxproNAthre",
                         "minimum detection frequency:",
-                        3,
+                        1,
                         min = 0,
                         step = 1
                       ),
@@ -866,7 +866,7 @@ ui <- renderUI(
                       selectInput("maxnormmethod", "normalization method:", choices = c("global", "median")),
                       selectInput("maximputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10")
                     ),
-                    selectInput("maxcontrol", label = "control label: ", choices = c("0", "2", "6", "24", "48", "no control")),
+                    selectInput("maxcontrol", label = "control label: ", choices = c("0", "6", "48", "no control")),
                     div(
                       class = "runbuttondiv",
                       actionButton(
@@ -1126,7 +1126,7 @@ ui <- renderUI(
                 column(6,numericInput("tsneseed", "random seed", 42)),
                 column(6, numericInput('tsneperplexity','perplexity',2,min = 1,step = 1)),
                 column(12, h4("UMAP:")),
-                column(6, textInput("umapmain", "main", "Simple UMAP")),
+                column(6, textInput("umapmain", "main", "UMAP")),
                 column(6, numericInput('umapneighbors','neighbors',5,min = 1,step = 1)),
                 column(12, div(actionButton("drbt", "Analysis", icon("magnifying-glass-chart"), class='analysisbutton'), style = "display:flex; justify-content:center; align-item:center;"))
               )
@@ -1188,11 +1188,11 @@ ui <- renderUI(
                 column(6, numericInput("limmapvalue", h5("pvalue threshold:"), 0.05, max = 0.05, min = 0.0000001, step = 0.0000001)),
                 column(
                   6,
-                  selectInput("limmaadjust", h5("pvalue adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),selected = 'BH')
+                  selectInput("limmaadjust", h5("pvalue adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),selected = 'none')
                 ),
                 column(6, numericInput("limmafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
                 column(6, textAreaInput("limmamain", h5("title:"), "Differentially expressed phosphosites with limma")),
-                column(6, textAreaInput("limmaxaxis", h5("x axis label:"), "logFC")),
+                column(6, textAreaInput("limmaxaxis", h5("x axis label:"), "log2FC")),
                 
                 column(6, textAreaInput("limmayaxis", h5("y axis label:"), "-log10(pvalue)")),
                 
@@ -1376,7 +1376,7 @@ ui <- renderUI(
                 "",
                 heading = "ANOVA Parameters Setting",
                 status = "info",
-                column(6, numericInput("anovafc", h5("FC threshold:"), 20, min = 1, step = 0.5)),
+                column(6, numericInput("anovafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
                 column(
                   6,
                   selectInput("anovaadjust", h5("p-values adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"), selected = "BH")
