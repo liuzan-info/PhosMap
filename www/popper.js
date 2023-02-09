@@ -22,13 +22,13 @@ function Pop() {
   let content = {
     /// Add a field for link color
     message:
-       "This site does not use cookies.",
-    btnText: "Got it!",
+       "We do not use any cookies. By accessing PhosMap, you agreed to use cookies in agreement with the PhosMap's Privacy Policy.",
+    btnText: "I agree",
     mode: "  banner bottom",
     theme: " theme-classic",
     palette: " palette1",
     link: "Learn more",
-    href: "https://www.cookiesandyou.com",
+    href: "https://github.com/liuzan-info/Phosmap-Privacy-Policy",
     target: "_blank",
   };
 
