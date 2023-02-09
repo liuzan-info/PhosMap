@@ -112,9 +112,9 @@ server<-shinyServer(function(input, output, session){
   
   output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
   
-  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"),file)})
   
-  output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
+  output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
   
   #######################################
   #######     import data ex      #######
@@ -2408,7 +2408,6 @@ server<-shinyServer(function(input, output, session){
   #######################################
   # analysis data upload
   analysisouts <- reactive({
-    output$testout <- renderText(c)
     if(input$analysisdatatype==3){
       message <- "The example data is loaded"
       designfile = "examplefile/analysistools/phosphorylation_exp_design_info.txt"
@@ -2816,17 +2815,18 @@ server<-shinyServer(function(input, output, session){
       target2 <- summarydf[, c(-2, -3, -4)]
       colnames(target2)[1] <- "ID"
       target3 <- summarydf[, -1]
+      # avoid isoform
+      target2 <- target2[!duplicated(target2$ID), ]
       
       dflist <- list(designfile_analysis(), target2, target3, clinicalfile_analysis())
       dflist
     }else{
-      dflist <- list(analysisouts()[[2]], analysisouts()[[3]], analysisouts()[[4]], analysisouts()[[5]])
+      target2 <- analysisouts()[[3]]
+      # avoid isoform
+      target2 <- target2[!duplicated(target2$ID), ]
+      dflist <- list(analysisouts()[[2]], target2, analysisouts()[[4]], analysisouts()[[5]])
       dflist
     }
-  })
-
-  output$test222 <- renderDataTable({
-    fileset()[[3]]
   })
   
   pca <- reactive({
@@ -3166,6 +3166,7 @@ server<-shinyServer(function(input, output, session){
       
       specifiedpoints <- input$limmalabelspec
       specifiedpoints <- strsplit(specifiedpoints, "\n")[[1]]
+      if(identical(strsplit("", "\n")[[1]], character(0))){specifiedpoints <- "abcdefghij"}
       limma_results_df$sign <- ifelse((limma_results_df$pvalue < input$limmalabelpvalue & abs(limma_results_df$logFC) > log2(input$limmalabelfc)) | limma_results_df$ID == specifiedpoints,limma_results_df$ID,NA)
       p <- ggplot(data = limma_results_df, aes(x = logFC, y = -log10(pvalue), text = paste("ID:", ID))) +
         geom_point(aes(color = change), alpha=0.6, size=2) +

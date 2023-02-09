@@ -1392,7 +1392,7 @@ ui <- renderUI(
                   6,
                   selectInput("anovaadjust", h5("p-values adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"), selected = "BH")
                 ),
-                column(12, numericInput("anovapvalue", h5("pvalue threshold:"), 0.01, max = 0.05, min = 0.0000001, step = 0.0000001)),
+                column(12, numericInput("anovapvalue", h5("pvalue threshold:"), 0.1, max = 0.05, min = 0.0000001, step = 0.0000001)),
                 column(12, div(actionButton("anovabt", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;"),
               )
             ),
