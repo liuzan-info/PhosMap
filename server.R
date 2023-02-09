@@ -3813,7 +3813,7 @@ server<-shinyServer(function(input, output, session){
       dev.off()
       output$kapstep2plot <- renderPlot(ph)
       output$kapplotdl <- downloadHandler(
-        filename = function(){paste("pca_result", userID,".pdf",sep="")},
+        filename = function(){paste("kinase_activity_pred", userID,".pdf",sep="")},
         content = function(file){
           p <- as.ggplot(ph)
           ggsave(filename = file, p,width = 12,height = 12)
