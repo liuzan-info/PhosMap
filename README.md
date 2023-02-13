@@ -1,6 +1,7 @@
 # PhosMap
 A Webserver for Comprehensive Analysis of Quantitative Phosphoproteomics
 <img src="www/main.svg" width = 70%>
+
 ## Brief Description
 PhosMap is a user-friendly webserver that enables users to accomplish one-stop phosphoproteomics data analysis, including data preprocessing and six analysis modules (dimension reduction analysis, differential expression analysis, time course analysis, kinase activity prediction, phosphorylation motif enrichment analysis and survival analysis).The online version can be linked from here: https://bio-inf.shinyapps.io/phosmap/.
 
@@ -45,6 +46,9 @@ This tool is developed with R, so if you want to run it locally, you may do some
   install_github('ecnuzdd/PhosMap')
   ```
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
+
+## Detail of R package "PhosMap"
+https://github.com/ecnuzdd/PhosMap
 
 ## Friendly suggestion
 1. Open PhosMap with Chrome.
