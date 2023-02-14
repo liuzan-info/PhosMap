@@ -21,14 +21,15 @@ function Pop() {
 
   let content = {
     /// Add a field for link color
-    message:
-       "We do not use any cookies. By accessing PhosMap, you agreed to use cookies in agreement with the PhosMap's Privacy Policy.",
-    btnText: "I agree",
+    // message:
+    //    "PhosMap only uses necessary cookies. The website cannot function properly without these cookies, and can only be disabled by changing your browser preferences. By clicking “Accept”, you consent to our use of cookies. Alternatively, please install PhosMap locally according to our ",
+    btnText: "Accept",
     mode: "  banner bottom",
     theme: " theme-classic",
     palette: " palette1",
-    link: "Learn more",
-    href: "https://github.com/liuzan-info/Phosmap-Privacy-Policy",
+    // link: "Learn more",
+    link: "github",
+    href: "https://github.com/liuzan-info/PhosMap",
     target: "_blank",
   };
 
@@ -45,7 +46,12 @@ function Pop() {
       content.theme +
       content.palette +
       '"><span id="msg" class="message">' +
-      content.message +
+      // content.message +
+      "PhosMap uses necessary cookies to improve functionality from " +
+      "<a target='_blank' class='policylink' href = 'https://posit.co/about/posit-service-terms-of-use/'>Posit ShinyApps.io</a>" +
+      ". By clicking “Accept”, you consent to our use of cookies." +
+      "<br/>" +
+      "Alternatively, please install PhosMap locally according to our " +
       '<a id="plcy-lnk" class="policylink" href="' +
       content.href +
       '"' +
@@ -53,7 +59,10 @@ function Pop() {
       content.target +
       ">" +
       content.link +
-      '</a></span><div id="btn" class="compliance"><a href="#" id="cookie-btn" class="spopupbtnok" >' +
+      '</a>' +
+      '.' +
+      '</span>' +
+      '<div id="btn" class="compliance"><a href="#" id="cookie-btn" class="spopupbtnok" >' +
       content.btnText +
       '</a></div><span class="credit"></span></div>';
     document.body.appendChild(conDivObj);
