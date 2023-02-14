@@ -4308,7 +4308,8 @@ server<-shinyServer(function(input, output, session){
       aligned_peptides = motifres1()[[2]][[id]]
       index_of_match = match(aligned_peptides, motifres1()[[4]]$aligned_seq)
       result <- fileset()[[3]][index_of_match,]
-      result <- result[,c(1,2,3,4,6)]
+      # result <- result[,c(1,2,3,4,6)]
+      result <- result[,c(1,2)]
       
       showModal(modalDialog(
         title = "Matched sites",
