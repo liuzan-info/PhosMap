@@ -2121,12 +2121,12 @@ server<-shinyServer(function(input, output, session){
             wellPanel(
               h5("Proteomics data preprocessing parameters", style = "color: grey;"),
               numericInput("usermasuscutoff", label = "US cutoff: ", value = 1),
-              bsTooltip(
-                "usermasuscutoff", 
-                # "xxxxx",
-                placement = "right", 
-                options = list(container = "body")
-              ),
+              # bsTooltip(
+              #   "usermasuscutoff", 
+              #   # "xxxxx",
+              #   placement = "right", 
+              #   options = list(container = "body")
+              # ),
               numericInput("usermasproNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
               bsTooltip(
                 "usermasproNAthre",
