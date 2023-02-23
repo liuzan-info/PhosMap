@@ -1,3 +1,5 @@
+<img src="https://img.shields.io/github/license/liuzan-info/PhosMap">
+
 # PhosMap
 A Webserver for Comprehensive Analysis of Quantitative Phosphoproteomics
 <img src="www/main.svg" width = 70%>
