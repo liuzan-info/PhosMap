@@ -848,12 +848,14 @@ server<-shinyServer(function(input, output, session){
 
   #mascot
   phosphorylation_exp_design_info_file_path <- 'examplefile/mascot/phosphorylation_exp_design_info.txt'
-  mascot_xml_dir <- 'examplefile/mascot/mascot_xml'
+  # mascot_xml_dir <- 'examplefile/mascot/mascot_xml'
+  mascot_xml_dir <- 'examplefile/root/mascot/mascot_xml'
   phosphorylation_peptide_dir <- 'examplefile/mascot/phosphorylation_peptide_txt'
 
   observeEvent(
     input$parserbt01,{
       mascot_txt_dir <- paste0(mascotdemopreloc, "demomascottxt_data")
+      # Convert the suffix, convert again after extraction for reading
       file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
       file2 = list.files(file1, full.names = T)
       for (f in file2){
