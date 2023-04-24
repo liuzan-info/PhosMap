@@ -31,6 +31,11 @@ library(bslib)
 library(PhosMap)
 library(qpdf)
 library(uwot)
+# library for imputation 
+library(pcaMethods)
+library(rrcovNA)
+library(impute)
+library(e1071)
 
 
 ui <- renderUI(
@@ -117,56 +122,15 @@ ui <- renderUI(
       tabPanel(
         "Home",
         # icon = icon("house"),
-        column(
-          3,
-          panel(
-            "",
-            heading = "Update Log",
-            status = "warning",
-            h5("PhosMap 1.0.0 was released in April 2023.")
-          ),
-          panel(
-            "",
-            heading = "Notice",
-            status = "info",
-            h5("We provide a demo server at https://bio-inf.shinyapps.io/phosmap/. \
-               This server is single-thread and of low-level hardware, we do recommend\
-               users to analyze the data using the demo server with small data sets. \
-               An upgraded hardware is necessary, according to the possible computational\
-               cost of the data, to reach the potential of PhosMap.")
-          ),
-          panel(
-            "",
-            heading = "Introduction",
-            status = "success",
-            h5("PhosMap supports multiple function modules for full landscape of \
-               phosphoproteomics data analyses including quality control, phosphosite \
-               mapping, dimension reduction analysis, time course analysis, kinase \
-               activity analysis and survival analysis. Various of publication ready \
-               figures and tables could be generated via PhosMap. We provided a downloadable\
-               R package for local customized analysis of massive data in the R shiny environment\
-               deploying on the Docker upon the Windows, Linux, and Mac system."),
-            h5("PhosMap enables researchers and clinicians to process their own \
-               phosphoproteomics data expediently and efficiently, and whereby \
-               facilitate better data exploration and interpretation to obtain \
-               valuable biological insights.")
-          )
-        ),
-        column(
-          9,
-          # h1(style = "text-align: center;", "PhosMap"),
-          h3(style = "text-align: center;", "PhosMap: a docker image-based tool to \
-             accomplish one-stop interactive analysis of quantitative phosphoproteomics"),
-          div(style = "text-align:center;", img(src = "newmain.jpg", height = "700px", width = "900px", style = "")),
-          
-        ),
-        column(
-          12,
-          br(),
-          hr(),
-          h5(style = "text-align: center;","This website is free and open to all users and there is no login requirement.")
-          
-        )
+        h1(style = "text-align: center;", "PhosMap"),
+        h3(style = "text-align: center;", "A Webserver for Comprehensive Analysis of Quantitative Phosphoproteomics"),
+        div(style = "text-align:center;", img(src = "main.svg", height = "500px", width = "1400px", style = "")),
+        br(),
+        br(),
+        br(),
+        br(),
+        hr(),
+        h5(style = "text-align: center;","This website is free and open to all users and there is no login requirement.")
       ),
       
       tabPanel(
@@ -246,7 +210,6 @@ ui <- renderUI(
             width = 9,
             hr(),
             htmlOutput("htmlanalysis"),
-            # wellPanel("Data Overview", class = "warning"),
             conditionalPanel(
               condition = "input.analysisdatatype == 2",
               uiOutput("viewedfileanalysisui"),
@@ -786,20 +749,7 @@ ui <- renderUI(
               column(6, selectInput("motifspecies", h5("species:"), choices = c("human", "mouse", "rattus"))),
               column(6, selectInput("motiffastatype", h5("fasta type:"), choices = c("refseq", "uniprot"))),
               column(6, numericInput("motifpvalue", h5("pvalue threshold:"), 0.01, max = 0.05, min = 0.0000001, step = 0.0000001)),
-              column(12, div(
-                dropdownButton(
-                  h5("使用motifx算法"),
-                  actionButton("motifanalysisbt", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton"),
-                  h5("有很多motif分析的算法，如streme，根据您的需求和数据特点，\
-                     您可以选择其他算法。为了满足这一需求，我们提供当前的匹配到的以motif为中心的suqence"),
-                  downloadButton("motifseqdownload", label = "download sequence file"),
-                  circle = F, status = "danger",
-                  icon = icon("magnifying-glass-chart"), width = "400px",
-                  label = "Analysis",
-                  # tooltip = tooltipOptions(title = "Click to see inputs !")
-                  tooltip = F
-                )
-              ), style = "display:flex; justify-content:center; align-item:center;")
+              column(12, div(actionButton("motifanalysisbt", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;"),
             ),
             panel(
               "",
@@ -1257,7 +1207,23 @@ ui <- renderUI(
                           options = list(container = "body")
                         ),
                         selectInput("mascotnormmethod", label = "normalization method: ", choices = c("global", "median")),
-                        selectInput("mascotimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10"),
+                        selectInput("mascotimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),# 在这呢
+                        # added by lja
+                        column(12,
+                               prettyToggle(
+                                 inputId = "democountbygroup",
+                                 label_on = "count by group",
+                                 icon_on = icon("check"),
+                                 status_on = "info",
+                                 status_off = "warning",
+                                 label_off = "do not count by group",
+                                 icon_off = icon("xmark"),
+                                 value = FALSE
+                               )
+                        ),
+                        
+                        
+                        
                         numericInputIcon(
                           inputId = "top",
                           label = "top",
@@ -1569,7 +1535,22 @@ ui <- renderUI(
                         heading = "Step2: Normalizaiton & Imputation & Filtering",
                         status = "warning",
                         selectInput("maxphosnormmethod", "normalization method:", choices = c("global", "median")),
-                        selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10"),
+                        selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
+                        # added by lja
+                        column(12,
+                               prettyToggle(
+                                 inputId = "maxdemocountbygroup",
+                                 label_on = "count by group",
+                                 icon_on = icon("check"),
+                                 status_on = "info",
+                                 status_off = "warning",
+                                 label_off = "do not count by group",
+                                 icon_off = icon("xmark"),
+                                 value = FALSE
+                               )
+                        ),
+                        
+                        
                         numericInputIcon(
                           inputId = "maxtop",
                           label = "top:",
