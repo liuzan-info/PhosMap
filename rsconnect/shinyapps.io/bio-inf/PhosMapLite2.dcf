@@ -1,0 +1,13 @@
+name: PhosMapLite2
+title: PhosMapLite2
+username:
+account: bio-inf
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8817639
+bundleId: 7075195
+url: https://bio-inf.shinyapps.io/PhosMapLite2/
+when: 1681215994.01595
+lastSyncTime: 1681215994.01596
+asMultiple: FALSE
+asStatic: FALSE

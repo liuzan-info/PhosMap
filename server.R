@@ -676,6 +676,7 @@ server<-shinyServer(function(input, output, session){
         )
       }
       else{
+        design_file <- read.table("examplefile/maxquant/phosphorylation_exp_design_info.txt",header=T)
         newdata3out <- read.csv(paste0(maxdemopreloc, "DemoPreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxdemopreloc, "DemoPreQcForMotifAnalysis.csv"))
         
@@ -687,45 +688,91 @@ server<-shinyServer(function(input, output, session){
           newdata4 <- sweep(newdata3out[-1],2,apply(newdata3out[-1],2,median,na.rm=T),FUN="/")
         }
         newdata4 <- newdata4 *1e5
-        
-        
         newdata4[newdata4==0]<-NA
-        df <- df1 <- newdata4
-        method <- input$maxphosimputemethod
-        if(method=="none"){
-          df[is.na(df)]<-0
-        }else if(method=="minimum"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)
-        }else if(method=="minimum/10"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)/10
-        }
-        
-        dfmotif <- data.frame(newdata3motif$AA_in_protein, newdata3motif$Sequence, newdata3motif$ID, df)
-        colnames(dfmotif) <- colnames(newdata3motif)
-        rownames(dfmotif) <- seq(nrow(dfmotif))
-        df <- data.frame(newdata3out$ID, df)
-        colnames(df) <- colnames(newdata3out)
-        
-        phospho_data_topX = keep_psites_with_max_in_topX(df, percent_of_kept_sites = input$maxtop/100)
-        phospho_data_topX_for_motifanalysis = keep_psites_with_max_in_topX2(dfmotif, percent_of_kept_sites = input$maxtop/100)
-        
-        
-        summarydf <- data.frame(phospho_data_topX$ID, phospho_data_topX_for_motifanalysis)
-        colnames(summarydf) <- c("Position", colnames(phospho_data_topX_for_motifanalysis))
-        rownames(summarydf) <- rownames(phospho_data_topX)
-        
-        output$demomaxresult2 <- renderDataTable(summarydf)
-        output$demomaxdropproresult2 <- renderDataTable(summarydf)
-        write.csv(summarydf, paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"))
-        updateTabsetPanel(session, "demomaxresultnav", selected = "demomaxstep2val")
-        updateTabsetPanel(session, "demomaxdropproresultnav", selected = "demomaxdropprostep2val")
-        updateActionButton(session, "demomaxnormbt", icon = icon("rotate-right"))
-        updateActionButton(session, "demomaxnormprobt", icon = icon("play"))
-        if(input$maxuseprocheck1 == 1) {
-          updateProgressBar(session = session, id = "demomaxpreprobar", value = 66)
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        if (input$maxdemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$maxphosimputemethod)
         } else {
-          updateProgressBar(session = session, id = "demomaxpreprobar", value = 100)
+          # 遍历每个分组
+          if (input$maxphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$maxphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          } 
+          
         }
+        
+        if (!any(errorlabel_values)) {
+          dfmotif <- data.frame(newdata3motif$AA_in_protein, newdata3motif$Sequence, newdata3motif$ID, df)
+          colnames(dfmotif) <- colnames(newdata3motif)
+          rownames(dfmotif) <- seq(nrow(dfmotif))
+          df <- data.frame(newdata3out$ID, df)
+          colnames(df) <- colnames(newdata3out)
+
+          phospho_data_topX = keep_psites_with_max_in_topX(df, percent_of_kept_sites = input$maxtop/100)
+          phospho_data_topX_for_motifanalysis = keep_psites_with_max_in_topX2(dfmotif, percent_of_kept_sites = input$maxtop/100)
+
+
+          summarydf <- data.frame(phospho_data_topX$ID, phospho_data_topX_for_motifanalysis)
+          colnames(summarydf) <- c("Position", colnames(phospho_data_topX_for_motifanalysis))
+          rownames(summarydf) <- rownames(phospho_data_topX)
+
+          output$demomaxresult2 <- renderDataTable(summarydf)
+          output$demomaxdropproresult2 <- renderDataTable(summarydf)
+          write.csv(summarydf, paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"))
+          updateTabsetPanel(session, "demomaxresultnav", selected = "demomaxstep2val")
+          updateTabsetPanel(session, "demomaxdropproresultnav", selected = "demomaxdropprostep2val")
+          updateActionButton(session, "demomaxnormbt", icon = icon("rotate-right"))
+          updateActionButton(session, "demomaxnormprobt", icon = icon("play"))
+          if(input$maxuseprocheck1 == 1) {
+            updateProgressBar(session = session, id = "demomaxpreprobar", value = 66)
+          } else {
+            updateProgressBar(session = session, id = "demomaxpreprobar", value = 100)
+          }
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+        
+        
       }
     }
   )
@@ -848,14 +895,12 @@ server<-shinyServer(function(input, output, session){
 
   #mascot
   phosphorylation_exp_design_info_file_path <- 'examplefile/mascot/phosphorylation_exp_design_info.txt'
-  # mascot_xml_dir <- 'examplefile/mascot/mascot_xml'
-  mascot_xml_dir <- 'examplefile/root/mascot/mascot_xml'
+  mascot_xml_dir <- 'examplefile/mascot/mascot_xml'
   phosphorylation_peptide_dir <- 'examplefile/mascot/phosphorylation_peptide_txt'
 
   observeEvent(
     input$parserbt01,{
       mascot_txt_dir <- paste0(mascotdemopreloc, "demomascottxt_data")
-      # Convert the suffix, convert again after extraction for reading
       file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
       file2 = list.files(file1, full.names = T)
       for (f in file2){
@@ -1108,55 +1153,124 @@ server<-shinyServer(function(input, output, session){
     }
     else{
       summary_df_of_unique_proteins_with_sites <- read.csv(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"), row.names = 1)
-      
-      phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites2(
-        summary_df_of_unique_proteins_with_sites,
-        phosphorylation_exp_design_info_file_path,
-        input$masphosNAthre,
-        normmethod = input$mascotnormmethod,
-        imputemethod = input$mascotimputemethod,
-        topN = NA, mod_types = c('S', 'T', 'Y')
-      )
-
-      phospho_data_filtering_STY_and_normalization <-
-        phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
-      
-      ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
-                  phospho_data_filtering_STY_and_normalization$AA_in_protein,
-                  sep = '_')
-      Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
-      phospho_data <- data.frame(ID, Value)
-      phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
-                                     phospho_data_filtering_STY_and_normalization$GeneSymbol,
-                                     phospho_data_filtering_STY_and_normalization$AA_in_protein,
-                                     sep = '_')
-      rownames(phospho_data) <- phospho_data_rownames
-      
-      phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
-      # Further filter phosphoproteomics data..
-      phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
-      phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
-      colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
-      
-      summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
-      colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
-      rownames(summarydf) <- rownames(phospho_data_topX)
-      
-      output$viewednorm01 <- renderDataTable(summarydf)
-      output$viewednorm01droppro <- renderDataTable(summarydf)
-      
-      write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
-      
-      updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
-      updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep4val")
-      
-      updateActionButton(session, "normalizationbt01", icon = icon("rotate-right"))
-      updateActionButton(session, "normalizationbt02", icon = icon("play"))
-      if(input$useprocheck1 == 1) {
-        updateProgressBar(session = session, id = "preprobar", value = 80)
+      design_file <- read.table("examplefile/mascot/phosphorylation_exp_design_info.txt",header=T)
+      if (input$democountbygroup == FALSE) {
+        phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites3(
+          summary_df_of_unique_proteins_with_sites,
+          phosphorylation_exp_design_info_file_path,
+          input$masphosNAthre,
+          normmethod = input$mascotnormmethod,
+          imputemethod = input$mascotimputemethod,
+          topN = NA, mod_types = c('S', 'T', 'Y')
+        )
+        
+        phospho_data_filtering_STY_and_normalization <-
+          phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
+        
+        ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                    phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                    sep = '_')
+        Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
+        phospho_data <- data.frame(ID, Value)
+        phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
+                                       phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                                       phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                                       sep = '_')
+        rownames(phospho_data) <- phospho_data_rownames
+        
+        phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
+        # Further filter phosphoproteomics data..
+        phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
+        phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
+        colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
+        
+        summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
+        colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
+        rownames(summarydf) <- rownames(phospho_data_topX)
+        
+        output$viewednorm01 <- renderDataTable(summarydf)
+        output$viewednorm01droppro <- renderDataTable(summarydf)
+        
+        write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
+        
+        updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
+        updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep4val")
+        
+        updateActionButton(session, "normalizationbt01", icon = icon("rotate-right"))
+        updateActionButton(session, "normalizationbt02", icon = icon("play"))
+        if(input$useprocheck1 == 1) {
+          updateProgressBar(session = session, id = "preprobar", value = 80)
+        } else {
+          updateProgressBar(session = session, id = "preprobar", value = 100)
+        }
       } else {
-        updateProgressBar(session = session, id = "preprobar", value = 100)
+        
+        phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites4(
+          summary_df_of_unique_proteins_with_sites,
+          phosphorylation_exp_design_info_file_path,
+          input$masphosNAthre,
+          normmethod = input$mascotnormmethod,
+          imputemethod = input$mascotimputemethod,
+          topN = NA, mod_types = c('S', 'T', 'Y'),
+          design_file = design_file
+        )
+        
+        # print('函数调用完毕')
+        # print(phospho_data_filtering_STY_and_normalization_list)
+        
+        if (identical(phospho_data_filtering_STY_and_normalization_list, list())) {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        } else {
+          # print('执行了后续步骤')
+          phospho_data_filtering_STY_and_normalization <-
+            phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
+
+          ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                      phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                      sep = '_')
+          Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
+          phospho_data <- data.frame(ID, Value)
+          phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
+                                         phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                                         phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                                         sep = '_')
+          rownames(phospho_data) <- phospho_data_rownames
+
+          phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
+          # Further filter phosphoproteomics data..
+          phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
+          phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
+          colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
+
+          summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
+          colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
+          rownames(summarydf) <- rownames(phospho_data_topX)
+
+          output$viewednorm01 <- renderDataTable(summarydf)
+          output$viewednorm01droppro <- renderDataTable(summarydf)
+
+          write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
+
+          updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
+          updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep4val")
+
+          updateActionButton(session, "normalizationbt01", icon = icon("rotate-right"))
+          updateActionButton(session, "normalizationbt02", icon = icon("play"))
+          if(input$useprocheck1 == 1) {
+            updateProgressBar(session = session, id = "preprobar", value = 80)
+          } else {
+            updateProgressBar(session = session, id = "preprobar", value = 100)
+          }
+        }
       }
+      
+      
     }
   })
   
@@ -1564,6 +1678,7 @@ server<-shinyServer(function(input, output, session){
         )
       } else {
         print("maxquant norm")
+        design_file <- read.table(input$updesign$datapath,header = T)
         newdata3out <- read.csv(paste0(maxuserpreloc, "PreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxuserpreloc, "PreQcForMotifAnalysis.csv"))
         if(input$maxphosnormmethod == "global") {
@@ -1575,48 +1690,106 @@ server<-shinyServer(function(input, output, session){
         newdata4 <- newdata4 *1e5
         
         newdata4[newdata4==0]<-NA
-        df <- df1 <- newdata4
-        method <- input$maxphosimputemethod
-        if(method=="0"){
-          df[is.na(df)]<-0
-        }else if(method=="minimum"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)
-        }else if(method=="minimum/10"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)/10
-        }
-        
-        dfmotif <- data.frame(newdata3motif$AA_in_protein, newdata3motif$Sequence, newdata3motif$ID, df)
-        colnames(dfmotif) <- colnames(newdata3motif)
-        rownames(dfmotif) <- seq(nrow(dfmotif))
-        df <- data.frame(newdata3out$ID, df)
-        colnames(df) <- colnames(newdata3out)
-        
-        phospho_data_topX = keep_psites_with_max_in_topX(df, percent_of_kept_sites = input$maxtop/100)
-        phospho_data_topX_for_motifanalysis = keep_psites_with_max_in_topX2(dfmotif, percent_of_kept_sites = input$maxtop/100)
-        
-        summarydf <- data.frame(phospho_data_topX$ID, phospho_data_topX_for_motifanalysis)
-        colnames(summarydf) <- c("Position", colnames(phospho_data_topX_for_motifanalysis))
-        rownames(summarydf) <- rownames(phospho_data_topX)
-        
-        output$usermaxresult2 <- renderDataTable(summarydf)
-        output$usermaxnoproresult2 <- renderDataTable(summarydf)
-        output$usermaxdropproresult2 <- renderDataTable(summarydf)
-        
-        write.csv(summarydf, paste0(maxuserpreloc, "PreNormImputeSummary.csv"))
-
-        updateTabsetPanel(session, "usermaxresultnav", selected = "usermaxstep2val")
-        updateTabsetPanel(session, "usermaxnoproresultnav", selected = "usermaxnoprostep2val")
-        updateTabsetPanel(session, "usermaxdropproresultnav", selected = "usermaxdropprostep2val")
-        updateActionButton(session, "usermaxnormbt", icon = icon("rotate-right"))
-        updateActionButton(session, "usermaxnormprobt", icon = icon("play"))
-        
-        if(is.null(input$maxuseruseprocheck)) {
-          updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
-        } else if(input$maxuseruseprocheck == 1) {
-          updateProgressBar(session = session, id = "usermaxpreprobar", value = 66)
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        if (input$maxdemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$maxphosimputemethod)
         } else {
-          updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
+          # 遍历每个分组
+          if (input$maxphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$maxphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          } 
+          
         }
+        # df <- df1 <- newdata4
+        # method <- input$maxphosimputemethod
+        # if(method=="0"){
+        #   df[is.na(df)]<-0
+        # }else if(method=="minimum"){
+        #   df[is.na(df)]<-min(df1,na.rm = TRUE)
+        # }else if(method=="minimum/10"){
+        #   df[is.na(df)]<-min(df1,na.rm = TRUE)/10
+        # }
+        if (!any(errorlabel_values)) {
+          dfmotif <- data.frame(newdata3motif$AA_in_protein, newdata3motif$Sequence, newdata3motif$ID, df)
+          colnames(dfmotif) <- colnames(newdata3motif)
+          rownames(dfmotif) <- seq(nrow(dfmotif))
+          df <- data.frame(newdata3out$ID, df)
+          colnames(df) <- colnames(newdata3out)
+          
+          phospho_data_topX = keep_psites_with_max_in_topX(df, percent_of_kept_sites = input$maxtop/100)
+          phospho_data_topX_for_motifanalysis = keep_psites_with_max_in_topX2(dfmotif, percent_of_kept_sites = input$maxtop/100)
+          
+          summarydf <- data.frame(phospho_data_topX$ID, phospho_data_topX_for_motifanalysis)
+          colnames(summarydf) <- c("Position", colnames(phospho_data_topX_for_motifanalysis))
+          rownames(summarydf) <- rownames(phospho_data_topX)
+          
+          output$usermaxresult2 <- renderDataTable(summarydf)
+          output$usermaxnoproresult2 <- renderDataTable(summarydf)
+          output$usermaxdropproresult2 <- renderDataTable(summarydf)
+          
+          write.csv(summarydf, paste0(maxuserpreloc, "PreNormImputeSummary.csv"))
+          
+          updateTabsetPanel(session, "usermaxresultnav", selected = "usermaxstep2val")
+          updateTabsetPanel(session, "usermaxnoproresultnav", selected = "usermaxnoprostep2val")
+          updateTabsetPanel(session, "usermaxdropproresultnav", selected = "usermaxdropprostep2val")
+          updateActionButton(session, "usermaxnormbt", icon = icon("rotate-right"))
+          updateActionButton(session, "usermaxnormprobt", icon = icon("play"))
+          
+          if(is.null(input$maxuseruseprocheck)) {
+            updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
+          } else if(input$maxuseruseprocheck == 1) {
+            updateProgressBar(session = session, id = "usermaxpreprobar", value = 66)
+          } else {
+            updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
+          }
+        } else {
+          
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+          
+        }
+        
+        
       }
     }
   )
@@ -2014,6 +2187,145 @@ server<-shinyServer(function(input, output, session){
   )
   
   
+  # observeEvent(input$normalizationbt11, {
+  #   if(!file.exists(paste0(mascotuserpreloc, 'summary_df_of_unique_proteins_with_sites.csv'))) {
+  #     sendSweetAlert(
+  #       session = session,
+  #       title = "Tip",
+  #       text = "Please click the buttons in order",
+  #       type = "info"
+  #     )
+  #   }
+  #   else{
+  #     summary_df_of_unique_proteins_with_sites <- read.csv(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"), row.names = 1)
+  #     design_file = read.table(input$updesign$datapath, header=T)# 在这呢
+  #     if (input$democountbygroup == FALSE) {
+  #       phosphorylation_exp_design_info_file_path <- input$updesign$datapath
+  #       phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites3(
+  #         summary_df_of_unique_proteins_with_sites,
+  #         phosphorylation_exp_design_info_file_path,
+  #         input$usermasphosNAthre,
+  #         normmethod = input$mascotnormmethod,
+  #         imputemethod = input$mascotimputemethod,
+  #         topN = NA, mod_types = c('S', 'T', 'Y')
+  #       )
+  #       
+  #       phospho_data_filtering_STY_and_normalization <-
+  #         phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
+  #       
+  #       ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
+  #                   phospho_data_filtering_STY_and_normalization$AA_in_protein,
+  #                   sep = '_')
+  #       Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
+  #       phospho_data <- data.frame(ID, Value)
+  #       phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
+  #                                      phospho_data_filtering_STY_and_normalization$GeneSymbol,
+  #                                      phospho_data_filtering_STY_and_normalization$AA_in_protein,
+  #                                      sep = '_')
+  #       rownames(phospho_data) <- phospho_data_rownames
+  #       
+  #       phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
+  #       # Further filter phosphoproteomics data..
+  #       phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
+  #       phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
+  #       colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
+  #       
+  #       summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
+  #       colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
+  #       rownames(summarydf) <- rownames(phospho_data_topX)
+  #       
+  #       output$viewednorm14 <- renderDataTable(summarydf)
+  #       output$viewednorm14nopro <- renderDataTable(summarydf)
+  #       output$viewednorm14droppro <- renderDataTable(summarydf)
+  #       
+  #       write.csv(summarydf, paste0(mascotuserpreloc, 'NormImputeSummary.csv'), row.names = T)
+  #       
+  #       updateTabsetPanel(session, "usermascotresultnav", selected = "usermascotstep4val")
+  #       updateTabsetPanel(session, "usermascotnoproresultnav", selected = "usermascotnoprostep4val")
+  #       updateTabsetPanel(session, "usermascotdropproresultnav", selected = "usermascotdropprostep4val")
+  #       
+  #       updateActionButton(session, "normalizationbt11", icon = icon("rotate-right"))
+  #       updateActionButton(session, "normalizationbt12", icon = icon("play"))
+  #       
+  #       if(is.null(input$useruseprocheck1)) {
+  #         updateProgressBar(session = session, id = "userpreprobar", value = 100)
+  #       } else if(input$useruseprocheck1 == 1) {
+  #         updateProgressBar(session = session, id = "userpreprobar", value = 80)
+  #       } else {
+  #         updateProgressBar(session = session, id = "userpreprobar", value = 100)
+  #       }
+  #     } else {
+  #       phosphorylation_exp_design_info_file_path <- input$updesign$datapath
+  #       phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites4(
+  #         summary_df_of_unique_proteins_with_sites,
+  #         phosphorylation_exp_design_info_file_path,
+  #         input$usermasphosNAthre,
+  #         normmethod = input$mascotnormmethod,
+  #         imputemethod = input$mascotimputemethod,
+  #         topN = NA, mod_types = c('S', 'T', 'Y'),
+  #         design_file = design_file
+  #       )
+  #       if (identical(phospho_data_filtering_STY_and_normalization_list, list())) {
+  #         sendSweetAlert(
+  #           session = session,
+  #           title = "Error...",
+  #           text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+  #           type = "error",
+  #           btn_labels = "OK"
+  #         )
+  #       } else {
+  #         #在这
+  #         phospho_data_filtering_STY_and_normalization <-
+  #           phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
+  #         
+  #         ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
+  #                     phospho_data_filtering_STY_and_normalization$AA_in_protein,
+  #                     sep = '_')
+  #         Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
+  #         phospho_data <- data.frame(ID, Value)
+  #         phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
+  #                                        phospho_data_filtering_STY_and_normalization$GeneSymbol,
+  #                                        phospho_data_filtering_STY_and_normalization$AA_in_protein,
+  #                                        sep = '_')
+  #         rownames(phospho_data) <- phospho_data_rownames
+  #         
+  #         phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
+  #         # Further filter phosphoproteomics data..
+  #         phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
+  #         phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
+  #         colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
+  #         
+  #         summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
+  #         colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
+  #         rownames(summarydf) <- rownames(phospho_data_topX)
+  #         
+  #         output$viewednorm14 <- renderDataTable(summarydf)
+  #         output$viewednorm14nopro <- renderDataTable(summarydf)
+  #         output$viewednorm14droppro <- renderDataTable(summarydf)
+  #         
+  #         write.csv(summarydf, paste0(mascotuserpreloc, 'NormImputeSummary.csv'), row.names = T)
+  #         
+  #         updateTabsetPanel(session, "usermascotresultnav", selected = "usermascotstep4val")
+  #         updateTabsetPanel(session, "usermascotnoproresultnav", selected = "usermascotnoprostep4val")
+  #         updateTabsetPanel(session, "usermascotdropproresultnav", selected = "usermascotdropprostep4val")
+  #         
+  #         updateActionButton(session, "normalizationbt11", icon = icon("rotate-right"))
+  #         updateActionButton(session, "normalizationbt12", icon = icon("play"))
+  #         
+  #         if(is.null(input$useruseprocheck1)) {
+  #           updateProgressBar(session = session, id = "userpreprobar", value = 100)
+  #         } else if(input$useruseprocheck1 == 1) {
+  #           updateProgressBar(session = session, id = "userpreprobar", value = 80)
+  #         } else {
+  #           updateProgressBar(session = session, id = "userpreprobar", value = 100)
+  #         }
+  #       }
+  #     }
+  #     
+  #       
+  #     
+  #   }
+  # })
   observeEvent(input$normalizationbt11, {
     if(!file.exists(paste0(mascotuserpreloc, 'summary_df_of_unique_proteins_with_sites.csv'))) {
       sendSweetAlert(
@@ -2034,7 +2346,7 @@ server<-shinyServer(function(input, output, session){
         imputemethod = input$mascotimputemethod,
         topN = NA, mod_types = c('S', 'T', 'Y')
       )
-
+      
       phospho_data_filtering_STY_and_normalization <-
         phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
       
@@ -2081,6 +2393,7 @@ server<-shinyServer(function(input, output, session){
       }
     }
   })
+  
   
   # If the user uploads the proteome data, show the option
   proaval <- reactive(is.null(input$upprodesign) | is.null(input$upprogene))
@@ -2403,7 +2716,7 @@ server<-shinyServer(function(input, output, session){
   # analysis data upload
   analysisouts <- reactive({
     if(input$analysisdatatype==2){
-      message <- "Data Overview"
+      message <- "The example data is loaded"
       designfile = "examplefile/analysistools/phosphorylation_exp_design_info.txt"
       # profilingfile = "examplefile/analysistools/data_frame_normalization_with_control_no_pair.csv"
       # motiffile = "examplefile/analysistools/motifanalysis.csv"
@@ -2538,10 +2851,6 @@ server<-shinyServer(function(input, output, session){
   
   fileset <- reactive({
     if(input$analysisdatatype == 1){
-      validate(
-        need(designfile_analysis(), 'Please check that the experimental design file is uploaded !'),
-        need(profilingfile_analysis(), 'Please check that the phosphorylation data frame is uploaded !')
-      )
       summarydf <- profilingfile_analysis()
       target2 <- summarydf[, c(-2, -3, -4)]
       colnames(target2)[1] <- "ID"
@@ -2561,6 +2870,10 @@ server<-shinyServer(function(input, output, session){
   })
   
   pca <- reactive({
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
@@ -2682,6 +2995,11 @@ server<-shinyServer(function(input, output, session){
   
   tsne <- eventReactive(
     input$drbt, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
+      
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -2751,6 +3069,11 @@ server<-shinyServer(function(input, output, session){
   )
   
   umap <- eventReactive(input$drbt,{
+    
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -2831,6 +3154,11 @@ server<-shinyServer(function(input, output, session){
   
   limma <- eventReactive(input$limmabt,
                          {
+                           validate(
+                             need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+                             need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+                           )
+                           
                            phosphorylation_experiment_design_file <- fileset()[[1]]
                            data_frame_normalization_with_control_no_pair <- fileset()[[2]]
                            expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$limmagroup1)+1,which(phosphorylation_experiment_design_file$Group==input$limmagroup2)+1)]
@@ -2956,6 +3284,10 @@ server<-shinyServer(function(input, output, session){
   })
   
   sam <- eventReactive(input$sambt,{
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$samgroup1)+1,which(phosphorylation_experiment_design_file$Group==input$samgroup2)+1)]
@@ -3125,6 +3457,10 @@ server<-shinyServer(function(input, output, session){
 
   # anova
   anova <- eventReactive(input$anovabt,{
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     expr_data_frame <- fileset()[[2]]
     
@@ -3286,6 +3622,10 @@ server<-shinyServer(function(input, output, session){
   # Time course
   tc <- eventReactive(
     input$tcanalysis, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3387,6 +3727,10 @@ server<-shinyServer(function(input, output, session){
   # Kinase-substrate enrichment analysis (KSEA)
   kap1 <- eventReactive(
     input$kapanalysisbt1, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3601,6 +3945,10 @@ server<-shinyServer(function(input, output, session){
   
   ksea1 <- eventReactive(
     input$kseaanalysisbt1, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       
@@ -3770,6 +4118,8 @@ server<-shinyServer(function(input, output, session){
   surplots <- eventReactive(
     input$survivalanalysis, {
       validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
         need(fileset()[[4]],'Please check that the clinical data file is uploaded !')
       )
       Clinical <- fileset()[[4]]
@@ -3914,12 +4264,12 @@ server<-shinyServer(function(input, output, session){
 
   observeEvent(
     input$motifanalysisbt, {
-      # validate(
-      #   need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-      #   need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
-      #   need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
-      # )
-      if(input$analysisdatatype == 2) {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
+        need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
+      )
+      if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
         ask_confirmation(
           inputId = "myconfirmation",
           title = "This step will take several hours.",
@@ -3934,28 +4284,6 @@ server<-shinyServer(function(input, output, session){
       }
     }
   )
-  
-  output$motifseqdownload <- downloadHandler(
-    filename = function(){paste("sequence_for_motif", userID,".csv",sep="")},
-    content = function(file){
-      foreground_data <- fileset()[[3]]
-      
-      ID = as.vector(foreground_data$ID)
-      Sequence = as.vector(foreground_data$Sequence)
-      AA_in_protein = as.vector(foreground_data$AA_in_protein)
-      
-      # *** required parameters ***
-      fixed_length = 15
-      species = input$motifspecies
-      fasta_type = input$motiffastatype
-      
-      # get foreground data frame
-      foreground_df = get_aligned_seq_for_mea02(ID, Sequence, AA_in_protein, fixed_length, species = species, fasta_type = fasta_type)
-      
-      write.csv(foreground_df, file, row.names = FALSE)
-    }
-  )
-  
   motifres1 <- eventReactive(
     input$myconfirmation, {
       if (isTRUE(input$myconfirmation)) {
