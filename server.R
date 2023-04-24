@@ -1220,15 +1220,7 @@ server<-shinyServer(function(input, output, session){
       updateTabsetPanel(
         session,
         "navbarpage",
-        selected = "UPLOAD DATA [ prerequisite ]"
-      )
-      updateRadioGroupButtons(
-        session = session, inputId = "analysisdatatype",
-        selected = 1
-      )
-      updateRadioGroupButtons(
-        session = session, inputId = "analysisdatatype",
-        selected = 2
+        selected = "Preprocessing"
       )
     }
   )
@@ -2408,8 +2400,8 @@ server<-shinyServer(function(input, output, session){
   #######################################
   # analysis data upload
   analysisouts <- reactive({
-    if(input$analysisdatatype==3){
-      message <- "The example data is loaded"
+    if(input$analysisdatatype==2){
+      message <- "Data Overview"
       designfile = "examplefile/analysistools/phosphorylation_exp_design_info.txt"
       # profilingfile = "examplefile/analysistools/data_frame_normalization_with_control_no_pair.csv"
       # motiffile = "examplefile/analysistools/motifanalysis.csv"
@@ -2445,273 +2437,6 @@ server<-shinyServer(function(input, output, session){
           output$viewedfileanalysis <- renderDataTable(target4)
         }
       )
-    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==2){ # pipe、案例数据、mascot
-      if(input$useprocheck1==1) {
-        file1 = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv")
-      } else {
-        file1 = paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv")
-      }
-      designfile = "examplefile/mascot/phosphorylation_exp_design_info.txt"
-      
-      clinicalfile = "examplefile/analysistools/Clinical_for_Pre.csv"
-      target1 <- read.csv(designfile, sep = "\t")
-      target4 <- read.csv(clinicalfile)
-      if(file.exists(file1)){
-        if(input$useprocheck1==1) {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
-        } else {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose "load your data"'
-        }
-        
-        target5 <- read.csv(file1, row.name=1)
-        target2 <- target5[, c(-2, -3, -4)]
-        colnames(target2)[1] <- "ID"
-        target3 <- target5[, -1]
-        output$viewedfileanalysis <- renderDataTable(target1)
-        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-        
-        observeEvent(
-          input$viewanalysispipedesign, {
-            output$viewedfileanalysis <- renderDataTable(target1)
-            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipeclin, {
-            output$viewedfileanalysis <- renderDataTable(target4)
-            output$viewedfileanalysisui <- renderUI({h4("3.Clinical data file:")})
-          }
-        )
-      }else {
-        if(input$useprocheck1==1) {
-          message <- "PhosMap does not detect pipeline data comes from [example data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]."
-        } else {
-          message <- "PhosMap does not detect pipeline data comes from [example data]-[Firmiana/mascot]."
-        }
-        target1 <- NULL
-        target4 <- NULL
-        target2 <- NULL
-        target3 <- NULL
-        target5 <- NULL
-        output$viewedfileanalysis <- renderDataTable(NULL)
-        output$viewedfileanalysisui <- renderUI(NULL)
-        
-      }
-    }
-    else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==2){ # # pipe、user、mascot
-      if(is.null(input$useruseprocheck1)) {
-        file1 = paste0(mascotuserpreloc, "NormImputeSummary.csv")
-      } else if(input$useruseprocheck1==0) {
-        file1 = paste0(mascotuserpreloc, "NormImputeSummary.csv")
-      } else {
-        file1 = paste0(mascotuserpreloc, "PreNormBasedProSummary.csv")
-      }
-      designfile = input$updesign
-      clinicalfile = input$annalysisupload24
-      
-      if(file.exists(file1) & !(is.null(designfile))){
-        if(is.null(input$useruseprocheck1)) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose "load your data"'
-        } else if(input$useruseprocheck1==0) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose "load your data"'
-        } else {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
-        }
-        
-        target1 <- read.csv(designfile$datapath, sep = "\t")
-        target5 <- read.csv(file1, row.name=1)
-        target2 <- target5[, c(-2, -3, -4)]
-        colnames(target2)[1] <- "ID"
-        target3 <- target5[, -1]
-        if(is.null(clinicalfile)){
-          target4 <- NULL
-        }else {
-          target4 <- read.csv(clinicalfile$datapath)
-        }
-        output$viewedfileanalysis <- renderDataTable(target1)
-        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-        
-        observeEvent(
-          input$viewanalysispipedesign, {
-            output$viewedfileanalysis <- renderDataTable(target1)
-            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
-          }
-        )
-        
-        observeEvent(
-          input$annalysisupload24, {
-            output$viewedfileanalysis <- renderDataTable(target4)
-            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
-            output$viewanalysispipeclinui <- renderUI({actionButton("viewanalysispipeclinuibt", "view")})
-          }
-        )
-        
-        observeEvent(
-          input$viewanalysispipeclinuibt, {
-            output$viewedfileanalysis <- renderDataTable(target4)
-            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
-          }
-        )
-      }else{
-        if(is.null(input$useruseprocheck1)) {
-          message <- "PhosMap does not detect pipeline data comes from [your data]-[Firmiana/mascot]."
-        } else if(input$useruseprocheck1==0) {
-          message <- "PhosMap does not detect pipeline data comes from [your data]-[Firmiana/mascot]."
-        } else {
-          message <- "PhosMap does not detect pipeline data comes from [your data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]."
-        }
-        target1 <- NULL
-        target2 <- NULL
-        target3 <- NULL
-        target4 <- NULL
-        target5 <- NULL
-        output$viewedfileanalysis <- renderDataTable(NULL)
-        output$viewedfileanalysisui <- renderUI(NULL)
-      }
-    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==1){# pipe、example、maxquant
-      if(input$maxuseprocheck1==1) {
-        file1 = paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv")
-      } else {
-        file1 = paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv")
-      }
-      designfile = "examplefile/maxquant/phosphorylation_exp_design_info.txt"
-      clinicalfile = "examplefile/analysistools/Clinical_for_Pre.csv"
-      if(file.exists(file1)){
-        if(input$maxuseprocheck1==1) {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
-        } else {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose "load your data"'
-        }
-        target1 <- read.csv(designfile, sep = "\t")
-        target4 <- read.csv(clinicalfile)
-        target5 <- read.csv(file1, row.name=1)
-        target2 <- target5[, c(-2, -3, -4)]
-        colnames(target2)[1] <- "ID" 
-        target3 <- target5[, -1]
-        
-        output$viewedfileanalysis <- renderDataTable(target1)
-        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-        
-        observeEvent(
-          input$viewanalysispipedesign, {
-            output$viewedfileanalysis <- renderDataTable(target1)
-            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipeclin, {
-            output$viewedfileanalysis <- renderDataTable(target4)
-            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
-          }
-        )
-      }else{
-        if(input$maxuseprocheck1==1) {
-          message <- "PhosMap does not detect pipeline data comes from [example data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]."
-        } else {
-          message <- "PhosMap does not detect pipeline data comes from [example data]-[MaxQuant]."
-        }
-        target1 <- NULL
-        target2 <- NULL
-        target3 <- NULL
-        target4 <- NULL
-        target5 <- NULL
-        output$viewedfileanalysis <- renderDataTable(NULL)
-        output$viewedfileanalysisui <- renderUI(NULL)
-      }
-    }else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==1){# pipe、user、maxquant
-      if(is.null(input$maxuseruseprocheck)) {
-        file1 = paste0(maxuserpreloc, "PreNormImputeSummary.csv")
-      } else if(input$maxuseruseprocheck==0) {
-        file1 = paste0(maxuserpreloc, "PreNormImputeSummary.csv")
-      } else {
-        file1 = paste0(maxuserpreloc, "PreNormBasedProSummary.csv")
-      }
-      designfile = input$updesign
-      if(file.exists(file1) & !(is.null(designfile))){
-        if(is.null(input$maxuseruseprocheck)) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose "load your data"'
-        } else if(input$maxuseruseprocheck==0) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose "load your data"'
-        } else {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
-        }
-        target1 <- read.csv(designfile$datapath, sep = "\t")
-        # target4 <- read.csv(clinicalfile, row.name=1)
-        target5 <- read.csv(file1, row.name=1)
-        target2 <- target5[, c(-2, -3, -4)]
-        colnames(target2)[1] <- "ID"
-        target3 <- target5[, -1]
-        clinicalfile = input$annalysisupload24
-        
-        if(is.null(clinicalfile)){
-          target4 <- NULL
-        }else {
-          target4 <- read.csv(clinicalfile$datapath)
-        }
-        
-        output$viewedfileanalysis <- renderDataTable(target1)
-        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-        
-        observeEvent(
-          input$viewanalysispipedesign, {
-            output$viewedfileanalysis <- renderDataTable(target1)
-            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
-          }
-        )
-        observeEvent(
-          input$annalysisupload24, {
-            output$viewedfileanalysis <- renderDataTable(target4)
-            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
-            output$viewanalysispipeclinui <- renderUI({actionButton("viewanalysispipeclinuibt2", "view")})
-          }
-        )
-        observeEvent(
-          input$viewanalysispipeclinuibt2, {
-            output$viewedfileanalysis <- renderDataTable(target4)
-            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
-          }
-        )
-        
-      }else{
-        if(is.null(input$maxuseruseprocheck)) {
-          message <- "PhosMap does not detect pipeline data comes from [your data]-[MaxQuant]."
-        } else if(input$maxuseruseprocheck==0) {
-          message <- "PhosMap does not detect pipeline data comes from [your data]-[MaxQuant]."
-        } else {
-          message <- "PhosMap does not detect pipeline data comes from [your data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]."
-        }
-        target1 <- NULL
-        target2 <- NULL
-        target3 <- NULL
-        target4 <- NULL
-        target5 <- NULL
-        output$viewedfileanalysis <- renderDataTable(NULL)
-        output$viewedfileanalysisui <- renderUI(NULL)
-      }
     }else if(input$analysisdatatype==1){
       message <- "Data Overview"
       target1 <- NULL
@@ -2811,6 +2536,10 @@ server<-shinyServer(function(input, output, session){
   
   fileset <- reactive({
     if(input$analysisdatatype == 1){
+      validate(
+        need(designfile_analysis(), 'Please check that the experimental design file is uploaded !'),
+        need(profilingfile_analysis(), 'Please check that the phosphorylation data frame is uploaded !')
+      )
       summarydf <- profilingfile_analysis()
       target2 <- summarydf[, c(-2, -3, -4)]
       colnames(target2)[1] <- "ID"
@@ -2830,10 +2559,6 @@ server<-shinyServer(function(input, output, session){
   })
   
   pca <- reactive({
-    validate(
-      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
@@ -2907,23 +2632,36 @@ server<-shinyServer(function(input, output, session){
       xlab <- paste("PC1 (", PC1, "%)", sep = "")
       ylab <- paste("PC2 (", PC2, "%)", sep = "")
       if(input$pcamean == TRUE) {
+        plot.new()
+        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
         graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
       }else{
+        plot.new()
+        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
         graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
       }
-      legend("topright",title = "Group",inset = 0.01,
-             legend = unique(group),pch=16,
-             col = colors,bg='white')
-      
+      # legend("topright",title = "Group",inset = 0.01,
+      #        legend = unique(group),pch=16,
+      #        col = colors,bg='white')
+      usr <- par("usr")
+      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
+      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
+      legend(x = x_rel, y = y_rel, title = 'Group', inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
       pdf(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''))
       if(input$pcamean == TRUE) {
+        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
         graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
       }else{
+        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
         graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
       }
-      legend("topright",title = "Group",inset = 0.01,
-             legend = unique(group),pch=16,
-             col = colors,bg='white')
+      # legend("topright",title = "Group",inset = 0.01,
+      #        legend = unique(group),pch=16,
+      #        col = colors,bg='white')
+      usr <- par("usr")
+      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
+      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
+      legend(x = x_rel, y = y_rel, title = 'Group', inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
       dev.off()
       
       pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
@@ -2942,11 +2680,6 @@ server<-shinyServer(function(input, output, session){
   
   tsne <- eventReactive(
     input$drbt, {
-      validate(
-        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-      )
-      
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -2984,15 +2717,22 @@ server<-shinyServer(function(input, output, session){
       colors <- tsne()[[5]]
       group <- tsne()[[2]]
       main <- tsne()[[4]]
-      
+      par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
       graphics::plot(tsne$Y, col=rep(colors,table(group)), pch=16, lwd = 2, xlab = 'Dim 1', ylab = 'Dim 2', main = input$tsnemain)
-      legend("topright",title = "Group",inset = 0.01,
+      usr <- par("usr")
+      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
+      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
+      legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
              legend = unique(group),pch=16,
              col = colors,bg='white')
       
       pdf(paste('tmp/',userID,'/analysis/tsne/tsne.pdf',sep=''))
+      par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
       graphics::plot(tsne$Y, col=rep(colors,table(group)), pch=16, lwd = 2, xlab = 'Dim 1', ylab = 'Dim 2', main = input$tsnemain)
-      legend("topright",title = "Group",inset = 0.01,
+      usr <- par("usr")
+      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
+      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
+      legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
              legend = unique(group),pch=16,
              col = colors,bg='white')
       dev.off()
@@ -3009,11 +2749,6 @@ server<-shinyServer(function(input, output, session){
   )
   
   umap <- eventReactive(input$drbt,{
-    
-    validate(
-      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3035,9 +2770,13 @@ server<-shinyServer(function(input, output, session){
     color_group_unique <- umap()[[2]]
     main <- umap()[[3]]
     expr_data_group <- umap()[[4]]
+    par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
     plot(expr_data_umap,col=rep(color_group_unique,table(expr_data_group)),pch=16,asp=1,xlab = "UMAP_1",ylab = "UMAP_2",main = main)
-    abline(h=0,v=0,lty=2,col="gray")
-    legend("topright",title = "Group",inset = 0.01,
+    usr <- par("usr")
+    x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
+    y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
+    # abline(h=0,v=0,lty=2,col="gray")
+    legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
            legend = unique(expr_data_group),pch=16,
            col = color_group_unique,
            bg='white'
@@ -3053,9 +2792,13 @@ server<-shinyServer(function(input, output, session){
       color_group_unique <- umap()[[2]]
       main <- umap()[[3]]
       expr_data_group <- umap()[[4]]
+      par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
       plot(expr_data_umap,col=rep(color_group_unique,table(expr_data_group)),pch=16,asp=1,xlab = "UMAP_1",ylab = "UMAP_2",main = main)
-      abline(h=0,v=0,lty=2,col="gray")
-      legend("topright",title = "Group",inset = 0.01,
+      usr <- par("usr")
+      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
+      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
+      # abline(h=0,v=0,lty=2,col="gray")
+      legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
              legend = unique(expr_data_group),pch=16,
              col = color_group_unique,
              bg='white'
@@ -3086,11 +2829,6 @@ server<-shinyServer(function(input, output, session){
   
   limma <- eventReactive(input$limmabt,
                          {
-                           validate(
-                             need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-                             need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-                           )
-                           
                            phosphorylation_experiment_design_file <- fileset()[[1]]
                            data_frame_normalization_with_control_no_pair <- fileset()[[2]]
                            expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$limmagroup1)+1,which(phosphorylation_experiment_design_file$Group==input$limmagroup2)+1)]
@@ -3216,10 +2954,6 @@ server<-shinyServer(function(input, output, session){
   })
   
   sam <- eventReactive(input$sambt,{
-    validate(
-      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$samgroup1)+1,which(phosphorylation_experiment_design_file$Group==input$samgroup2)+1)]
@@ -3389,10 +3123,6 @@ server<-shinyServer(function(input, output, session){
 
   # anova
   anova <- eventReactive(input$anovabt,{
-    validate(
-      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     expr_data_frame <- fileset()[[2]]
     
@@ -3554,10 +3284,6 @@ server<-shinyServer(function(input, output, session){
   # Time course
   tc <- eventReactive(
     input$tcanalysis, {
-      validate(
-        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3659,10 +3385,6 @@ server<-shinyServer(function(input, output, session){
   # Kinase-substrate enrichment analysis (KSEA)
   kap1 <- eventReactive(
     input$kapanalysisbt1, {
-      validate(
-        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3877,10 +3599,6 @@ server<-shinyServer(function(input, output, session){
   
   ksea1 <- eventReactive(
     input$kseaanalysisbt1, {
-      validate(
-        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
-      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       
@@ -4050,8 +3768,6 @@ server<-shinyServer(function(input, output, session){
   surplots <- eventReactive(
     input$survivalanalysis, {
       validate(
-        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
         need(fileset()[[4]],'Please check that the clinical data file is uploaded !')
       )
       Clinical <- fileset()[[4]]
@@ -4196,12 +3912,12 @@ server<-shinyServer(function(input, output, session){
 
   observeEvent(
     input$motifanalysisbt, {
-      validate(
-        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
-        need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
-      )
-      if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
+      # validate(
+      #   need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      #   need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
+      #   need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
+      # )
+      if(input$analysisdatatype == 2) {
         ask_confirmation(
           inputId = "myconfirmation",
           title = "This step will take several hours.",
@@ -4216,6 +3932,28 @@ server<-shinyServer(function(input, output, session){
       }
     }
   )
+  
+  output$motifseqdownload <- downloadHandler(
+    filename = function(){paste("sequence_for_motif", userID,".csv",sep="")},
+    content = function(file){
+      foreground_data <- fileset()[[3]]
+      
+      ID = as.vector(foreground_data$ID)
+      Sequence = as.vector(foreground_data$Sequence)
+      AA_in_protein = as.vector(foreground_data$AA_in_protein)
+      
+      # *** required parameters ***
+      fixed_length = 15
+      species = input$motifspecies
+      fasta_type = input$motiffastatype
+      
+      # get foreground data frame
+      foreground_df = get_aligned_seq_for_mea02(ID, Sequence, AA_in_protein, fixed_length, species = species, fasta_type = fasta_type)
+      
+      write.csv(foreground_df, file, row.names = FALSE)
+    }
+  )
+  
   motifres1 <- eventReactive(
     input$myconfirmation, {
       if (isTRUE(input$myconfirmation)) {
