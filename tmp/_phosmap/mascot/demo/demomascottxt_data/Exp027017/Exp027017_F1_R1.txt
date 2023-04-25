@@ -1,0 +1,1 @@
+pep_seq	pep_query_num	query_rank	pep_score	pep_var_mod	pep_var_mod_pos	pep_var_mod_conf

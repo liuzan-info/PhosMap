@@ -1,11 +1,24 @@
 <img src="https://img.shields.io/github/license/liuzan-info/PhosMap">
 
 # PhosMap
-A Webserver for Comprehensive Analysis of Quantitative Phosphoproteomics
+A docker image-based tool to accomplish one-stop interactive analysis of quantitative phosphoproteomics.
 <img src="www/main.svg" width = 70%>
 
 ## Brief Description
-PhosMap is a user-friendly webserver that enables users to accomplish one-stop phosphoproteomics data analysis, including data preprocessing and six analysis modules (dimension reduction analysis, differential expression analysis, time course analysis, kinase activity prediction, phosphorylation motif enrichment analysis and survival analysis).The online version can be linked from here: https://bio-inf.shinyapps.io/phosmap/.
+PhosMap supports multiple function modules for full landscape of 
+phosphoproteomics data analyses including quality control, phosphosite 
+mapping, dimension reduction analysis, time course analysis, kinase 
+activity analysis and survival analysis. Various of publication ready 
+figures and tables could be generated via PhosMap. We provided a downloadable
+R package for local customized analysis of massive data in the R shiny environment
+deploying on the Docker upon the Windows, Linux, and Mac system.
+
+
+We provide a demo server at https://bio-inf.shinyapps.io/phosmap/. 
+This server is single-thread and of low-level hardware, we do recommend
+users to analyze the data using the demo server with small data sets. 
+An upgraded hardware is necessary, according to the possible computational
+cost of the data, to reach the potential of PhosMap.
 
 ## How to install
 There are two different ways to launch PhosMap:
@@ -35,10 +48,14 @@ This tool is developed with R, so if you want to run it locally, you may do some
 - [3] **Download the source code from github.**
 - [4] **Download the necessary data.** Please download "PhosMap_datasets.zip" from module "Download" on https://bio-inf.shinyapps.io/phosmap/. Then unzip this file to phosmap folder like this pic.
   <img src="www/unzip.jpg" width=30%>
-- [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf"). 
+- [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf","pcaMethods","impute","rrcovNA","e1071"). 
   You can run the codes below to install them:
   ```linux
-  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png","svglite","ggplotify","bslib","qpdf"))
+  if (!require("BiocManager", quietly = TRUE)){install.packages("BiocManager")}
+
+  BiocManager::install(c("pcaMethods", "impute"))
+
+  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png","svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071"))
 
   install.packages('devtools')
   require(devtools)
