@@ -26,7 +26,7 @@ Then, you can enter PhosMap by visiting HostIP:HostPort.
 For example: HostPort could be set to 8083. This parameter can be changed according to user needs. 
 such as,
 ```linux
-docker run -p 8083:8787 liuzandh/phosmap:1.0.0
+docker run -p 8083:3838 liuzandh/phosmap:1.0.0
 ```
 Next, open 127.0.0.1:8083 in the local browser or remotely access ip:8083 (you should ensure that the machine can be accessed remotely).
 
