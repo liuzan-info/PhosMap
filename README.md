@@ -50,22 +50,16 @@ This tool is developed with R, so if you want to run it locally, you may do some
 - [3] **Download the source code from github.**
 - [4] **Download the necessary data.** Please download "PhosMap_datasets.zip" from module "Download" on https://bio-inf.shinyapps.io/phosmap/. Then unzip this file to phosmap folder like this pic.
   <img src="www/unzip.jpg" width=30%>
-<<<<<<< HEAD
+
 - [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf","pcaMethods","impute","rrcovNA","e1071"). 
-=======
-- [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf","rrcovNA","e1071","pcaMethods","impute"). 
->>>>>>> lite
+
   You can run the codes below to install them:
   ```linux
   if (!require("BiocManager", quietly = TRUE)){install.packages("BiocManager")}
 
   BiocManager::install(c("pcaMethods", "impute"))
 
-<<<<<<< HEAD
-  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png","svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071"))
-=======
   install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071"))
->>>>>>> lite
 
   install.packages('devtools')
   require(devtools)
