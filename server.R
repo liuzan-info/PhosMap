@@ -116,6 +116,18 @@ server<-shinyServer(function(input, output, session){
   
   output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
   
+  observeEvent(
+    input$viewinstall,{
+      showModal(modalDialog(
+        title = "Installation video",
+        size = "l",
+        tags$iframe(width="560", height="400", src="https://www.bilibili.com/bangumi/play/ep327584?from_spmid=666.25.episode.0", frameborder="0", allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
   #######################################
   #######     import data ex      #######
   #######################################
@@ -676,6 +688,7 @@ server<-shinyServer(function(input, output, session){
         )
       }
       else{
+        design_file <- read.table("examplefile/maxquant/phosphorylation_exp_design_info.txt",header=T)
         newdata3out <- read.csv(paste0(maxdemopreloc, "DemoPreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxdemopreloc, "DemoPreQcForMotifAnalysis.csv"))
         
@@ -687,19 +700,54 @@ server<-shinyServer(function(input, output, session){
           newdata4 <- sweep(newdata3out[-1],2,apply(newdata3out[-1],2,median,na.rm=T),FUN="/")
         }
         newdata4 <- newdata4 *1e5
-        
-        
         newdata4[newdata4==0]<-NA
-        df <- df1 <- newdata4
-        method <- input$maxphosimputemethod
-        if(method=="none"){
-          df[is.na(df)]<-0
-        }else if(method=="minimum"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)
-        }else if(method=="minimum/10"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)/10
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        if (input$maxdemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$maxphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$maxphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+        
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+        
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$maxphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
         }
         
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          } 
+          
+        }
+        
+        if (!any(errorlabel_values)) {
         dfmotif <- data.frame(newdata3motif$AA_in_protein, newdata3motif$Sequence, newdata3motif$ID, df)
         colnames(dfmotif) <- colnames(newdata3motif)
         rownames(dfmotif) <- seq(nrow(dfmotif))
@@ -725,7 +773,32 @@ server<-shinyServer(function(input, output, session){
           updateProgressBar(session = session, id = "demomaxpreprobar", value = 66)
         } else {
           updateProgressBar(session = session, id = "demomaxpreprobar", value = 100)
+            sendSweetAlert(
+              session = session,
+              title = "All Done",
+              text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+              type = "success",
+              btn_labels = "OK"
+            )
+            sendSweetAlert(
+              session = session,
+              title = "All Done",
+              text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+              type = "success",
+              btn_labels = "OK"
+            )
         }
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+        
+        
       }
     }
   )
@@ -823,6 +896,13 @@ server<-shinyServer(function(input, output, session){
         updateTabsetPanel(session, "demomaxresultnav", selected = "demomaxstep3val")
         updateActionButton(session, "demomaxnormprobt", icon = icon("rotate-right"))
         updateProgressBar(session = session, id = "demomaxpreprobar", value = 100)
+        sendSweetAlert(
+          session = session,
+          title = "All Done",
+          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          type = "success",
+          btn_labels = "OK"
+        )
       }
     }
   )
@@ -1108,8 +1188,9 @@ server<-shinyServer(function(input, output, session){
     }
     else{
       summary_df_of_unique_proteins_with_sites <- read.csv(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"), row.names = 1)
-      
-      phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites2(
+      design_file <- read.table("examplefile/mascot/phosphorylation_exp_design_info.txt",header=T)
+      if (input$democountbygroup == FALSE) {
+        phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites3(
         summary_df_of_unique_proteins_with_sites,
         phosphorylation_exp_design_info_file_path,
         input$masphosNAthre,
@@ -1156,7 +1237,89 @@ server<-shinyServer(function(input, output, session){
         updateProgressBar(session = session, id = "preprobar", value = 80)
       } else {
         updateProgressBar(session = session, id = "preprobar", value = 100)
+        sendSweetAlert(
+          session = session,
+          title = "All Done",
+          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          type = "success",
+          btn_labels = "OK"
+        )
       }
+      } else {
+        
+        phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites4(
+          summary_df_of_unique_proteins_with_sites,
+          phosphorylation_exp_design_info_file_path,
+          input$masphosNAthre,
+          normmethod = input$mascotnormmethod,
+          imputemethod = input$mascotimputemethod,
+          topN = NA, mod_types = c('S', 'T', 'Y'),
+          design_file = design_file
+        )
+        
+        # print('函数调用完毕')
+        # print(phospho_data_filtering_STY_and_normalization_list)
+        
+        if (identical(phospho_data_filtering_STY_and_normalization_list, list())) {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        } else {
+          # print('执行了后续步骤')
+          phospho_data_filtering_STY_and_normalization <-
+            phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
+
+          ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                      phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                      sep = '_')
+          Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
+          phospho_data <- data.frame(ID, Value)
+          phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
+                                         phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                                         phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                                         sep = '_')
+          rownames(phospho_data) <- phospho_data_rownames
+
+          phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
+          # Further filter phosphoproteomics data..
+          phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
+          phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
+          colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
+
+          summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
+          colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
+          rownames(summarydf) <- rownames(phospho_data_topX)
+
+          output$viewednorm01 <- renderDataTable(summarydf)
+          output$viewednorm01droppro <- renderDataTable(summarydf)
+
+          write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
+
+          updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
+          updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep4val")
+
+          updateActionButton(session, "normalizationbt01", icon = icon("rotate-right"))
+          updateActionButton(session, "normalizationbt02", icon = icon("play"))
+          if(input$useprocheck1 == 1) {
+            updateProgressBar(session = session, id = "preprobar", value = 80)
+          } else {
+            updateProgressBar(session = session, id = "preprobar", value = 100)
+            sendSweetAlert(
+              session = session,
+              title = "All Done",
+              text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+              type = "success",
+              btn_labels = "OK"
+            )
+          }
+        }
+      }
+      
+      
     }
   })
   
@@ -1214,6 +1377,13 @@ server<-shinyServer(function(input, output, session){
       updateTabsetPanel(session, "resultnav", selected = "demomascotstep5val")
       updateActionButton(session, "normalizationbt02", icon = icon("rotate-right"))
       updateProgressBar(session = session, id = "preprobar", value = 100)
+      sendSweetAlert(
+        session = session,
+        title = "All Done",
+        text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+        type = "success",
+        btn_labels = "OK"
+      )
     }
   })
   
@@ -1563,7 +1733,7 @@ server<-shinyServer(function(input, output, session){
           type = "info"
         )
       } else {
-        print("maxquant norm")
+        design_file <- read.table(input$updesign$datapath,header = T)
         newdata3out <- read.csv(paste0(maxuserpreloc, "PreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxuserpreloc, "PreQcForMotifAnalysis.csv"))
         if(input$maxphosnormmethod == "global") {
@@ -1575,16 +1745,61 @@ server<-shinyServer(function(input, output, session){
         newdata4 <- newdata4 *1e5
         
         newdata4[newdata4==0]<-NA
-        df <- df1 <- newdata4
-        method <- input$maxphosimputemethod
-        if(method=="0"){
-          df[is.na(df)]<-0
-        }else if(method=="minimum"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)
-        }else if(method=="minimum/10"){
-          df[is.na(df)]<-min(df1,na.rm = TRUE)/10
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        if (input$maxdemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$maxphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$maxphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+        }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+        
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$maxphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
         }
         
+        }
+        # df <- df1 <- newdata4
+        # method <- input$maxphosimputemethod
+        # if(method=="0"){
+        #   df[is.na(df)]<-0
+        # }else if(method=="minimum"){
+        #   df[is.na(df)]<-min(df1,na.rm = TRUE)
+        # }else if(method=="minimum/10"){
+        #   df[is.na(df)]<-min(df1,na.rm = TRUE)/10
+        # }
+        if (!any(errorlabel_values)) {
         dfmotif <- data.frame(newdata3motif$AA_in_protein, newdata3motif$Sequence, newdata3motif$ID, df)
         colnames(dfmotif) <- colnames(newdata3motif)
         rownames(dfmotif) <- seq(nrow(dfmotif))
@@ -1612,11 +1827,38 @@ server<-shinyServer(function(input, output, session){
         
         if(is.null(input$maxuseruseprocheck)) {
           updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
         } else if(input$maxuseruseprocheck == 1) {
           updateProgressBar(session = session, id = "usermaxpreprobar", value = 66)
         } else {
           updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
         }
+        } else {
+          
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+          
+        }
+        
+        
       }
     }
   )
@@ -1714,6 +1956,13 @@ server<-shinyServer(function(input, output, session){
         updateTabsetPanel(session, "usermaxresultnav", selected = "usermaxstep3val")
         updateActionButton(session, "usermaxnormprobt", icon = icon("rotate-right"))
         updateProgressBar(session = session, id = "usermaxpreprobar", value = 100)
+        sendSweetAlert(
+          session = session,
+          title = "All Done",
+          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          type = "success",
+          btn_labels = "OK"
+        )
       }
     }
   )
@@ -2074,10 +2323,24 @@ server<-shinyServer(function(input, output, session){
       
       if(is.null(input$useruseprocheck1)) {
         updateProgressBar(session = session, id = "userpreprobar", value = 100)
+        sendSweetAlert(
+          session = session,
+          title = "All Done",
+          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          type = "success",
+          btn_labels = "OK"
+        )
       } else if(input$useruseprocheck1 == 1) {
         updateProgressBar(session = session, id = "userpreprobar", value = 80)
       } else {
         updateProgressBar(session = session, id = "userpreprobar", value = 100)
+        sendSweetAlert(
+          session = session,
+          title = "All Done",
+          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          type = "success",
+          btn_labels = "OK"
+        )
       }
     }
   })
@@ -2393,6 +2656,13 @@ server<-shinyServer(function(input, output, session){
       
       updateActionButton(session, "normalizationbt12", icon = icon("rotate-right"))
       updateProgressBar(session = session, id = "userpreprobar", value = 100)
+      sendSweetAlert(
+        session = session,
+        title = "All Done",
+        text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+        type = "success",
+        btn_labels = "OK"
+      )
     }
   })
   
@@ -2466,6 +2736,8 @@ server<-shinyServer(function(input, output, session){
     }
     dataread
   })
+  
+  
   
   observeEvent(
     input$analysisupload11,{
@@ -2648,7 +2920,7 @@ server<-shinyServer(function(input, output, session){
       usr <- par("usr")
       x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
       y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel, title = 'Group', inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
+      legend(x = x_rel, y = y_rel, title = input$pcalegend, inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
       pdf(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''))
       if(input$pcamean == TRUE) {
         par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
@@ -2663,7 +2935,7 @@ server<-shinyServer(function(input, output, session){
       usr <- par("usr")
       x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
       y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel, title = 'Group', inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
+      legend(x = x_rel, y = y_rel, title = input$pcalegend, inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
       dev.off()
       
       pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
@@ -2724,7 +2996,7 @@ server<-shinyServer(function(input, output, session){
       usr <- par("usr")
       x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
       y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
+      legend(x = x_rel, y = y_rel,title = input$tsnelegend,inset = 0.01,
              legend = unique(group),pch=16,
              col = colors,bg='white')
       
@@ -2734,7 +3006,7 @@ server<-shinyServer(function(input, output, session){
       usr <- par("usr")
       x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
       y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
+      legend(x = x_rel, y = y_rel,title = input$tsnelegend,inset = 0.01,
              legend = unique(group),pch=16,
              col = colors,bg='white')
       dev.off()
@@ -2778,7 +3050,7 @@ server<-shinyServer(function(input, output, session){
     x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
     y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
     # abline(h=0,v=0,lty=2,col="gray")
-    legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
+    legend(x = x_rel, y = y_rel,title = input$umaplegend,inset = 0.01,
            legend = unique(expr_data_group),pch=16,
            col = color_group_unique,
            bg='white'
@@ -2800,7 +3072,7 @@ server<-shinyServer(function(input, output, session){
       x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
       y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
       # abline(h=0,v=0,lty=2,col="gray")
-      legend(x = x_rel, y = y_rel,title = "Group",inset = 0.01,
+      legend(x = x_rel, y = y_rel,title = input$umaplegend,inset = 0.01,
              legend = unique(expr_data_group),pch=16,
              col = color_group_unique,
              bg='white'
@@ -3828,7 +4100,7 @@ server<-shinyServer(function(input, output, session){
       })
       output$survivalui <- renderUI({
         tagList(
-          selectInput("survivalsig", h5("Select a feature:"), choices = surplots()[[2]])
+          selectInput("survivalsig", h5("Select a Psite:"), choices = surplots()[[2]])
         )
       })
     }
@@ -3902,28 +4174,14 @@ server<-shinyServer(function(input, output, session){
   
   
   # Motif enrichment analysis
-  observeEvent(
-    input$infoLink, {
-      updateTabsetPanel(
-        session,
-        "navbarpage",
-        selected = "Download"
-      )
-    }
-  )
 
   observeEvent(
     input$motifanalysisbt, {
-      # validate(
-      #   need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
-      #   need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
-      #   need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
-      # )
       if(input$analysisdatatype == 2) {
         ask_confirmation(
           inputId = "myconfirmation",
-          title = "This step will take several hours.",
-          text = "To quickly present the case data, we RANDOMLY sampled the original data to obtain smaller background data and foreground data. Do you confirm run?"
+          title = "Attention...",
+          text = "To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. Do you confirm run?"
         )
       } else {
         ask_confirmation(
@@ -3981,11 +4239,14 @@ server<-shinyServer(function(input, output, session){
         # construct foreground and background
         foreground = as.vector(foreground_df$aligned_seq)
         background = as.vector(background_df$Aligned_Seq)
-        if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
-          if(length(foreground) > 1000) {
-            foreground <- foreground[sample(length(foreground), 1000)]
-          }
-          background <- background[sample(length(background), 10000)]
+        if(input$analysisdatatype == 2) {
+          # if(length(foreground) > 500) {
+          #   # foreground <- foreground[sample(length(foreground), 500)]
+          #   foreground <- head(foreground, 500)
+          # }
+          foreground <- tail(foreground, 300)
+          # background <- background[sample(length(background), 1000)]
+          background <- tail(background, 800)
         }
         motifs_list = mea_based_on_background(foreground, AA_in_protein, background, motifx_pvalue)
         # Find sequences in foreground that are mapped to specific motif
@@ -4009,7 +4270,7 @@ server<-shinyServer(function(input, output, session){
     input$motifanalysisbt, {
       output$motifenrichrank <- renderUI({
         tagList(
-          column(12, numericInput("motifenrichrankin", h5("selected row number for plotting motif logo:"), 2, max = length(motifres1()[[2]]), min = 1, step = 1)),
+          column(12, numericInput("motifenrichrankin", h5("selected row number for plotting motif logo:"), 1, max = length(motifres1()[[2]]), min = 1, step = 1)),
         )
       })
       output$motifdfresult <- renderDataTable(datatable(rbind(motifres1()[[1]][["S"]], motifres1()[[1]][["T"]], motifres1()[[1]][["Y"]]), options = list(pageLength = 25)))
