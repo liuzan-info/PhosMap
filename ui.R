@@ -137,7 +137,7 @@ ui <- renderUI(
                users to analyze the data using the demo server with small data sets. \
                An upgraded hardware is necessary, according to the possible computational\
                cost of the data, to reach the potential of PhosMap."),
-            actionButton("viewinstall", "Installation video", icon("video")),
+            actionButton("viewinstall", "Tutorial video", icon("video")),
             HTML(
               "
               <table id='help'>

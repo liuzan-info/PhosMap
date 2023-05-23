@@ -34,14 +34,14 @@ Create a docker container containing PhosMap:
 ```linux
 docker run  -p HostPort:3838 liuzandh/phosmap:1.0.0
 ```
-Then, you can enter PhosMap by visiting HostIP:HostPort.
+Then, you can enter PhosMap by visiting `HostIP:HostPort/PhosMap`.
 
 For example: HostPort could be set to 8083. This parameter can be changed according to user needs. 
 such as,
 ```linux
 docker run -p 8083:3838 liuzandh/phosmap:1.0.0
 ```
-Next, open 127.0.0.1:8083 in the local browser or remotely access ip:8083 (you should ensure that the machine can be accessed remotely).
+Next, open `127.0.0.1:8083/PhosMap` in the local browser or `remotely access ip:8083/PhosMap` (you should ensure that the machine can be accessed remotely).
 
 ### 2. R-based installation
 This tool is developed with R, so if you want to run it locally, you may do some preparatory work:
@@ -69,6 +69,9 @@ This tool is developed with R, so if you want to run it locally, you may do some
   install_github('ecnuzdd/PhosMap')
   ```
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
+
+## How to use
+You can find comprehensive documentation and an in-depth video tutorial on this website.https://bio-inf.shinyapps.io/phosmap/
 
 ## Detail of R package "PhosMap"
 https://github.com/ecnuzdd/PhosMap

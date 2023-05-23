@@ -119,9 +119,10 @@ server<-shinyServer(function(input, output, session){
   observeEvent(
     input$viewinstall,{
       showModal(modalDialog(
-        title = "Installation video",
+        title = "Tutorial video",
         size = "l",
-        tags$iframe(width="560", height="400", src="https://www.bilibili.com/bangumi/play/ep327584?from_spmid=666.25.episode.0", frameborder="0", allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
+        h5("If the following video fails to play, you can choose to open this link instead. https://www.youtube.com/watch?v=KGccNSmjhsk"),
+        tags$iframe(width="560", height="400", src="https://www.bilibili.com/video/BV1zh411F7vJ/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
         easyClose = T,
         footer = modalButton("OK")
       ))
