@@ -205,108 +205,922 @@ ui <- renderUI(
         ),
         column(
           12,
-          br(),
-          hr(),
-          h5(style = "text-align: center;","This website is free and open to all users and there is no login requirement.")
+        br(),
+        hr(),
+        h5(style = "text-align: center;","This website is free and open to all users and there is no login requirement.")
           
         )
       ),
       
       tabPanel(
         "Import Data",
-        # icon = icon("upload", class = "fa-solid fa-upload"),
+        icon = icon("upload", class = "fa-solid fa-upload"),
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h3(
-              "Import Data",
-              tags$span(
-                id = 'span_import',
-                `data-toggle` = "tooltip",
-                title = '
-                In this section, users are required to upload preprocessed phosphorylation data, while the template for the experimental design file and clinical data file can be obtained from the FAQ module.
-                ',
-                tags$span(class = "glyphicon glyphicon-question-sign")
+            h3("Import Data",),
+            wellPanel(
+              materialSwitch(
+                inputId = "loaddatatype",
+                label = "Load example data", 
+                value = FALSE,
+                status = "success",
+                right = TRUE
+              ),
+              radioGroupButtons(
+                inputId = "softwaretype",
+                label = NULL,
+                choices = list("MaxQuant" = 1, "Firmiana" = 2),
+                # direction = "vertical",
+                individual = TRUE,
+                selected = 1,
+                checkIcon = list(
+                  yes = tags$i(class = "fa fa-circle", 
+                               style = "color: steelblue"),
+                  no = tags$i(class = "fa fa-circle-o", 
+                              style = "color: steelblue")),
               )
             ),
-            div(
-              id = "pcadatatypediv",
-              radioGroupButtons(
-                inputId = "analysisdatatype",
-                label = NULL,
-                # choices = list("your data" = 1, "pipeline data" = 2, "example data" = 3),
-                choices = list("your data" = 1, "example data" = 2),
-                individual = TRUE,
-                selected = 2,
-                checkIcon = list(
-                  yes = tags$i(class = "fa fa-circle",
-                               style = "color: steelblue"),
-                  no = tags$i(class = "fa fa-circle-o",
-                              style = "color: steelblue")),
-              ),
-              actionButton("pre2analysis", "Go to preprocessing", icon = icon("paper-plane")),
-            ),
-            # bsTooltip(
-            #   "pcadatatypediv", "1. pipeline data: data obtained through the above preprocessing process; 2. example data: data we provide; 3. your data: formated phosphoomics data",
-            #   placement = "right",
-            #   options = list(container = "body")
-            # ),
-            hr(style = "border-color: grey;"),
             conditionalPanel(
-              condition = "input.analysisdatatype == 2",
+              condition = "input.loaddatatype == true",
               h4("1. Experimental design file: "),
-              actionButton("viewanalysisexamdesign", "view", icon("eye")),
+              actionButton("viewbt1", "view", icon("eye"), class = "viewbutton"),
+              hr(style = "border-style: dashed;border-color: grey;")
+            ),
+            conditionalPanel(
+              condition = "input.loaddatatype == true  & input.softwaretype == 2",
+              h4("2. Mascot xml file: "),
+              selectInput("mascotdemoxmlid", NULL, choices = c("Exp027015_F1_R1", "Exp027016_F1_R1", "Exp027017_F1_R1", "Exp027031_F1_R1", "Exp027032_F1_R1", "Exp027033_F1_R1", "Exp027046_F1_R1", "Exp027047_F1_R1", "Exp027048_F1_R1")),
               hr(style = "border-style: dashed;border-color: grey;"),
-              h4("2. Phosphorylation data frame: "),
-              actionButton("viewanalysisexamdf", "view", icon("eye")),
+              # hr(),
+              h4("3. Phosphoproteomics peptide file: "),
+              selectInput("mascotdemopeptidefileid", NULL, choices = c("Exp027015_peptide", "Exp027016_peptide", "Exp027017_peptide", "Exp027031_peptide", "Exp027032_peptide", "Exp027033_peptide", "Exp027046_peptide", "Exp027047_peptide", "Exp027048_peptide")),
               hr(style = "border-style: dashed;border-color: grey;"),
-              h4("3. Clinical data file[optional]: "),
-              actionButton("viewanalysisexamclin", "view", icon("eye"))
+              h4("4. Proteomics data[optional]"),
+              br(style = "line-height:1px;"),
+              h4("4.1 Proteomics experimental design file: "),
+              actionButton("viewbt5", "view", icon("eye"), class = "viewbutton"),
+              h4("4.2 Profiling file: "),
+              selectInput("mascotdemoproid", NULL, choices = c("Exp026982_gene", "Exp026983_gene", "Exp026995_gene", "Exp026996_gene", "Exp027008_gene", "Exp027009_gene"))
+            ),
+
+            #Maxquant
+            conditionalPanel(
+              condition = "input.loaddatatype == true  & input.softwaretype == 1",
+              h4("2. Phospho (STY)Sites.txt: "),
+              actionButton("viewdemomaxphosbt", "view", icon("eye"), class = "viewbutton"),
+              hr(style = "border-style: dashed;border-color: grey;"),
+              # hr(),
+              h4("3. Proteomics data[optional]"),
+              br(),
+              h4("3.1 Proteomics experimental design file: "),
+              actionButton("viewdemomaxprodesignbt", "view", icon("eye"), class = "viewbutton"),
+              h4("3.2 proteinGroups.txt: "),
+              actionButton("viewdemomaxprobt", "view", icon("eye"), class = "viewbutton"),
+            ),
+            
+            ## user data
+            # shared phosphoproteomics design file
+            conditionalPanel(
+              condition = "input.loaddatatype == false",
+              h4("1. Experimental design file: "),
+              fileInput("updesign", NULL, accept = ".txt"),
+              hidden(
+                div(
+                  id = "hiddenview1",
+                  actionButton("viewbt4", "view", icon("eye"))
+                )
+              ),
+              hr(style = "border-style: dashed;border-color: grey;")
+            ),
+            
+            # mascot
+            conditionalPanel(
+              condition = "input.loaddatatype == false & input.softwaretype == 2",
+              h4("2. Mascot xml file: "),
+              fileInput("upmascot", NULL, accept = "application/zip"),
+              uiOutput("masui"),
+              hr(style = "border-style: dashed;border-color: grey;"),
+              h4("3. Phosphoproteomics peptide file: "),
+              fileInput("uppeptide", NULL, accept = "application/zip"),
+              uiOutput("pepui"),
+              hr(style = "border-style: dashed;border-color: grey;"),
+              
+              h4("4. Proteomics data[optional]"),
+              br(),
+              h4("4.1 Proteomics experimental design file: "),
+              fileInput("upprodesign", NULL, accept = ".txt"),
+              uiOutput("prodesignui"),
+              hidden(
+                div(
+                  id = "prohiddenview",
+                  actionButton("proviewbt", "view", icon("eye"))
+                )
+              ),
+              
+              h4("4.2 Profiling file: "),
+              fileInput("upprogene", NULL, accept = "application/zip"),
+              uiOutput("progeneui"),
+            ),
+            
+            # Maxquant
+            conditionalPanel(
+              condition = "input.loaddatatype == false & input.softwaretype == 1",
+              h4("2. Phospho (STY)Sites.txt: "),
+              fileInput("upusermaxphos", NULL, accept = ".txt"),
+              hidden(
+                div(
+                  id = "hidviewusermaxphosbt",
+                  actionButton("viewusermaxphosbt", "view", icon("eye"), class = "viewbutton")
+                ),
+                div(
+                  id = "hidviewusermaxphosbtwarning",
+                  actionButton("viewusermaxphosbtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
+                )
+              ),
+              hr(style = "border-style: dashed;border-color: grey;"),
+              h4("3. Proteomics data[optional]"),
+              br(),
+              h4("3.1 Proteomics experimental design file: "),
+              fileInput("upusermaxprodesign", NULL, accept = ".txt"),
+              hidden(
+                div(
+                  id = "hidviewusermaxprodesignbt",
+                  actionButton("viewusermaxprodesignbt", "view", icon("eye"), class = "viewbutton")
+                )
+              ),
+              h4("3.2 proteinGroups.txt: "),
+              fileInput("upusermaxpro", NULL, accept = ".txt"),
+              hidden(
+                div(
+                  id = "hidviewusermaxprobt",
+                  actionButton("viewusermaxprobt", "view", icon("eye"), class = "viewbutton")
+                ),
+                div(
+                  id = "hidviewusermaxprobtwarning",
+                  actionButton("viewusermaxprobtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
+                )
+              )
             ),
             
             conditionalPanel(
-              # any
-              condition = "input.analysisdatatype == 1",
-              h4("1. Experimental design file: "),
-              fileInput(
-                inputId = "analysisupload11",
-                label = NULL,
-                accept = ".txt"
-              ),
-              uiOutput("viewanalysisyourdesign"),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              h4("2. Phosphorylation data frame: "),
-              fileInput(
-                inputId = "analysisupload12",
-                label = NULL,
-                accept = ".csv"
-              ),
-              uiOutput("viewanalysisyourexpre"),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              h4("3. Clinical data file[optional]: "),
-              fileInput(
-                inputId = "analysisupload14",
-                label = NULL,
-                accept = ".csv"
-              ),
-              uiOutput("viewanalysisyourclin")
+              condition = "input.loaddatatype == false & input.softwaretype == 3",
+              h4("another user data")
             )
           ),
-          
           mainPanel(
             width = 9,
             hr(),
-            htmlOutput("htmlanalysis"),
-            # wellPanel("Data Overview", class = "warning"),
+            # tabsetPanel(
+            #   tabPanel(
+            #     "Data Overview",
             conditionalPanel(
-              condition = "input.analysisdatatype == 2",
-              uiOutput("viewedfileanalysisui"),
-              dataTableOutput("viewedfileanalysis")
+              condition = "input.loaddatatype == true",
+              htmlOutput("html"),
+              dataTableOutput("viewedfile")
             ),
             conditionalPanel(
-              condition = "input.analysisdatatype == 1",
-              uiOutput("viewedfileanalysisuiuser"),
-              dataTableOutput("viewedfileanalysisuser")
+              condition = "input.loaddatatype == false",
+              htmlOutput("html2"),
+              dataTableOutput("viewedfile2"),
+            )
+          )
+        )
+            
+      ),
+      tabPanel(
+        "Preprocessing",
+        fluidRow(
+          conditionalPanel(
+            condition = "input.softwaretype == 2",
+            column(2, NULL),
+            column(8, h2(style = "text-align: center;", "Preprocessing")),
+            column(2, actionButton("pre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
+            column(
+              12,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                progressBar(id = "preprobar", value = 0, status = "success")
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                progressBar(id = "userpreprobar", value = 0, status = "success")
+              ),
+            ),
+            
+            column(
+              3,
+              panel(
+                heading = "Step1: Parser",
+                status = "primary",
+                h5("no parameter"),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "parserbt01",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "parserbt11",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              panel(
+                heading = "Step2: Quality Control & Merging",
+                status = "warning",
+                numericInput(
+                  "qcscore",
+                  "minimum score:",
+                  20,
+                  max = 100,
+                  min = 0,
+                  step = 0.5
+                ),
+                bsTooltip(
+                  "qcscore", 
+                  "the minimum score of credible peptides",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                numericInput(
+                  "qcfdr",
+                  "minimum FDR:",
+                  0.01,
+                  max = 0.02,
+                  min = 0,
+                  step = 0.002
+                ),
+                bsTooltip(
+                  "qcfdr", 
+                  "the minimum FDR of credible peptides",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "mergingbt0",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "mergingbt1",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              panel(
+                heading = "Step3: Mapping",
+                status = "danger",
+                selectInput("species", "species:", choices = c("human", "mouse", "rattus")),
+                selectInput("idtype", "id type", choices = c("RefSeq_Protein_GI", "RefSeq_Protein_Accession", "Uniprot_Protein_Accession", "GeneID")),
+                selectInput("fastatype", "fasta type", choices = c("refseq", "uniprot")),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "mappingbt01",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "mappingbt11",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              )
+            ),
+            column(
+              3,
+              panel(
+                heading = "Step4: Filtering & Normalization & Imputation",
+                footer = "This step also filters modification types, remaining only 'S/T/Y'",
+                status = "info",
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  numericInput("masphosNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
+                ),
+                bsTooltip(
+                  "masphosNAthre",
+                  # "xxxx",
+                  "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  numericInput("usermasphosNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
+                ),
+                bsTooltip(
+                  "usermasphosNAthre",
+                  "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                selectInput("mascotnormmethod", label = "normalization method: ", choices = c("global", "median")),
+                column(12,
+                       prettyToggle(
+                         inputId = "democountbygroup",
+                         label_on = "separately imputing by group",
+                         icon_on = icon("check"),
+                         status_on = "info",
+                         status_off = "warning",
+                         label_off = "imputing jointly ",
+                         icon_off = icon("xmark"),
+                         value = FALSE
+                       )
+                ),
+                pickerInput(
+                  inputId = "mascotimputemethod",
+                  label = "imputation method: ", 
+                  choices = list(
+                    only_joint= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    separate_or_joint = c("bpca", "lls", "knnmethod", "rowmedian")),
+                  selected = "minimum/10"
+                ),
+                # selectInput("mascotimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
+                        
+                numericInputIcon(
+                  inputId = "top",
+                  label = "top",
+                  value = 100,
+                  step = 1,
+                  max = 100,
+                  min = 1,
+                  icon = list(NULL, icon("percent"))
+                ),
+                bsTooltip(
+                  "top", 
+                  "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "normalizationbt01",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "normalizationbt11",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                panel(
+                  heading = "Step5: Normalization based on proteomics data",
+                  status = "success",
+                  prettyToggle(
+                    inputId = "useprocheck1",
+                    label_on = "With proteomics data", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "Without proteomics data",
+                    icon_off = icon("xmark"),
+                    value = TRUE
+                  ),
+                  conditionalPanel(
+                    condition = "input.useprocheck1 == 1",
+                    wellPanel(
+                      h5("Proteomics data preprocessing parameters", style = "color: grey;"),
+                      numericInput("masuscutoff", label = "US cutoff: ", value = 1),
+                      numericInput("masproNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
+                      bsTooltip(
+                        "masproNAthre",
+                        "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                        placement = "right",
+                        options = list(container = "body")
+                      ),
+                      selectInput("mascotpronormmethod", label = "normalization method: ", choices = c("global", "median")),
+                      selectInput("mascotproimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10")
+                    ),
+                    selectInput("mascotcontrol", label = "control label: ", choices = c("0", "6", "48", "no control")),
+                    div(
+                      class = "runbuttondiv",
+                      actionButton(
+                        "normalizationbt02",
+                        "",
+                        icon("play"),
+                        class = "runbutton"
+                      )
+                    )
+                  ),
+                  conditionalPanel(
+                    condition = "input.useprocheck1 == 0",
+                    wellPanel(
+                      h5("After 'Step1-Step2-Step3-Step4' have been run, you can click 'Go to analysis tools'", style = "color: grey;")
+                    )
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                uiOutput("userusepro")
+              )
+            ),
+            column(
+              6,
+              conditionalPanel(
+                condition = "input.loaddatatype == true & input.useprocheck1 == 1",
+                navbarPage(
+                  title = "Result",
+                  id = "resultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "demomascotstep1val",
+                    h4("Peptide identification files with psites scores:"),
+                    uiOutput("demomascotparserui")
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demomascotstep2val",
+                    h4("Peptide data frame through phosphorylation sites quality control:"),
+                    uiOutput("mergingui0"),
+                    column(11,dataTableOutput("viewedmerging")),
+                    column(1,downloadBttn(
+                      outputId = "viewedmerging_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 3",
+                    value = "demomascotstep3val",
+                    h4("Data frame mapped ID to Gene Symbol:"),
+                    uiOutput("mapping02"),
+                    column(11,dataTableOutput("viewedmapping02")),
+                    column(1,downloadBttn(
+                      outputId = "viewedmapping02_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 4",
+                    value = "demomascotstep4val",
+                    h4("Phosphorylation data frame:"),
+                    column(11,dataTableOutput("viewednorm01")),
+                    column(1,downloadBttn(
+                      outputId = "viewednorm01_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 5",
+                    value = "demomascotstep5val",
+                    h4("Phosphorylation data frame:"),
+                    column(11,dataTableOutput("viewednorm02")),
+                    column(1,downloadBttn(
+                      outputId = "viewednorm02_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    )),
+                    br(),
+                    h4("Proteomics data frame:"),
+                    column(11,dataTableOutput("viewednorm02pro")),
+                    column(1,downloadBttn(
+                      outputId = "viewednorm02pro_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == true & input.useprocheck1 == 0",
+                navbarPage(
+                  title = "Result",
+                  id = "resultnavdroppro",
+                  tabPanel(
+                    "Step 1",
+                    value = "demomascotdropprostep1val",
+                    h4("Peptide identification files with psites scores:"),
+                    uiOutput("demomascotdropproparserui")
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demomascotdropprostep2val",
+                    h4("Peptide data frame through phosphorylation sites quality control:"),
+                    column(11,dataTableOutput("viewedmergingdroppro")),
+                    column(1,downloadBttn(
+                      outputId = "viewedmergingdroppro_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 3",
+                    value = "demomascotdropprostep3val",
+                    h4("Data frame mapped ID to Gene Symbol:"),
+                    column(11,dataTableOutput("viewedmapping02droppro")),
+                    column(1,downloadBttn(
+                      outputId = "viewedmapping02droppro_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 4",
+                    value = "demomascotdropprostep4val",
+                    h4("Phosphorylation data frame:"),
+                    column(11,dataTableOutput("viewednorm01droppro")),
+                    column(1,downloadBttn(
+                      outputId = "viewednorm01droppro_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                uiOutput("userresultpanelui")
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.softwaretype == 1",
+            column(2, NULL),
+            column(8, h2(style = "text-align: center;", "Preprocessing")),
+            column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
+            column(
+              12,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                progressBar(id = "demomaxpreprobar", value = 0, status = "success")
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                progressBar(id = "usermaxpreprobar", value = 0, status = "success")
+              )
+            ),
+            column(
+              3,
+              panel(
+                heading = "Step1: Quality Control",
+                status = "primary",
+                numericInput(
+                  "minqcscore",
+                  "minimum score:",
+                  40,
+                  max = 200,
+                  min = 40,
+                  step = 1
+                ),
+                numericInput(
+                  "minqclocalizationprob",
+                  "minimum localization probability:",
+                  0.75,
+                  max = 1,
+                  min = 0,
+                  step = 0.01
+                ),
+                numericInput(
+                  "maxphosNAthre",
+                  "minimum detection frequency:",
+                  1,
+                  min = 0,
+                  step = 1
+                ),
+                bsTooltip(
+                  "maxphosNAthre",
+                  # "xxxx",
+                  "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demomaxqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "usermaxqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              panel(
+                heading = "Step2: Normalizaiton & Imputation & Filtering",
+                status = "warning",
+                selectInput("maxphosnormmethod", "normalization method:", choices = c("global", "median")),
+                column(12,
+                       prettyToggle(
+                         inputId = "maxdemocountbygroup",
+                         label_on = "separately imputing by group",
+                         icon_on = icon("check"),
+                         status_on = "info",
+                         status_off = "warning",
+                         label_off = "imputing jointly ",
+                         icon_off = icon("xmark"),
+                         value = FALSE
+                       )
+                ),
+                pickerInput(
+                  inputId = "maxphosimputemethod",
+                  label = "imputation method: ", 
+                  choices = list(
+                    only_joint= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    separate_or_joint = c("bpca", "lls", "knnmethod", "rowmedian")),
+                  selected = "minimum/10"
+                ),
+                # selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
+
+                        
+                numericInputIcon(
+                  inputId = "maxtop",
+                  label = "top:",
+                  value = 100,
+                  step = 1,
+                  max = 100,
+                  min = 1,
+                  icon = list(NULL, icon("percent"))
+                ),
+                bsTooltip(
+                  "maxtop", 
+                  "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demomaxnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "usermaxnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              )
+            ),
+            column(
+              3,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                panel(
+                  heading = "Step3: Normalization based on proteomics data",
+                  status = "danger",
+                  prettyToggle(
+                    inputId = "maxuseprocheck1",
+                    label_on = "With proteomics data", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "Without proteomics data",
+                    icon_off = icon("xmark"),
+                    value = TRUE
+                  ),
+                  conditionalPanel(
+                    condition = "input.maxuseprocheck1 == 1",
+                    wellPanel(
+                      h5("Proteomics data preprocessing parameters", style = "color: grey;"),
+                      selectInput("maxintensitylist", "intensity type: ", choices = c("Intensity", "iBAQ", "LFQ.intensity"), selected = "iBAQ"),
+                      numericInput(
+                        "maxuniquepeptide",
+                        "minimum unique peptide:",
+                        1,
+                        min = 0,
+                        step = 1
+                      ),
+                      numericInput(
+                        "maxproNAthre",
+                        "minimum detection frequency:",
+                        1,
+                        min = 0,
+                        step = 1
+                      ),
+                      bsTooltip(
+                        "maxproNAthre",
+                        "minimum detection frequency for per protein, equivalents to the number of samples minus the number of ‘0’ value",
+                        placement = "right",
+                        options = list(container = "body")
+                      ),
+                      selectInput("maxnormmethod", "normalization method:", choices = c("global", "median")),
+                      selectInput("maximputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10")
+                    ),
+                    selectInput("maxcontrol", label = "control label: ", choices = c("0", "6", "48", "no control")),
+                    div(
+                      class = "runbuttondiv",
+                      actionButton(
+                        "demomaxnormprobt",
+                        "",
+                        icon("play"),
+                        class = "runbutton"
+                      )
+                    )
+                  ),
+                  conditionalPanel(
+                    condition = "input.maxuseprocheck1 == 0",
+                    wellPanel(
+                      h5("After 'Step1-Step2' have been run, you can click 'Go to analysis tools'", style = "color: grey;")
+                    )
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                panel(
+                  heading = "Step3: Normalization based on proteomics data",
+                  status = "danger",
+                  uiOutput("maxuserusepro")
+                )
+              )
+            ),
+            column(
+              6,
+              conditionalPanel(
+                condition = "input.maxuseprocheck1 == 1 & input.loaddatatype == true",
+                navbarPage(
+                  title = "Result",
+                  id = "demomaxresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "demomaxstep1val",
+                    h4("QC result: "),
+                    column(11,dataTableOutput("demomaxresult1")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demomaxstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("demomaxresult2")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 3",
+                    value = "demomaxstep3val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("demomaxresult3")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxresult3_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    )),
+                    br(),
+                    h4("Proteomics data frame:"),
+                    column(11,dataTableOutput("demomaxresult3pro")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxresult3pro_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.maxuseprocheck1 == 0 & input.loaddatatype == true",
+                navbarPage(
+                  title = "Result",
+                  id = "demomaxdropproresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "demomaxdropprostep1val",
+                    h4("QC result: "),
+                    column(11,dataTableOutput('demomaxdropproresult1')),
+                    column(1,downloadBttn(
+                      outputId = "demomaxdropproresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demomaxdropprostep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("demomaxdropproresult2")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxdropproresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                uiOutput("maxuserresultpanelui")
+              )
             )
           )
         )
@@ -316,8 +1130,117 @@ ui <- renderUI(
         menuName = "analysisnavbar",
         icon = icon("share-nodes"),
         tabPanel(
+          "UPLOAD DATA [ prerequisite ]",
+          sidebarLayout(
+            sidebarPanel(
+              width = 3,
+              h3("Analysis Data Upload"),
+              div(
+                id = "pcadatatypediv",
+                radioGroupButtons(
+                  inputId = "analysisdatatype",
+                  label = NULL,
+                  choices = list("your data" = 1, "pipeline data" = 2, "example data" = 3),
+                  individual = TRUE,
+                  selected = 2,
+                  checkIcon = list(
+                    yes = tags$i(class = "fa fa-circle", 
+                                 style = "color: steelblue"),
+                    no = tags$i(class = "fa fa-circle-o", 
+                                style = "color: steelblue")),
+                )
+              ),
+              bsTooltip(
+                "pcadatatypediv", "1. pipeline data: data obtained through the above preprocessing process; 2. example data: data we provide; 3. your data: formated phosphoomics data",
+                placement = "right",
+                options = list(container = "body")
+              ),
+              hr(style = "border-color: grey;"),
+              conditionalPanel(
+                condition = "input.analysisdatatype == 3",
+                h4("1. Experimental design file: "),
+                actionButton("viewanalysisexamdesign", "view", icon("eye")),
+                hr(style = "border-style: dashed;border-color: grey;"),
+                h4("2. Phosphorylation data frame: "),
+                actionButton("viewanalysisexamdf", "view", icon("eye")),
+                hr(style = "border-style: dashed;border-color: grey;"),
+                h4("3. Clinical data file[optional]: "),
+                actionButton("viewanalysisexamclin", "view", icon("eye"))
+              ),
+              
+              
+              conditionalPanel(
+                # pipeline
+                condition = "input.analysisdatatype == 2",
+                h4("1. Experimental design file: "),
+                actionButton("viewanalysispipedesign", "view", icon("eye")),
+                hr(style = "border-style: dashed;border-color: grey;"),
+                h4("2. Phosphorylation data frame: "),
+                actionButton("viewanalysispipedf", "view", icon("eye")),
+                hr(style = "border-style: dashed;border-color: grey;"),
+                h4("3. Clinical data file[optional]: "),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  actionButton("viewanalysispipeclin", "view", icon("eye"))
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  fileInput(
+                    inputId = "annalysisupload24",
+                    label = NULL,
+                    accept = ".csv"
+                  ),
+                  uiOutput("viewanalysispipeclinui")
+                )
+              ),
+              
+              conditionalPanel(
+                # any
+                condition = "input.analysisdatatype == 1",
+                h4("1. Experimental design file: "),
+                fileInput(
+                  inputId = "analysisupload11",
+                  label = NULL,
+                  accept = ".txt"
+                ),
+                uiOutput("viewanalysisyourdesign"),
+                hr(style = "border-style: dashed;border-color: grey;"),
+                h4("2. Phosphorylation data frame: "),
+                fileInput(
+                  inputId = "analysisupload12",
+                  label = NULL,
+                  accept = ".csv"
+                ),
+                uiOutput("viewanalysisyourexpre"),
+                hr(style = "border-style: dashed;border-color: grey;"),
+                h4("3. Clinical data file[optional]: "),
+                fileInput(
+                  inputId = "analysisupload14",
+                  label = NULL,
+                  accept = ".csv"
+                ),
+                uiOutput("viewanalysisyourclin")
+              )
+            ),
+            mainPanel(
+              width = 9,
+              hr(),
+              htmlOutput("htmlanalysis"),
+              conditionalPanel(
+                condition = "input.analysisdatatype == 2 | input.analysisdatatype == 3",
+                uiOutput("viewedfileanalysisui"),
+                dataTableOutput("viewedfileanalysis")
+              ),
+              conditionalPanel(
+                condition = "input.analysisdatatype == 1",
+                uiOutput("viewedfileanalysisuiuser"),
+                dataTableOutput("viewedfileanalysisuser")
+              )
+            )
+          )
+        ),
+        tabPanel(
           "Dimension Reduction Analysis",
-          # "DRA",
           h2("Dimension Reduction Analysis", class = "tooltitle"),
           h4("This module is used to reduce the dimension of phosphosites and visualize samples.", class = "toolsubtitle"),
           fluidRow(
@@ -328,9 +1251,9 @@ ui <- renderUI(
                 heading = "Parameters Setting",
                 status = "info",
                 column(12, h4("PCA:")),
-                column(6, textInput("pcamain", "title", "PCA")),
+                column(6, textInput("pcamain", "main", "PCA")),
                 column(6, textInput("pcalegend", "legend title", "Hour")),
-                column(12, prettyToggle(
+                column(6, prettyToggle(
                   inputId = "pcamean",
                   label_on = "group mean", 
                   icon_on = icon("check"),
@@ -341,12 +1264,12 @@ ui <- renderUI(
                   value = F
                 )),
                 column(12, h4("t-SNE:")),
-                column(6, textInput("tsnemain", "title", "t-SNE")),
+                column(6, textInput("tsnemain", "main", "t-SNE")),
                 column(6, textInput("tsnelegend", "legend title", "Hour")),
                 column(6,numericInput("tsneseed", "random seed", 42)),
                 column(6, numericInput('tsneperplexity','perplexity',2,min = 1,step = 1)),
                 column(12, h4("UMAP:")),
-                column(6, textInput("umapmain", "title", "UMAP")),
+                column(6, textInput("umapmain", "main", "UMAP")),
                 column(6, textInput("umaplegend", "legend title", "Hour")),
                 column(6, numericInput('umapneighbors','neighbors',5,min = 1,step = 1)),
                 column(12, div(actionButton("drbt", "Analysis", icon("magnifying-glass-chart"), class='analysisbutton'), style = "display:flex; justify-content:center; align-item:center;"))
@@ -385,7 +1308,6 @@ ui <- renderUI(
         ),
         tabPanel(
           "Differential Phosphorylation Analysis",
-          # "DPA",
           h2("Differential Phosphorylation Analysis", class = "tooltitle"),
           h4("This module is used to identify differential phosphorylation sites.", class = "toolsubtitle"),
           radioGroupButtons(
@@ -414,7 +1336,7 @@ ui <- renderUI(
                   selectInput("limmaadjust", h5("pvalue adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),selected = 'none')
                 ),
                 column(6, numericInput("limmafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
-                column(6, textAreaInput("limmamain", h5("title:"), "Differential phosphosites with limma")),
+                column(6, textAreaInput("limmamain", h5("title:"), "Differentially expressed phosphosites with limma")),
                 column(6, textAreaInput("limmaxaxis", h5("x axis label:"), "log2FC")),
                 
                 column(6, textAreaInput("limmayaxis", h5("y axis label:"), "-log10(pvalue)")),
@@ -652,7 +1574,6 @@ ui <- renderUI(
         ),
         tabPanel(
           "Time Course Analysis(fuzzy clustering)",
-          # "TCA",
           h2("Time Course Analysis(fuzzy clustering)", class = "tooltitle"),
           h4("Fuzzy clustering is applied to time course analysis for discovering patterns associated with time points in PhosMap.", class = "toolsubtitle"),
           fluidRow(
@@ -694,7 +1615,6 @@ ui <- renderUI(
         ),
         tabPanel(
           "Kinase-Substrate Enrichment Analysis",
-          # "KSEA",
           h2("Kinase-Substrate Enrichment Analysis", class = "tooltitle"),
           h4("This module is used to predict kinase activity.", class = "toolsubtitle"),
           fluidRow(
@@ -824,12 +1744,12 @@ ui <- renderUI(
         ),
         tabPanel(
           "Motif Enrichment Analysis",
-          # "MEA",
           h2("Motif Enrichment Analysis", class = "tooltitle"),
           column(3, NULL),
           column(6, h4("This module is used to find and visualize enriched motifs.", class = "toolsubtitle")),
-          # column(3, actionLink("infoLink", "Motif-Kinase Relation", class = "btn-info")),
           column(3, downloadButton("dlmotifkinase", "Motif-Kinase Relation")),
+          # column(3, actionLink("infoLink", "Motif-Kinase Relation", class = "btn-info")),
+          
           fluidRow(
             column(
               4,
@@ -869,7 +1789,7 @@ ui <- renderUI(
                 heading = "Heatmap Parameters Setting",
                 status = "danger",
                 h5("Assign quantitative values of peptides to their motif", style = "color: grey;"),
-                column(12, numericInput("minseqs", h5("matched seqs threshold"), 5, min = 1, step = 1)),
+                column(12, numericInput("minseqs", h5("matched seqs threshold"), 50, min = 1, step = 1)),
                 column(6, selectInput("motifscale", h5("scale:"), choices = c("none", "row", "column"), selected = "none")),
                 column(6, selectInput("motifdistance", h5("distance metric:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
                 column(6, selectInput("motifclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
@@ -899,11 +1819,11 @@ ui <- renderUI(
                 )
               )
             )
+            
           )
         ),
         tabPanel(
           "Survival Analysis",
-          # "SA",
           h2("Survival Analysis", class = "tooltitle"),
           h4("This module is used to identify phosphorylation sites or kinases associated with clinical outcomes of patients.", class = "toolsubtitle"),
           fluidRow(
@@ -919,7 +1839,7 @@ ui <- renderUI(
               ),
               panel(
                 "",
-                heading = "Psite Selection",
+                heading = "Feature Selection",
                 status = "warning",
                 column(12, uiOutput("survivalui")),
                 column(6, colourInput("survivalhighcol", h5('"high" colour'), "#3300CC")),
@@ -957,938 +1877,6 @@ ui <- renderUI(
           )
         )
       ),
-      
-      tabPanel(
-        "Preprocessing",
-        sidebarLayout(
-          sidebarPanel(
-            width = 3,
-            h3("Upload Data",),
-            wellPanel(
-              materialSwitch(
-                inputId = "loaddatatype",
-                label = "Load example data", 
-                value = FALSE,
-                status = "success",
-                right = TRUE
-              ),
-              radioGroupButtons(
-                inputId = "softwaretype",
-                label = NULL,
-                choices = list("MaxQuant" = 1, "Firmiana" = 2),
-                # direction = "vertical",
-                individual = TRUE,
-                selected = 1,
-                checkIcon = list(
-                  yes = tags$i(class = "fa fa-circle", 
-                               style = "color: steelblue"),
-                  no = tags$i(class = "fa fa-circle-o", 
-                              style = "color: steelblue")),
-              )
-            ),
-            conditionalPanel(
-              condition = "input.loaddatatype == true",
-              h4("1. Experimental design file: "),
-              actionButton("viewbt1", "view", icon("eye"), class = "viewbutton"),
-              hr(style = "border-style: dashed;border-color: grey;")
-            ),
-            conditionalPanel(
-              condition = "input.loaddatatype == true  & input.softwaretype == 2",
-              h4("2. Mascot xml file: "),
-              selectInput("mascotdemoxmlid", NULL, choices = c("Exp027015_F1_R1", "Exp027016_F1_R1", "Exp027017_F1_R1", "Exp027031_F1_R1", "Exp027032_F1_R1", "Exp027033_F1_R1", "Exp027046_F1_R1", "Exp027047_F1_R1", "Exp027048_F1_R1")),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              # hr(),
-              h4("3. Phosphoproteomics peptide file: "),
-              selectInput("mascotdemopeptidefileid", NULL, choices = c("Exp027015_peptide", "Exp027016_peptide", "Exp027017_peptide", "Exp027031_peptide", "Exp027032_peptide", "Exp027033_peptide", "Exp027046_peptide", "Exp027047_peptide", "Exp027048_peptide")),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              h4("4. Proteomics data[optional]"),
-              br(style = "line-height:1px;"),
-              h4("4.1 Proteomics experimental design file: "),
-              actionButton("viewbt5", "view", icon("eye"), class = "viewbutton"),
-              h4("4.2 Profiling file: "),
-              selectInput("mascotdemoproid", NULL, choices = c("Exp026982_gene", "Exp026983_gene", "Exp026995_gene", "Exp026996_gene", "Exp027008_gene", "Exp027009_gene"))
-            ),
-            
-            #Maxquant
-            conditionalPanel(
-              condition = "input.loaddatatype == true  & input.softwaretype == 1",
-              h4("2. Phospho (STY)Sites.txt: "),
-              actionButton("viewdemomaxphosbt", "view", icon("eye"), class = "viewbutton"),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              # hr(),
-              h4("3. Proteomics data[optional]"),
-              br(),
-              h4("3.1 Proteomics experimental design file: "),
-              actionButton("viewdemomaxprodesignbt", "view", icon("eye"), class = "viewbutton"),
-              h4("3.2 proteinGroups.txt: "),
-              actionButton("viewdemomaxprobt", "view", icon("eye"), class = "viewbutton"),
-            ),
-            
-            ## user data
-            # shared phosphoproteomics design file
-            conditionalPanel(
-              condition = "input.loaddatatype == false",
-              h4("1. Experimental design file: "),
-              fileInput("updesign", NULL, accept = ".txt"),
-              hidden(
-                div(
-                  id = "hiddenview1",
-                  actionButton("viewbt4", "view", icon("eye"))
-                )
-              ),
-              hr(style = "border-style: dashed;border-color: grey;")
-            ),
-            
-            # mascot
-            conditionalPanel(
-              condition = "input.loaddatatype == false & input.softwaretype == 2",
-              h4("2. Mascot xml file: "),
-              fileInput("upmascot", NULL, accept = "application/zip"),
-              uiOutput("masui"),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              h4("3. Phosphoproteomics peptide file: "),
-              fileInput("uppeptide", NULL, accept = "application/zip"),
-              uiOutput("pepui"),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              
-              h4("4. Proteomics data[optional]"),
-              br(),
-              h4("4.1 Proteomics experimental design file: "),
-              fileInput("upprodesign", NULL, accept = ".txt"),
-              uiOutput("prodesignui"),
-              hidden(
-                div(
-                  id = "prohiddenview",
-                  actionButton("proviewbt", "view", icon("eye"))
-                )
-              ),
-              
-              h4("4.2 Profiling file: "),
-              fileInput("upprogene", NULL, accept = "application/zip"),
-              uiOutput("progeneui"),
-            ),
-            
-            # Maxquant
-            conditionalPanel(
-              condition = "input.loaddatatype == false & input.softwaretype == 1",
-              h4("2. Phospho (STY)Sites.txt: "),
-              fileInput("upusermaxphos", NULL, accept = ".txt"),
-              hidden(
-                div(
-                  id = "hidviewusermaxphosbt",
-                  actionButton("viewusermaxphosbt", "view", icon("eye"), class = "viewbutton")
-                ),
-                div(
-                  id = "hidviewusermaxphosbtwarning",
-                  actionButton("viewusermaxphosbtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
-                )
-              ),
-              hr(style = "border-style: dashed;border-color: grey;"),
-              h4("3. Proteomics data[optional]"),
-              br(),
-              h4("3.1 Proteomics experimental design file: "),
-              fileInput("upusermaxprodesign", NULL, accept = ".txt"),
-              hidden(
-                div(
-                  id = "hidviewusermaxprodesignbt",
-                  actionButton("viewusermaxprodesignbt", "view", icon("eye"), class = "viewbutton")
-                )
-              ),
-              h4("3.2 proteinGroups.txt: "),
-              fileInput("upusermaxpro", NULL, accept = ".txt"),
-              hidden(
-                div(
-                  id = "hidviewusermaxprobt",
-                  actionButton("viewusermaxprobt", "view", icon("eye"), class = "viewbutton")
-                ),
-                div(
-                  id = "hidviewusermaxprobtwarning",
-                  actionButton("viewusermaxprobtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
-                )
-              )
-            ),
-            
-            conditionalPanel(
-              condition = "input.loaddatatype == false & input.softwaretype == 3",
-              h4("another user data")
-            )
-          ),
-          # mainPanel(
-          #   width = 9,
-          #   hr(),
-          #   conditionalPanel(
-          #     condition = "input.loaddatatype == true",
-          #     htmlOutput("html"),
-          #     dataTableOutput("viewedfile")
-          #   ),
-          #   conditionalPanel(
-          #     condition = "input.loaddatatype == false",
-          #     htmlOutput("html2"),
-          #     dataTableOutput("viewedfile2"),
-          #   )
-          # )
-          mainPanel(
-            width = 9,
-            hr(),
-            tabsetPanel(
-              tabPanel(
-                "Data Overview",
-                conditionalPanel(
-                  condition = "input.loaddatatype == true",
-                  htmlOutput("html"),
-                  dataTableOutput("viewedfile")
-                ),
-                conditionalPanel(
-                  condition = "input.loaddatatype == false",
-                  htmlOutput("html2"),
-                  dataTableOutput("viewedfile2"),
-                )
-              ),
-              tabPanel(
-                "Preprocessing",
-                fluidRow(
-                  conditionalPanel(
-                    condition = "input.softwaretype == 2",
-                    # column(2, NULL),
-                    # column(8, h2(style = "text-align: center;", "Preprocessing")),
-                    # column(2, actionButton("pre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
-                    column(
-                      12,
-                      conditionalPanel(
-                        condition = "input.loaddatatype == true",
-                        progressBar(id = "preprobar", value = 0, status = "success")
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == false",
-                        progressBar(id = "userpreprobar", value = 0, status = "success")
-                      ),
-                    ),
-                    
-                    column(
-                      3,
-                      panel(
-                        heading = "Step1: Parser",
-                        status = "primary",
-                        h5("no parameter"),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "parserbt01",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "parserbt11",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        )
-                      ),
-                      panel(
-                        heading = "Step2: Quality Control & Merging",
-                        status = "warning",
-                        numericInput(
-                          "qcscore",
-                          "minimum score:",
-                          20,
-                          max = 100,
-                          min = 0,
-                          step = 0.5
-                        ),
-                        bsTooltip(
-                          "qcscore", 
-                          "the minimum score of credible peptides",
-                          placement = "right", 
-                          options = list(container = "body")
-                        ),
-                        numericInput(
-                          "qcfdr",
-                          "minimum FDR:",
-                          0.01,
-                          max = 0.02,
-                          min = 0,
-                          step = 0.002
-                        ),
-                        bsTooltip(
-                          "qcfdr", 
-                          "the minimum FDR of credible peptides",
-                          placement = "right", 
-                          options = list(container = "body")
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "mergingbt0",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "mergingbt1",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        )
-                      ),
-                      panel(
-                        heading = "Step3: Mapping",
-                        status = "danger",
-                        selectInput("species", "species:", choices = c("human", "mouse", "rattus")),
-                        selectInput("idtype", "id type", choices = c("RefSeq_Protein_GI", "RefSeq_Protein_Accession", "Uniprot_Protein_Accession", "GeneID")),
-                        selectInput("fastatype", "fasta type", choices = c("refseq", "uniprot")),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "mappingbt01",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "mappingbt11",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    column(
-                      3,
-                      panel(
-                        heading = "Step4: Filtering & Normalization & Imputation",
-                        footer = "This step also filters modification types, remaining only 'S/T/Y'",
-                        status = "info",
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          numericInput("masphosNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
-                        ),
-                        bsTooltip(
-                          "masphosNAthre",
-                          # "xxxx",
-                          "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
-                          placement = "right",
-                          options = list(container = "body")
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          numericInput("usermasphosNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
-                        ),
-                        bsTooltip(
-                          "usermasphosNAthre",
-                          "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
-                          placement = "right",
-                          options = list(container = "body")
-                        ),
-                        selectInput("mascotnormmethod", label = "normalization method: ", choices = c("global", "median")),
-                        column(12,
-                               prettyToggle(
-                                 inputId = "democountbygroup",
-                                 label_on = "separately imputing by group",
-                                 icon_on = icon("check"),
-                                 status_on = "info",
-                                 status_off = "warning",
-                                 label_off = "imputing jointly ",
-                                 icon_off = icon("xmark"),
-                                 value = FALSE
-                               )
-                        ),
-                        pickerInput(
-                          inputId = "mascotimputemethod",
-                          label = "imputation method: ", 
-                          choices = list(
-                            only_joint= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
-                            separate_or_joint = c("bpca", "lls", "knnmethod", "rowmedian")),
-                          selected = "minimum/10"
-                        ),
-                        # selectInput("mascotimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
-                        
-                        numericInputIcon(
-                          inputId = "top",
-                          label = "top",
-                          value = 100,
-                          step = 1,
-                          max = 100,
-                          min = 1,
-                          icon = list(NULL, icon("percent"))
-                        ),
-                        bsTooltip(
-                          "top", 
-                          "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
-                          placement = "right", 
-                          options = list(container = "body")
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "normalizationbt01",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "normalizationbt11",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == true",
-                        panel(
-                          heading = "Step5: Normalization based on proteomics data",
-                          status = "success",
-                          prettyToggle(
-                            inputId = "useprocheck1",
-                            label_on = "With proteomics data", 
-                            icon_on = icon("check"),
-                            status_on = "info",
-                            status_off = "warning", 
-                            label_off = "Without proteomics data",
-                            icon_off = icon("xmark"),
-                            value = TRUE
-                          ),
-                          conditionalPanel(
-                            condition = "input.useprocheck1 == 1",
-                            wellPanel(
-                              h5("Proteomics data preprocessing parameters", style = "color: grey;"),
-                              numericInput("masuscutoff", label = "US cutoff: ", value = 1),
-                              numericInput("masproNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
-                              bsTooltip(
-                                "masproNAthre",
-                                "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
-                                placement = "right",
-                                options = list(container = "body")
-                              ),
-                              selectInput("mascotpronormmethod", label = "normalization method: ", choices = c("global", "median")),
-                              selectInput("mascotproimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10")
-                            ),
-                            selectInput("mascotcontrol", label = "control label: ", choices = c("0", "6", "48", "no control")),
-                            div(
-                              class = "runbuttondiv",
-                              actionButton(
-                                "normalizationbt02",
-                                "",
-                                icon("play"),
-                                class = "runbutton"
-                              )
-                            )
-                          ),
-                          conditionalPanel(
-                            condition = "input.useprocheck1 == 0",
-                            wellPanel(
-                              h5("After 'Step1-Step2-Step3-Step4' have been run, you can click 'Go to analysis tools'", style = "color: grey;")
-                            )
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == false",
-                        uiOutput("userusepro")
-                      )
-                    ),
-                    column(
-                      6,
-                      conditionalPanel(
-                        condition = "input.loaddatatype == true & input.useprocheck1 == 1",
-                        navbarPage(
-                          title = "Result",
-                          id = "resultnav",
-                          tabPanel(
-                            "Step 1",
-                            value = "demomascotstep1val",
-                            h4("Peptide identification files with psites scores:"),
-                            uiOutput("demomascotparserui")
-                          ),
-                          tabPanel(
-                            "Step 2",
-                            value = "demomascotstep2val",
-                            h4("Peptide data frame through phosphorylation sites quality control:"),
-                            uiOutput("mergingui0"),
-                            column(11,dataTableOutput("viewedmerging")),
-                            column(1,downloadBttn(
-                              outputId = "viewedmerging_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 3",
-                            value = "demomascotstep3val",
-                            h4("Data frame mapped ID to Gene Symbol:"),
-                            uiOutput("mapping02"),
-                            column(11,dataTableOutput("viewedmapping02")),
-                            column(1,downloadBttn(
-                              outputId = "viewedmapping02_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 4",
-                            value = "demomascotstep4val",
-                            h4("Phosphorylation data frame:"),
-                            column(11,dataTableOutput("viewednorm01")),
-                            column(1,downloadBttn(
-                              outputId = "viewednorm01_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 5",
-                            value = "demomascotstep5val",
-                            h4("Phosphorylation data frame:"),
-                            column(11,dataTableOutput("viewednorm02")),
-                            column(1,downloadBttn(
-                              outputId = "viewednorm02_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            )),
-                            br(),
-                            h4("Proteomics data frame:"),
-                            column(11,dataTableOutput("viewednorm02pro")),
-                            column(1,downloadBttn(
-                              outputId = "viewednorm02pro_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == true & input.useprocheck1 == 0",
-                        navbarPage(
-                          title = "Result",
-                          id = "resultnavdroppro",
-                          tabPanel(
-                            "Step 1",
-                            value = "demomascotdropprostep1val",
-                            h4("Peptide identification files with psites scores:"),
-                            uiOutput("demomascotdropproparserui")
-                          ),
-                          tabPanel(
-                            "Step 2",
-                            value = "demomascotdropprostep2val",
-                            h4("Peptide data frame through phosphorylation sites quality control:"),
-                            column(11,dataTableOutput("viewedmergingdroppro")),
-                            column(1,downloadBttn(
-                              outputId = "viewedmergingdroppro_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 3",
-                            value = "demomascotdropprostep3val",
-                            h4("Data frame mapped ID to Gene Symbol:"),
-                            column(11,dataTableOutput("viewedmapping02droppro")),
-                            column(1,downloadBttn(
-                              outputId = "viewedmapping02droppro_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 4",
-                            value = "demomascotdropprostep4val",
-                            h4("Phosphorylation data frame:"),
-                            column(11,dataTableOutput("viewednorm01droppro")),
-                            column(1,downloadBttn(
-                              outputId = "viewednorm01droppro_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == false",
-                        uiOutput("userresultpanelui")
-                      )
-                    )
-                  ),
-                  conditionalPanel(
-                    condition = "input.softwaretype == 1",
-                    # column(2, NULL),
-                    # column(8, h2(style = "text-align: center;", "Preprocessing")),
-                    # column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
-                    column(
-                      12,
-                      conditionalPanel(
-                        condition = "input.loaddatatype == true",
-                        progressBar(id = "demomaxpreprobar", value = 0, status = "success")
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == false",
-                        progressBar(id = "usermaxpreprobar", value = 0, status = "success")
-                      )
-                    ),
-                    column(
-                      3,
-                      panel(
-                        heading = "Step1: Quality Control",
-                        status = "primary",
-                        numericInput(
-                          "minqcscore",
-                          "minimum score:",
-                          40,
-                          max = 200,
-                          min = 40,
-                          step = 1
-                        ),
-                        numericInput(
-                          "minqclocalizationprob",
-                          "minimum localization probability:",
-                          0.75,
-                          max = 1,
-                          min = 0,
-                          step = 0.01
-                        ),
-                        numericInput(
-                          "maxphosNAthre",
-                          "minimum detection frequency:",
-                          1,
-                          min = 0,
-                          step = 1
-                        ),
-                        bsTooltip(
-                          "maxphosNAthre",
-                          # "xxxx",
-                          "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
-                          placement = "right",
-                          options = list(container = "body")
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "demomaxqcbt",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "usermaxqcbt",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        )
-                      ),
-                      panel(
-                        heading = "Step2: Normalizaiton & Imputation & Filtering",
-                        status = "warning",
-                        selectInput("maxphosnormmethod", "normalization method:", choices = c("global", "median")),
-                        column(12,
-                               prettyToggle(
-                                 inputId = "maxdemocountbygroup",
-                                 label_on = "separately imputing by group",
-                                 icon_on = icon("check"),
-                                 status_on = "info",
-                                 status_off = "warning",
-                                 label_off = "imputing jointly ",
-                                 icon_off = icon("xmark"),
-                                 value = FALSE
-                               )
-                        ),
-                        pickerInput(
-                          inputId = "maxphosimputemethod",
-                          label = "imputation method: ", 
-                          choices = list(
-                            only_joint= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
-                            separate_or_joint = c("bpca", "lls", "knnmethod", "rowmedian")),
-                          selected = "minimum/10"
-                        ),
-                        # selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
-
-                        
-                        numericInputIcon(
-                          inputId = "maxtop",
-                          label = "top:",
-                          value = 100,
-                          step = 1,
-                          max = 100,
-                          min = 1,
-                          icon = list(NULL, icon("percent"))
-                        ),
-                        bsTooltip(
-                          "maxtop", 
-                          "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
-                          placement = "right", 
-                          options = list(container = "body")
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == true",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "demomaxnormbt",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        ),
-                        conditionalPanel(
-                          condition = "input.loaddatatype == false",
-                          div(
-                            class = "runbuttondiv",
-                            actionButton(
-                              "usermaxnormbt",
-                              "",
-                              icon("play"),
-                              class = "runbutton"
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    column(
-                      3,
-                      conditionalPanel(
-                        condition = "input.loaddatatype == true",
-                        panel(
-                          heading = "Step3: Normalization based on proteomics data",
-                          status = "danger",
-                          prettyToggle(
-                            inputId = "maxuseprocheck1",
-                            label_on = "With proteomics data", 
-                            icon_on = icon("check"),
-                            status_on = "info",
-                            status_off = "warning", 
-                            label_off = "Without proteomics data",
-                            icon_off = icon("xmark"),
-                            value = TRUE
-                          ),
-                          conditionalPanel(
-                            condition = "input.maxuseprocheck1 == 1",
-                            wellPanel(
-                              h5("Proteomics data preprocessing parameters", style = "color: grey;"),
-                              selectInput("maxintensitylist", "intensity type: ", choices = c("Intensity", "iBAQ", "LFQ.intensity"), selected = "iBAQ"),
-                              numericInput(
-                                "maxuniquepeptide",
-                                "minimum unique peptide:",
-                                1,
-                                min = 0,
-                                step = 1
-                              ),
-                              numericInput(
-                                "maxproNAthre",
-                                "minimum detection frequency:",
-                                1,
-                                min = 0,
-                                step = 1
-                              ),
-                              bsTooltip(
-                                "maxproNAthre",
-                                "minimum detection frequency for per protein, equivalents to the number of samples minus the number of ‘0’ value",
-                                placement = "right",
-                                options = list(container = "body")
-                              ),
-                              selectInput("maxnormmethod", "normalization method:", choices = c("global", "median")),
-                              selectInput("maximputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10"), selected = "minimum/10")
-                            ),
-                            selectInput("maxcontrol", label = "control label: ", choices = c("0", "6", "48", "no control")),
-                            div(
-                              class = "runbuttondiv",
-                              actionButton(
-                                "demomaxnormprobt",
-                                "",
-                                icon("play"),
-                                class = "runbutton"
-                              )
-                            )
-                          ),
-                          conditionalPanel(
-                            condition = "input.maxuseprocheck1 == 0",
-                            wellPanel(
-                              h5("After 'Step1-Step2' have been run, you can click 'Go to analysis tools'", style = "color: grey;")
-                            )
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == false",
-                        panel(
-                          heading = "Step3: Normalization based on proteomics data",
-                          status = "danger",
-                          uiOutput("maxuserusepro")
-                        )
-                      )
-                    ),
-                    column(
-                      6,
-                      conditionalPanel(
-                        condition = "input.maxuseprocheck1 == 1 & input.loaddatatype == true",
-                        navbarPage(
-                          title = "Result",
-                          id = "demomaxresultnav",
-                          tabPanel(
-                            "Step 1",
-                            value = "demomaxstep1val",
-                            h4("QC result: "),
-                            column(11,dataTableOutput("demomaxresult1")),
-                            column(1,downloadBttn(
-                              outputId = "demomaxresult1_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                            
-                          ),
-                          tabPanel(
-                            "Step 2",
-                            value = "demomaxstep2val",
-                            h4("Phosphorylation data frame: "),
-                            column(11,dataTableOutput("demomaxresult2")),
-                            column(1,downloadBttn(
-                              outputId = "demomaxresult2_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 3",
-                            value = "demomaxstep3val",
-                            h4("Phosphorylation data frame: "),
-                            column(11,dataTableOutput("demomaxresult3")),
-                            column(1,downloadBttn(
-                              outputId = "demomaxresult3_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            )),
-                            br(),
-                            h4("Proteomics data frame:"),
-                            column(11,dataTableOutput("demomaxresult3pro")),
-                            column(1,downloadBttn(
-                              outputId = "demomaxresult3pro_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.maxuseprocheck1 == 0 & input.loaddatatype == true",
-                        navbarPage(
-                          title = "Result",
-                          id = "demomaxdropproresultnav",
-                          tabPanel(
-                            "Step 1",
-                            value = "demomaxdropprostep1val",
-                            h4("QC result: "),
-                            column(11,dataTableOutput('demomaxdropproresult1')),
-                            column(1,downloadBttn(
-                              outputId = "demomaxdropproresult1_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          ),
-                          tabPanel(
-                            "Step 2",
-                            value = "demomaxdropprostep2val",
-                            h4("Phosphorylation data frame: "),
-                            column(11,dataTableOutput("demomaxdropproresult2")),
-                            column(1,downloadBttn(
-                              outputId = "demomaxdropproresult2_dl",
-                              label = "",
-                              style = "material-flat",
-                              color = "default",
-                              size = "sm"
-                            ))
-                          )
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.loaddatatype == false",
-                        uiOutput("maxuserresultpanelui")
-                      )
-                    )
-                  )
-                )
-              )
-            )
-            
-          )
-        )
-      ),
-          
-          
-      
       tabPanel(
         "Tutorial",
         div(style = "text-align:center;", img(src = "tumain.svg", height = "200px", width = "1000px", style = "")),
@@ -1952,12 +1940,7 @@ ui <- renderUI(
         h4("1. PhosMap_datasets.zip for local version:"),
         downloadButton("dldatasets", "PhosMap_datasets.zip"),
         hr(),
-        h4("2. Example data:"),
-        downloadButton("dlanalysisexample", "analysis data"),
-        h5("The data was obtained by processing the following 39 samples data."),
-        downloadButton("dlanalysisexamplefirmiana", "firmiana data"),
-        hr(),
-        h4("3. 'Preprocessing' example data:"),
+        h4("2. 'Preprocessing' example data:"),
         h5("Shared design file:"),
         downloadButton("dlphosdesign", "experimental design file"),
         downloadButton("dlprodesign", "proteomics experimental design file"),
@@ -1967,7 +1950,15 @@ ui <- renderUI(
         h5("Firmiana:"),
         downloadButton("masexampledl1", "Mascot xml file"),
         downloadButton("masexampledl2", "Phosphoproteomics peptide file"),
-        downloadButton("masexampledl3", "Profiling file")
+        downloadButton("masexampledl3", "Profiling file"),
+        hr(),
+        h4("3. 'Analysis' example data:"),
+        downloadButton("dlanalysisexample", "analysis data"),
+        h5("The data was obtained by processing the following 39 samples data."),
+        downloadButton("dlanalysisexamplefirmiana", "firmiana data"),
+        hr(),
+        # h4("4. Motif-kinase relation table:"),
+        # downloadButton("dlmotifkinase", "motif-kinase"),
       ),
       nav_item(a(target="_blank",  href="https://github.com/liuzan-info/PhosMap", icon("github"))),
       collapsible = TRUE
