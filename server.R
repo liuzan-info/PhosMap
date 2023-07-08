@@ -578,6 +578,149 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
+  output$userdesigndl <- downloadHandler(
+    filename = "experimental_design_template.txt",
+    content = function(file) {file.copy("examplefile/maxquant/phosphorylation_exp_design_info.txt", file)}
+  )
+  
+  instruction_design <- HTML("In this file, the <strong>'Experiment_Code'</strong> column and 
+               the <strong>'Group'</strong> column are required, and the column 
+               names cannot be changed. </br> </br>
+                 1. Each item in the <strong>'Experiment_Code'
+               </strong> column can be of any type, but must be unique, and is 
+               considered as the unique identifier for the sample.</br> </br>
+                 2. Each item in the <strong>'Group'</strong> column can be of 
+               any type, and the 
+               same value indicates that the samples belong to the same group. 
+               In the case data, the numbers represent the processing time.</br> </br>
+               The <strong>'Description'</strong> column is optional, and its 
+               content can be anything you enter, such as the original mass 
+               spectrum file name used in the case data.")
+  # maxqunt
+  observeEvent(
+    input$userdesigninstruction,{
+      showModal(modalDialog(
+        title = "Experimental design file",
+        size = "l",
+        tags$p(instruction_design),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$userphosmaxinstruction,{
+      showModal(modalDialog(
+        title = "Phospho (STY)Sites.txt",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of MaxQuant.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$userprodesigndl <- downloadHandler(
+    filename = "proteomics_design_template.txt",
+    content = function(file) {file.copy("examplefile/maxquant/profiling_exp_design_info.txt", file)}
+  )
+  
+  observeEvent(
+    input$userprodesigninstruction,{
+      showModal(modalDialog(
+        title = "Proteomics experimental design file",
+        size = "l",
+        tags$p(instruction_design),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$userpromaxinstruction,{
+      showModal(modalDialog(
+        title = "proteinGroups.txt",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of MaxQuant.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  # mascot
+  
+  observeEvent(
+    input$usermascotxmlinstruction,{
+      showModal(modalDialog(
+        title = "Mascot xml file",
+        size = "l",
+        tags$p(
+          HTML("This compressed file is obtained by compressing the corresponding
+               output of Mascot, for specific details, please refer to the manual
+               in the Tutorial module.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$usermascotpepinstruction,{
+      showModal(modalDialog(
+        title = "Phosphoproteomics peptide file",
+        size = "l",
+        tags$p(
+          HTML("This compressed file is obtained by compressing the corresponding
+               output of Firmiana, for specific details, please refer to the manual
+               in the Tutorial module.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$userpromascotdesigndl <- downloadHandler(
+    filename = "proteomics_design_template.txt",
+    content = function(file) {file.copy("examplefile/maxquant/profiling_exp_design_info.txt", file)}
+  )
+  
+  observeEvent(
+    input$userpromascotdesigninstruction,{
+      showModal(modalDialog(
+        title = "Proteomics experimental design file",
+        size = "l",
+        tags$p(instruction_design),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$usermascotprofilinginstruction,{
+      showModal(modalDialog(
+        title = "Profiling file",
+        size = "l",
+        tags$p(
+          HTML("This compressed file is obtained by compressing the corresponding
+               output of Firmiana, for specific details, please refer to the manual
+               in the Tutorial module.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
   #######################################
   #######     preprocessing       #######
   #######################################
@@ -2729,9 +2872,9 @@ server<-shinyServer(function(input, output, session){
       target4 <- read.csv(clinicalfile)
       if(file.exists(file1)){
         if(input$useprocheck1==1) {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         } else {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         }
         
         target5 <- read.csv(file1, row.name=1)
@@ -2788,11 +2931,11 @@ server<-shinyServer(function(input, output, session){
       
       if(file.exists(file1) & !(is.null(designfile))){
         if(is.null(input$useruseprocheck1)) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         } else if(input$useruseprocheck1==0) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         } else {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         }
         
         target1 <- read.csv(designfile$datapath, sep = "\t")
@@ -2861,9 +3004,9 @@ server<-shinyServer(function(input, output, session){
       clinicalfile = "examplefile/analysistools/Clinical_for_Pre.csv"
       if(file.exists(file1)){
         if(input$maxuseprocheck1==1) {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         } else {
-          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         }
         target1 <- read.csv(designfile, sep = "\t")
         target4 <- read.csv(clinicalfile)
@@ -2918,11 +3061,11 @@ server<-shinyServer(function(input, output, session){
       designfile = input$updesign
       if(file.exists(file1) & !(is.null(designfile))){
         if(is.null(input$maxuseruseprocheck)) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         } else if(input$maxuseruseprocheck==0) {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         } else {
-          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose "load your data"'
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
         }
         target1 <- read.csv(designfile$datapath, sep = "\t")
         # target4 <- read.csv(clinicalfile, row.name=1)
@@ -3265,6 +3408,7 @@ server<-shinyServer(function(input, output, session){
   tsne_plot <- eventReactive(
     input$drbt, {
       tsne <- tsne()[[3]]
+      print(tsne)
       colors <- tsne()[[5]]
       group <- tsne()[[2]]
       main <- tsne()[[4]]
@@ -3383,6 +3527,7 @@ server<-shinyServer(function(input, output, session){
     )
   })
   
+  click_counter <- reactiveValues(limma_count = 0, sam_count = 0, anova_count = 0)
   limma <- eventReactive(input$limmabt,
                          {
                            validate(
@@ -3434,6 +3579,7 @@ server<-shinyServer(function(input, output, session){
                            
                            test_data_plot <- data.frame(limmaph_df[,-c(1,2)])
                            rownames(test_data_plot) <- limmaph_df$ID
+                           click_counter$limma_count = 1
                            list(test_data_plot, group_test, rowname_test, limma_results_df)
                            
                            
@@ -3441,20 +3587,43 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$limmaphbt, {
-      if(nrow(limma()[[1]] > 0)) {
-        ph <- pheatmap(limma()[[1]],
-                     scale = input$limmaphscale,
-                     cluster_rows = input$limmaphcluster,
-                     cluster_cols = FALSE,
-                     annotation_col = limma()[[2]],
-                     annotation_row = limma()[[3]],
-                     show_rownames = input$limmaphrowname,
-                     clustering_distance_rows = input$limmaphdistance,
-                     clustering_method = input$limmaphclusmethod
-                     )
-        dev.off()
+      if(click_counter$limma_count) {
+        if(nrow(limma()[[1]] > 0)){
+          ph <- pheatmap(limma()[[1]],
+                         scale = input$limmaphscale,
+                         cluster_rows = input$limmaphcluster,
+                         cluster_cols = FALSE,
+                         annotation_col = limma()[[2]],
+                         annotation_row = limma()[[3]],
+                         show_rownames = input$limmaphrowname,
+                         clustering_distance_rows = input$limmaphdistance,
+                         clustering_method = input$limmaphclusmethod
+          )
+          dev.off()
+          output$limmaph <- renderPlot(ph)
+          output$limmainterph <- renderPlotly(
+            heatmaply(
+              limma()[[1]],
+              scale = input$limmaphscale,
+              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                low = "blue",
+                high = "red"
+              ),
+              Rowv = input$limmaphcluster,
+              Colv = FALSE,
+              hclust_method = input$limmaphclusmethod,
+              distance_method = input$limmaphdistance
+            )
+          )
+        }
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the 'Analysis' button first.",
+          type = "info"
+        )
       }
-      output$limmaph <- renderPlot(ph)
     }
   )
   
@@ -3642,6 +3811,7 @@ server<-shinyServer(function(input, output, session){
     test_change <- ifelse(sam_results$Fold.Change < 1, 'DOWN','UP')
     rowname_test <- data.frame(test_change, row.names = sam_results$ID)
     colnames(rowname_test) <- 'Change'
+    click_counter$sam_count = 1
     list(samr_obj, delta, expr_data_frame_plot, group_test, rowname_test)
     
   })
@@ -3665,18 +3835,43 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$samphbt, {
-      ph <- pheatmap(sam()[[3]],
-                     scale = input$samphscale,
-                     cluster_rows = input$samphcluster,
-                     cluster_cols = FALSE,
-                     annotation_col = sam()[[4]],
-                     annotation_row = sam()[[5]],
-                     show_rownames = input$samphrowname,
-                     clustering_distance_rows = input$samphdistance,
-                     clustering_method = input$samphclusmethod
-      )
-      dev.off()
-      output$samph <- renderPlot(ph)
+      if(click_counter$sam_count) {
+        if(nrow(sam()[[3]]> 0)){
+          ph <- pheatmap(sam()[[3]],
+                         scale = input$samphscale,
+                         cluster_rows = input$samphcluster,
+                         cluster_cols = FALSE,
+                         annotation_col = sam()[[4]],
+                         annotation_row = sam()[[5]],
+                         show_rownames = input$samphrowname,
+                         clustering_distance_rows = input$samphdistance,
+                         clustering_method = input$samphclusmethod
+          )
+          dev.off()
+          output$samph <- renderPlot(ph)
+          output$samphinter <- renderPlotly(
+            heatmaply(
+              sam()[[3]],
+              scale = input$samphscale,
+              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                low = "blue",
+                high = "red"
+              ),
+              Rowv = input$samphcluster,
+              Colv = FALSE,
+              hclust_method = input$samphclusmethod,
+              distance_method = input$samphdistance
+            )
+          )
+        }
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the 'Analysis' button first.",
+          type = "info"
+        )
+      }
     }
   )
   
@@ -3712,31 +3907,55 @@ server<-shinyServer(function(input, output, session){
     
     group_test <- data.frame(as.character(phosphorylation_experiment_design_file[,2]), row.names = phosphorylation_experiment_design_file[,1])
     colnames(group_test) <- "Group"
+    click_counter$anova_count = 1
     list(expr_data_frame_plot,group_test,df)
   })
   observeEvent(input$anovabt, {output$anovaresult <- renderDataTable(anova()[[3]])})
   observeEvent(
     input$anovaphbt, {
-      if(nrow(anova()[[1]] > 0)) {
-        ph <- pheatmap(anova()[[1]],
-                     scale = input$anovaphscale,
-                     cluster_rows = input$anovaphcluster,
-                     cluster_cols = FALSE,
-                     annotation_col = anova()[[2]],
-                     show_rownames = input$anovaphrowname,
-                     clustering_distance_rows = input$anovaphdistance,
-                     clustering_method = input$anovaphclusmethod
-                     )
-        dev.off()
-      } 
-      output$anovaph <- renderPlot(ph)
-      output$anovaphdlbt <- downloadHandler(
-        filename = function(){paste("anovaph_result", userID,".pdf",sep="")},
-        content = function(file){
-          p <- as.ggplot(ph)
-          ggsave(filename = file,plot = p,width = 9,height = 5)
-        }
-      )
+      if(click_counter$anova_count) {
+        if(nrow(anova()[[1]] > 0)) {
+          ph <- pheatmap(anova()[[1]],
+                         scale = input$anovaphscale,
+                         cluster_rows = input$anovaphcluster,
+                         cluster_cols = FALSE,
+                         annotation_col = anova()[[2]],
+                         show_rownames = input$anovaphrowname,
+                         clustering_distance_rows = input$anovaphdistance,
+                         clustering_method = input$anovaphclusmethod
+          )
+          dev.off()
+          output$anovaph <- renderPlot(ph)
+          output$anovaphdlbt <- downloadHandler(
+            filename = function(){paste("anovaph_result", userID,".pdf",sep="")},
+            content = function(file){
+              p <- as.ggplot(ph)
+              ggsave(filename = file,plot = p,width = 9,height = 5)
+            }
+          )
+          output$anovainterph <- renderPlotly(
+            heatmaply(
+              anova()[[1]],
+              scale = input$anovaphscale,
+              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                low = "blue",
+                high = "red"
+              ),
+              Rowv = input$anovaphcluster,
+              Colv = FALSE,
+              hclust_method = input$anovaphclusmethod,
+              distance_method = input$anovaphdistance,
+            )
+          )
+        } 
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the 'Analysis' button first.",
+          type = "info"
+        )
+      }
     }
   )
   
@@ -3748,17 +3967,6 @@ server<-shinyServer(function(input, output, session){
     anova_plot()
   })
   
-  observeEvent(
-    input$limmaphbt, {
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("limmaph"),
-        uiOutput('limmaphdl')
-      ))
-    }
-  )
-  output$limmaphdl <- renderUI({div(downloadButton("limmaphdlbt"), style = "display:flex; justify-content:center; align-item:center;")})
   output$limmaphdlbt <- downloadHandler(
     filename = function(){paste("limmaph_result", userID,".pdf",sep="")},
     content = function(file){
@@ -3789,20 +3997,6 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
-  observeEvent(
-    input$samphbt, {
-      if(nrow(sam()[[3]]) > 0) {
-        showModal(modalDialog(
-          title = "Heatmap",
-          size = "l",
-          plotOutput("samph"),
-          uiOutput('samphdl')
-        ))
-      }
-    }
-  )
-  
-  output$samphdl <- renderUI({div(downloadButton("samphdlbt"), style = "display:flex; justify-content:center; align-item:center;")})
   output$samphdlbt <- downloadHandler(
     
     filename = function(){paste("samph_result", userID,".pdf",sep="")},
@@ -3837,18 +4031,6 @@ server<-shinyServer(function(input, output, session){
       ))
     }
   )
-  
-  observeEvent(
-    input$anovaphbt, {
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("anovaph"),
-        uiOutput('anovaphdl')
-      ))
-    }
-  )
-  output$anovaphdl <- renderUI({div(downloadButton("anovaphdlbt"), style = "display:flex; justify-content:center; align-item:center;")})
   
   # Time course
   tc <- eventReactive(
@@ -4150,6 +4332,22 @@ server<-shinyServer(function(input, output, session){
           ggsave(filename = file, p,width = 12,height = 12)
         }
       )
+      output$kapstep2plotinter <- renderPlotly(
+        heatmaply(
+          ksea_value_cluster,
+          main = input$kapmain,
+          scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+            low = "blue", 
+            high = "red", 
+            limits = c(-4, 4)
+          ),
+          scale = input$kapscale,
+          # row_dendrogram = TRUE,  
+          Colv = FALSE, 
+          hclust_method = input$kapclusmethod, 
+          distance_method = input$kapdistance,
+        )
+      )
       output$kapstep2df <- renderDataTable(ksea_value_cluster)
       updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
     }
@@ -4260,6 +4458,23 @@ server<-shinyServer(function(input, output, session){
         breaks <- ksea2()[[3]]
         color <- ksea2()[[4]]
         
+        output$kapstep2plottwogroupinter <- renderPlotly(
+          heatmaply(
+            ksea_value_cluster,
+            main = input$kseamain,
+            scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+              low = "blue", 
+              high = "red", 
+              limits = c(-4, 4)
+            ),
+            scale = input$kseascale,
+            # row_dendrogram = TRUE,  
+            Colv = FALSE, 
+            hclust_method = input$kseaclusmethod, 
+            distance_method = input$kseadistance,
+          )
+        )
+        
         if(nrow(ksea_value_cluster) < 37) {
           output$kseastep2plotui <- renderUI({plotOutput("kseastep2plot")})
           ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
@@ -4339,6 +4554,13 @@ server<-shinyServer(function(input, output, session){
           dev.off()
           output$kseastep2plotxs <- renderPlot(ph)
         }
+        output$kaptwogroupplotdl <- downloadHandler(
+          filename = function(){paste("kinase_activity_pred", userID,".pdf",sep="")},
+          content = function(file){
+            p <- as.ggplot(ph)
+            ggsave(filename = file, p,width = 12,height = 12)
+          }
+        )
         output$kseastep2df <- renderDataTable(ksea_value_cluster)
         updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
       }
@@ -4409,7 +4631,7 @@ server<-shinyServer(function(input, output, session){
       })
       output$survivalui <- renderUI({
         tagList(
-          selectInput("survivalsig", h5("Select a Psite:"), choices = surplots()[[2]])
+          selectInput("survivalsig", h5("Select a statistically significant Psite:"), choices = surplots()[[2]])
         )
       })
     }
@@ -4417,51 +4639,63 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$survivalplotbt1, {
-      if(length(surplots()[[2]] > 0)) {
+      if ((input$sa_text_input %in% surplots()[[1]]$Feature) | (length(surplots()[[2]] > 0))){
+        if (input$sa_text_input %in% surplots()[[1]]$Feature) {
+          feature <- isolate(input$sa_text_input)
+        } else {
+          feature <- isolate(input$survivalsig)
+        }
         fit_km <- surplots()[[3]]
-      feature <- isolate(input$survivalsig)
-      fit_km[feature] <- as.numeric(surplots()[[4]][feature, ])
+        fit_km[feature] <- as.numeric(surplots()[[4]][feature, ])
       
-      res.cut <- surv_cutpoint(fit_km,
-                               time = colnames(fit_km)[2], event = colnames(fit_km)[1],
-                               variables = feature
-      )
-      
-      res.cat <- surv_categorize(res.cut)
-      res.cat[, 3] <- ifelse(fit_km[feature] > res.cut$cutpoint$cutpoint, "high", "low")
-      colnames(res.cat) <- c("time", "status", "Group")
-      
-      lowcol <- isolate(input$survivallowcol)
-      highcol <- isolate(input$survivalhighcol)
-      pdf(file = paste('tmp/',userID,'/analysis/surv/suv1.pdf',sep=''))#survivalplot1
-      print(plot(res.cut, feature, palette = c(lowcol, highcol)),newpage=F)
-      dev.off()
-      pdf(file = paste('tmp/',userID,'/analysis/surv/suv2.pdf',sep=''))#survivalplot1
-      print(ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
-                       linetype = c("solid", "solid"),
-                       surv.median.line = "hv", surv.scale = "percent",
-                       pval = T, risk.table = T,
-                       conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
-                       risk.table.y.text = T,
-                       palette = c(lowcol, highcol),
-                       xlab = "Survival time"
-      ),newpage=F)
-      dev.off()
-
-      output$survivalplot1 <- renderPlot({
-        plot(res.cut, feature, palette = c(lowcol, highcol))
+        res.cut <- surv_cutpoint(fit_km,
+                                 time = colnames(fit_km)[2], event = colnames(fit_km)[1],
+                                 variables = feature
+        )
         
-      })
-      
-      output$survivalplot2 <- renderPlot({ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
-                                                     linetype = c("solid", "solid"),
-                                                     surv.median.line = "hv", surv.scale = "percent",
-                                                     pval = T, risk.table = T,
-                                                     conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
-                                                     risk.table.y.text = T,
-                                                     palette = c(lowcol, highcol),
-                                                     xlab = "Survival time"
-      )})
+        res.cat <- surv_categorize(res.cut)
+        res.cat[, 3] <- ifelse(fit_km[feature] > res.cut$cutpoint$cutpoint, "high", "low")
+        colnames(res.cat) <- c("time", "status", "Group")
+        
+        lowcol <- isolate(input$survivallowcol)
+        highcol <- isolate(input$survivalhighcol)
+        pdf(file = paste('tmp/',userID,'/analysis/surv/suv1.pdf',sep=''))#survivalplot1
+        print(plot(res.cut, feature, palette = c(lowcol, highcol)),newpage=F)
+        dev.off()
+        pdf(file = paste('tmp/',userID,'/analysis/surv/suv2.pdf',sep=''))#survivalplot1
+        print(ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
+                         linetype = c("solid", "solid"),
+                         surv.median.line = "hv", surv.scale = "percent",
+                         pval = T, risk.table = T,
+                         conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
+                         risk.table.y.text = T,
+                         palette = c(lowcol, highcol),
+                         xlab = "Survival time"
+        ),newpage=F)
+        dev.off()
+  
+        output$survivalplot1 <- renderPlot({
+          plot(res.cut, feature, palette = c(lowcol, highcol))
+          
+        })
+        
+        output$survivalplot2 <- renderPlot({ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
+                                                       linetype = c("solid", "solid"),
+                                                       surv.median.line = "hv", surv.scale = "percent",
+                                                       pval = T, risk.table = T,
+                                                       conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
+                                                       risk.table.y.text = T,
+                                                       palette = c(lowcol, highcol),
+                                                       xlab = "Survival time"
+        )})
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Error...",
+          text = "Please select an item from the feature column in the right table to input.",
+          type = "error",
+          btn_labels = "OK"
+        )
       }
       
     }
@@ -4495,12 +4729,14 @@ server<-shinyServer(function(input, output, session){
         ask_confirmation(
           inputId = "myconfirmation",
           title = "Attention...",
-          text = "To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. Do you confirm run?"
+          text = sprintf("The value of the parameter 'fasta type' is set to %s. Please make sure this value is correct, otherwise the program will report an error. 
+                         To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. Do you confirm run?", input$motiffastatype)
         )
       } else {
         ask_confirmation(
           inputId = "myconfirmation",
-          title = "This step will take several hours.",
+          title = sprintf("The value of the parameter 'fasta type' is set to %s. Please make sure this value is correct, otherwise the program will report an error.
+                          This step will take several hours.", input$motiffastatype),
           text = "Do you confirm run? "
         )
       }
@@ -4721,22 +4957,28 @@ server<-shinyServer(function(input, output, session){
                           main = input$motifmain)
           }
           dev.off()
-        }
+          showModal(modalDialog(
+            title = "Heatmap",
+            size = "l",
+            plotOutput("motifenrich2"),
+            div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
+            
+          ))
+          output$motifenrich2 <- renderPlot(ph)
+          output$motifphdl <- downloadHandler(
+            filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
+            content = function(file){
+              ggsave(ph, filename = file,width = 9,height = 9)
+          })
+        } 
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "No motif meets the criteria, please reduce the 'matched seqs threshold' parameter.",
+          type = "info"
+        )
       }
-      
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("motifenrich2"),
-        div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
-        
-      ))
-      output$motifenrich2 <- renderPlot(ph)
-      output$motifphdl <- downloadHandler(
-        filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
-        content = function(file){
-          ggsave(ph, filename = file,width = 9,height = 9)
-        })
     }
   )
   

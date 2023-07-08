@@ -35,6 +35,7 @@ library(pcaMethods)
 library(rrcovNA)
 library(impute)
 library(e1071)
+library(heatmaply)
 
 
 ui <- renderUI(
@@ -88,10 +89,10 @@ ui <- renderUI(
           #timecourse{height:70vh !important;}
           #kaptimecourseplot{height:70vh !important;}
           #kapstep2plot{height:70vh !important;}
-          #kseastep2plot{height:70vh !important;}
-          #kseastep2plotmid{height:110vh !important;}
-          #kseastep2plotmini{height:140vh !important;}
-          #kseastep2plotxs{height:200vh !important;}
+          #kseastep2plot{height:80vh !important;}
+          #kseastep2plotmid{height:120vh !important;}
+          #kseastep2plotmini{height:150vh !important;}
+          #kseastep2plotxs{height:210vh !important;}
           #resultnav {float: left;}
           #resultnavdroppro {float: left;}
           #mascotdemodropproresultnav {float: left;}
@@ -218,7 +219,12 @@ ui <- renderUI(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h3("Import Data",),
+            fluidRow(
+              column(10, h3("Import Data")),
+              column(2, tags$div(title = "If pre-processed data is available, click this button to proceed directly to the analysis module and upload the data for analysis.", 
+                                 actionButton("pre2analysis", NULL, icon = icon("paper-plane"))
+              ))
+            ),
             wellPanel(
               materialSwitch(
                 inputId = "loaddatatype",
@@ -284,6 +290,10 @@ ui <- renderUI(
             conditionalPanel(
               condition = "input.loaddatatype == false",
               h4("1. Experimental design file: "),
+              downloadButton("userdesigndl", "Download Template", icon = NULL,
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              actionButton("userdesigninstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("updesign", NULL, accept = ".txt"),
               hidden(
                 div(
@@ -298,10 +308,14 @@ ui <- renderUI(
             conditionalPanel(
               condition = "input.loaddatatype == false & input.softwaretype == 2",
               h4("2. Mascot xml file: "),
+              actionButton("usermascotxmlinstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upmascot", NULL, accept = "application/zip"),
               uiOutput("masui"),
               hr(style = "border-style: dashed;border-color: grey;"),
               h4("3. Phosphoproteomics peptide file: "),
+              actionButton("usermascotpepinstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("uppeptide", NULL, accept = "application/zip"),
               uiOutput("pepui"),
               hr(style = "border-style: dashed;border-color: grey;"),
@@ -309,6 +323,10 @@ ui <- renderUI(
               h4("4. Proteomics data[optional]"),
               br(),
               h4("4.1 Proteomics experimental design file: "),
+              downloadButton("userpromascotdesigndl", "Download Template", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              actionButton("userpromascotdesigninstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upprodesign", NULL, accept = ".txt"),
               uiOutput("prodesignui"),
               hidden(
@@ -319,6 +337,8 @@ ui <- renderUI(
               ),
               
               h4("4.2 Profiling file: "),
+              actionButton("usermascotprofilinginstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upprogene", NULL, accept = "application/zip"),
               uiOutput("progeneui"),
             ),
@@ -327,6 +347,8 @@ ui <- renderUI(
             conditionalPanel(
               condition = "input.loaddatatype == false & input.softwaretype == 1",
               h4("2. Phospho (STY)Sites.txt: "),
+              actionButton("userphosmaxinstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upusermaxphos", NULL, accept = ".txt"),
               hidden(
                 div(
@@ -342,6 +364,10 @@ ui <- renderUI(
               h4("3. Proteomics data[optional]"),
               br(),
               h4("3.1 Proteomics experimental design file: "),
+              downloadButton("userprodesigndl", "Download Template", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              actionButton("userprodesigninstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upusermaxprodesign", NULL, accept = ".txt"),
               hidden(
                 div(
@@ -350,6 +376,8 @@ ui <- renderUI(
                 )
               ),
               h4("3.2 proteinGroups.txt: "),
+              actionButton("userpromaxinstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upusermaxpro", NULL, accept = ".txt"),
               hidden(
                 div(
@@ -1322,195 +1350,260 @@ ui <- renderUI(
           ),
           conditionalPanel(
             condition = "input.detools == 'limma'",
-            column(
-              4,
-              panel(
-                "",
-                heading = "Limma Parameters Setting",
-                status = "info",
-                column(6,uiOutput('limmaselect1')),
-                column(6,uiOutput('limmaselect2')),
-                column(6, numericInput("limmapvalue", h5("pvalue threshold:"), 0.05, max = 0.05, min = 0.0000001, step = 0.0000001)),
-                column(
-                  6,
-                  selectInput("limmaadjust", h5("pvalue adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),selected = 'none')
-                ),
-                column(6, numericInput("limmafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
-                column(6, textAreaInput("limmamain", h5("title:"), "Differentially expressed phosphosites with limma")),
-                column(6, textAreaInput("limmaxaxis", h5("x axis label:"), "log2FC")),
-                
-                column(6, textAreaInput("limmayaxis", h5("y axis label:"), "-log10(pvalue)")),
-                
-                column(4, colourInput("limmaupcolor", h5('"UP" colour'), "#FC5C00")),
-                column(4, colourInput("limmadowncolor", h5('"DOWN" colour'), "#31BDE0")),
-                column(4, colourInput("limmanotcolor", h5('"NOT" colour'), "#858080")),
-                conditionalPanel(
-                  condition = "input.deadisplaymode == true",
-                  column(6, numericInput("limmalabelfc", h5("FC threshold for labeling:"), 2, max = 10, min = 1, step = 0.5)),
-                  column(6, numericInput("limmalabelpvalue", h5("pvalue threshold for labeling:"), 0.05, max = 0.05, min = 0.0000001, step = 0.0000001)),
-                  column(12, textAreaInput("limmalabelspec", h5("specified points:"), "NUP35_S279\nPCNP_T139\nSEPTIN9_S30\n"))
-                ),
-                column(12, div(actionButton("limmabt", "Analysis", icon("magnifying-glass-chart"), class='analysisbutton'), style = "display:flex; justify-content:center; align-item:center;"))
-              )
-            ),
-            column(
-              5,
-              column(3,actionButton("viewlimmafile", "view result file", icon("eye"))),
-              column(3, NULL),
-              column(4, switchInput(
-                inputId = "deadisplaymode",
-                label = "mode", 
-                labelWidth = "50px",
-                size = "mini",
-                onLabel = "static",
-                offLabel = "interactive",
-                value = TRUE,
-              )),
+            fluidRow(
               column(
-                1,
-                conditionalPanel(
-                  condition = "input.deadisplaymode == true",
-                  downloadBttn(
-                    outputId = "limmaplotdl",
-                    label = "",
-                    style = "material-flat",
-                    color = "default",
-                    size = "sm"
+                4,
+                panel(
+                  "",
+                  heading = "Limma Parameters Setting",
+                  status = "info",
+                  column(6,uiOutput('limmaselect1')),
+                  column(6,uiOutput('limmaselect2')),
+                  column(6, numericInput("limmapvalue", h5("pvalue threshold:"), 0.05, max = 0.05, min = 0.0000001, step = 0.0000001)),
+                  column(
+                    6,
+                    selectInput("limmaadjust", h5("pvalue adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),selected = 'none')
+                  ),
+                  column(6, numericInput("limmafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
+                  column(6, textAreaInput("limmamain", h5("title:"), "Differentially expressed phosphosites with limma")),
+                  column(6, textAreaInput("limmaxaxis", h5("x axis label:"), "log2FC")),
+                  
+                  column(6, textAreaInput("limmayaxis", h5("y axis label:"), "-log10(pvalue)")),
+                  
+                  column(4, colourInput("limmaupcolor", h5('"UP" colour'), "#FC5C00")),
+                  column(4, colourInput("limmadowncolor", h5('"DOWN" colour'), "#31BDE0")),
+                  column(4, colourInput("limmanotcolor", h5('"NOT" colour'), "#858080")),
+                  conditionalPanel(
+                    condition = "input.deadisplaymode == true",
+                    column(6, numericInput("limmalabelfc", h5("FC threshold for labeling:"), 2, max = 10, min = 1, step = 0.5)),
+                    column(6, numericInput("limmalabelpvalue", h5("pvalue threshold for labeling:"), 0.05, max = 0.05, min = 0.0000001, step = 0.0000001)),
+                    column(12, textAreaInput("limmalabelspec", h5("specified points:"), placeholder = "NUP35_S279\nPCNP_T139\nSEPTIN9_S30\n"))
+                  ),
+                  column(12, div(actionButton("limmabt", "Analysis", icon("magnifying-glass-chart"), class='analysisbutton'), style = "display:flex; justify-content:center; align-item:center;"))
+                )
+              ),
+              column(
+                6,
+                column(3,actionButton("viewlimmafile", "view result file", icon("eye"))),
+                column(2, NULL),
+                column(5, switchInput(
+                  inputId = "deadisplaymode",
+                  label = "mode", 
+                  labelWidth = "50px",
+                  size = "mini",
+                  onLabel = "static",
+                  offLabel = "interactive",
+                  value = FALSE,
+                )),
+                column(
+                  1,
+                  conditionalPanel(
+                    condition = "input.deadisplaymode == true",
+                    downloadBttn(
+                      outputId = "limmaplotdl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    )
+                  )
+                ),
+                column(1, NULL),
+                column(
+                  12,
+                  conditionalPanel(
+                    condition = "input.deadisplaymode == true",
+                    plotOutput("limmastatic", width = "100%"),
+                  ),
+                  conditionalPanel(
+                    condition = "input.deadisplaymode == false",
+                    plotlyOutput("limmainter", width = "100%")
                   )
                 )
               ),
-              column(1, NULL),
+              column(2, NULL),
+              column(12, NULL),
               column(
-                12,
-                conditionalPanel(
-                  condition = "input.deadisplaymode == true",
-                  plotOutput("limmastatic", width = "100%"),
-                ),
-                conditionalPanel(
-                  condition = "input.deadisplaymode == false",
-                  plotlyOutput("limmainter", width = "100%")
+                4,
+                panel(
+                  "",
+                  heading = "Heatmap Parameters Setting",
+                  status = "warning",
+                  column(12, selectInput("limmaphscale", h5("scale:"), choices = c("none", "row", "column"), selected = "row")),
+                  column(6, prettyToggle(
+                    inputId = "limmaphcluster",
+                    label_on = "cluster by row", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "no cluster",
+                    icon_off = icon("xmark"),
+                    value = TRUE
+                  )),
+                  column(6, prettyToggle(
+                    inputId = "limmaphrowname",
+                    label_on = "display row name", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "miss row name",
+                    icon_off = icon("xmark"),
+                    value = F
+                  )),
+                  conditionalPanel(
+                    condition = "input.limmaphcluster == 1",
+                    column(6, selectInput("limmaphdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
+                    column(6, selectInput("limmaphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
+                  ),
+                  column(12, div(actionButton("limmaphbt", "Plot Heatmap", icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
                 )
-              )
-            ),
-            column(
-              3,
-              panel(
-                "",
-                heading = "Heatmap Parameters Setting",
-                status = "warning",
-                column(12, selectInput("limmaphscale", h5("scale:"), choices = c("none", "row", "column"), selected = "row")),
-                column(6, prettyToggle(
-                  inputId = "limmaphcluster",
-                  label_on = "cluster by row", 
-                  icon_on = icon("check"),
-                  status_on = "info",
-                  status_off = "warning", 
-                  label_off = "no cluster",
-                  icon_off = icon("xmark"),
-                  value = TRUE
-                )),
-                column(6, prettyToggle(
-                  inputId = "limmaphrowname",
-                  label_on = "display row name", 
-                  icon_on = icon("check"),
-                  status_on = "info",
-                  status_off = "warning", 
-                  label_off = "miss row name",
-                  icon_off = icon("xmark"),
-                  value = F
-                )),
+              ),
+              column(
+                8,
+                column(4, switchInput(
+                  inputId = "limmaphdisplaymode",
+                  label = "mode", 
+                  labelWidth = "50px",
+                  size = "mini",
+                  onLabel = "static",
+                  offLabel = "interactive",
+                  value = T,
+                ), offset = 7),
                 conditionalPanel(
-                  condition = "input.limmaphcluster == 1",
-                  column(6, selectInput("limmaphdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
-                  column(6, selectInput("limmaphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
+                  condition = "input.limmaphdisplaymode == true",
+                  column(
+                    1,
+                    downloadBttn(
+                      outputId = "limmaphdlbt",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    )
+                  ),
+                  column(12, plotOutput("limmaph"))
                 ),
-                column(12, div(actionButton("limmaphbt", "Plot Heatmap", icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
+                conditionalPanel(
+                  condition = "input.limmaphdisplaymode == false",
+                  column(1, NULL),
+                  column(12, plotlyOutput("limmainterph"))
+                )
               )
             )
           ),
           conditionalPanel(
             condition = "input.detools == 'SAM'",
-            column(
-              4,
-              panel(
-                "",
-                heading = "SAM Parameters Setting",
-                status = "info",
-                column(6,uiOutput('samselect1')),
-                column(6,uiOutput('samselect2')),
-                column(
-                  6,
-                  numericInput("samnperms",
-                               label = h5("nperms:"),
-                               value = 100,
-                               min = 0,
-                               max = 10000,
-                               step = 10)
-                ),
-                column(
-                  6,
-                  numericInput("samfdr",
-                               label = h5("minimum FDR:"),
-                               value = 0.05,
-                               min = 0,
-                               max = 0.05,
-                               step = 0.0000001)
-                ),
-                column(12,div(actionButton('sambt','Analysis', icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;")
-              )
-            ),
-            column(
-              5,
-              column(3,actionButton("viewsamfile", "view result file", icon("eye"))),
-              column(8, NULL),
+            fluidRow(
               column(
-                1,
-                downloadBttn(
-                  outputId = "samplotdl",
-                  label = "",
-                  style = "material-flat",
-                  color = "default",
-                  size = "sm"
+                4,
+                panel(
+                  "",
+                  heading = "SAM Parameters Setting",
+                  status = "info",
+                  column(6,uiOutput('samselect1')),
+                  column(6,uiOutput('samselect2')),
+                  column(
+                    6,
+                    numericInput("samnperms",
+                                 label = h5("nperms:"),
+                                 value = 100,
+                                 min = 0,
+                                 max = 10000,
+                                 step = 10)
+                  ),
+                  column(
+                    6,
+                    numericInput("samfdr",
+                                 label = h5("minimum FDR:"),
+                                 value = 0.05,
+                                 min = 0,
+                                 max = 0.05,
+                                 step = 0.0000001)
+                  ),
+                  column(12,div(actionButton('sambt','Analysis', icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;")
+                ),
+                panel(
+                  "",
+                  heading = "Heatmap Parameters Setting",
+                  status = "warning",
+                  column(12, selectInput("samphscale", h5("scale:"), choices = c("none", "row", "column"), selected = "row")),
+                  column(6, prettyToggle(
+                    inputId = "samphcluster",
+                    label_on = "cluster by row", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "no cluster",
+                    icon_off = icon("xmark"),
+                    value = TRUE
+                  )),
+                  column(6, prettyToggle(
+                    inputId = "samphrowname",
+                    label_on = "display row name", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "miss row name",
+                    icon_off = icon("xmark"),
+                    value = F
+                  )),
+                  conditionalPanel(
+                    condition = "input.samphcluster == 1",
+                    column(6, selectInput("samphdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
+                    column(6, selectInput("samphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
+                  ),
+                  column(12,div(actionButton('samphbt','Plot Heatmap', icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
                 )
               ),
               column(
-                12,
-                plotOutput("samstatic", width = "100%")
-              )
-            ),
-            column(
-              3,
-              panel(
-                "",
-                heading = "Heatmap Parameters Setting",
-                status = "warning",
-                column(12, selectInput("samphscale", h5("scale:"), choices = c("none", "row", "column"), selected = "row")),
-                column(6, prettyToggle(
-                  inputId = "samphcluster",
-                  label_on = "cluster by row", 
-                  icon_on = icon("check"),
-                  status_on = "info",
-                  status_off = "warning", 
-                  label_off = "no cluster",
-                  icon_off = icon("xmark"),
-                  value = TRUE
-                )),
-                column(6, prettyToggle(
-                  inputId = "samphrowname",
-                  label_on = "display row name", 
-                  icon_on = icon("check"),
-                  status_on = "info",
-                  status_off = "warning", 
-                  label_off = "miss row name",
-                  icon_off = icon("xmark"),
-                  value = F
-                )),
-                conditionalPanel(
-                  condition = "input.samphcluster == 1",
-                  column(6, selectInput("samphdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
-                  column(6, selectInput("samphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
+                8,
+                column(3,actionButton("viewsamfile", "view result file", icon("eye"))),
+                column(4, NULL),
+                column(
+                  1,
+                  downloadBttn(
+                    outputId = "samplotdl",
+                    label = "",
+                    style = "material-flat",
+                    color = "default",
+                    size = "sm"
+                  )
                 ),
-                column(12,div(actionButton('samphbt','Plot Heatmap', icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
+                column(12, NULL),
+                column(8, plotOutput("samstatic", width = "100%")),
+                column(4, NULL),
+                column(
+                  4,
+                  switchInput(
+                    inputId = "samdisplaymode",
+                    label = "mode", 
+                    labelWidth = "50px",
+                    size = "mini",
+                    onLabel = "static",
+                    offLabel = "interactive",
+                    value = FALSE,
+                  ),
+                  offset = 7
+                ),
+                conditionalPanel(
+                  condition = "input.samdisplaymode == true",
+                  column(
+                    1,
+                    downloadBttn(
+                      outputId = "samphdlbt",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    )
+                  ),
+                  column(12, plotOutput("samph")),
+                ),
+                conditionalPanel(
+                  condition = "input.samdisplaymode == false",
+                  column(1, NULL),
+                  column(12, plotlyOutput("samphinter"))
+                )
               )
             )
           ),
@@ -1529,14 +1622,7 @@ ui <- renderUI(
                 ),
                 column(12, numericInput("anovapvalue", h5("pvalue threshold:"), 0.1, max = 0.05, min = 0.0000001, step = 0.0000001)),
                 column(12, div(actionButton("anovabt", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;"),
-              )
-            ),
-            column(
-              5,
-              dataTableOutput("anovaresult")
-            ),
-            column(
-              3,
+              ),
               panel(
                 "",
                 heading = "Heatmap Parameters Setting",
@@ -1568,6 +1654,42 @@ ui <- renderUI(
                   column(6, selectInput("anovaphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
                 ),
                 column(12,div(actionButton('anovaphbt','Plot Heatmap', icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
+              )
+            ),
+            column(
+              8,
+              column(12, dataTableOutput("anovaresult")),
+              column(
+                4,
+                switchInput(
+                  inputId = "anovaphdisplaymode",
+                  label = "mode", 
+                  labelWidth = "50px",
+                  size = "mini",
+                  onLabel = "static",
+                  offLabel = "interactive",
+                  value = T,
+                ), 
+                offset = 7
+              ),
+              conditionalPanel(
+                condition = "input.anovaphdisplaymode == true",
+                column(
+                  1,
+                  downloadBttn(
+                    outputId = "anovaphdlbt",
+                    label = "",
+                    style = "material-flat",
+                    color = "default",
+                    size = "sm"
+                  )
+                ),
+                column(12, plotOutput("anovaph"))
+              ),
+              conditionalPanel(
+                condition = "input.anovaphdisplaymode == false",
+                column(1, NULL),
+                column(12, plotlyOutput("anovainterph"))
               )
             )
           )
@@ -1718,23 +1840,76 @@ ui <- renderUI(
                   value = "kapstep2val",
                   conditionalPanel(
                     condition = "input.kseamode == 'Multiple groups'",
-                    column(11, NULL),
+                    column(7, NULL),
                     column(
-                      1,
-                      downloadBttn(
-                        outputId = "kapplotdl",
-                        label = "",
-                        style = "material-flat",
-                        color = "default",
-                        size = "sm"
+                      4,
+                      switchInput(
+                        inputId = "kseamulgroupdisplaymode",
+                        label = "mode", 
+                        labelWidth = "70px",
+                        size = "mini",
+                        onLabel = "static",
+                        offLabel = "interactive",
+                        value = FALSE,
                       )
                     ),
-                    column(12, plotOutput("kapstep2plot")),
+                    conditionalPanel(
+                      condition = "input.kseamulgroupdisplaymode == true",
+                      column(
+                        1,
+                        downloadBttn(
+                          outputId = "kapplotdl",
+                          label = "",
+                          style = "material-flat",
+                          color = "default",
+                          size = "sm"
+                        )
+                      ),
+                      column(12, plotOutput("kapstep2plot"))
+                    ),
+                    conditionalPanel(
+                      condition = "input.kseamulgroupdisplaymode == false",
+                      column(1, NULL),
+                      column(12, plotlyOutput("kapstep2plotinter"))
+                    ),
+                    
                     column(12, dataTableOutput("kapstep2df"))
                   ),
                   conditionalPanel(
                     condition = "input.kseamode == 'Two groups'",
-                    uiOutput("kseastep2plotui"),
+                    column(7, NULL),
+                    column(
+                      4,
+                      switchInput(
+                        inputId = "kseatwogroupdisplaymode",
+                        label = "mode", 
+                        labelWidth = "70px",
+                        size = "mini",
+                        onLabel = "static",
+                        offLabel = "interactive",
+                        value = FALSE,
+                      )
+                    ),
+                    conditionalPanel(
+                      condition = "input.kseatwogroupdisplaymode == false",
+                      column(1, NULL),
+                      column(12, plotlyOutput("kapstep2plottwogroupinter"))
+                    ),
+                    conditionalPanel(
+                      condition = "input.kseatwogroupdisplaymode == true",
+                      column(
+                        1,
+                        downloadBttn(
+                          outputId = "kaptwogroupplotdl",
+                          label = "",
+                          style = "material-flat",
+                          color = "default",
+                          size = "sm"
+                        )
+                      ),
+                      column(12, uiOutput("kseastep2plotui"))
+                    ),
+                    
                     dataTableOutput("kseastep2df")
                   )
                 )
@@ -1789,7 +1964,7 @@ ui <- renderUI(
                 heading = "Heatmap Parameters Setting",
                 status = "danger",
                 h5("Assign quantitative values of peptides to their motif", style = "color: grey;"),
-                column(12, numericInput("minseqs", h5("matched seqs threshold"), 50, min = 1, step = 1)),
+                column(12, numericInput("minseqs", h5("matched seqs threshold"), 5, min = 1, step = 1)),
                 column(6, selectInput("motifscale", h5("scale:"), choices = c("none", "row", "column"), selected = "none")),
                 column(6, selectInput("motifdistance", h5("distance metric:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
                 column(6, selectInput("motifclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
@@ -1842,6 +2017,7 @@ ui <- renderUI(
                 heading = "Feature Selection",
                 status = "warning",
                 column(12, uiOutput("survivalui")),
+                column(12, textInput(inputId = "sa_text_input", label = h5("or input any Psite："), placeholder = "gi|56118310_NUCKS1_S181")),
                 column(6, colourInput("survivalhighcol", h5('"high" colour'), "#3300CC")),
                 column(6, colourInput("survivallowcol", h5('"low" colour'), "#CC3300")),
                 column(12,div(actionButton('survivalplotbt1','Plot', icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
@@ -1849,6 +2025,13 @@ ui <- renderUI(
             ),
             column(
               8,
+              column(1, downloadBttn(
+                outputId = "surv1tabledl",
+                label = "",
+                style = "material-flat",
+                color = "default",
+                size = "sm"
+              ), offset = 11),
               column(
                 12, dataTableOutput("survivaltable")
               ),
@@ -1959,6 +2142,10 @@ ui <- renderUI(
         hr(),
         # h4("4. Motif-kinase relation table:"),
         # downloadButton("dlmotifkinase", "motif-kinase"),
+      ),
+      tabPanel(
+        "Test",
+        # plotlyOutput("limmainterph")
       ),
       nav_item(a(target="_blank",  href="https://github.com/liuzan-info/PhosMap", icon("github"))),
       collapsible = TRUE
