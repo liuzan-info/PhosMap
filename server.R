@@ -50,8 +50,19 @@ server<-shinyServer(function(input, output, session){
       showModal(modalDialog(
         title = "Tutorial video",
         size = "l",
-        h5("If the following video fails to play, you can choose to open this link instead. https://www.youtube.com/watch?v=KGccNSmjhsk"),
-        tags$iframe(width="560", height="400", src="https://www.bilibili.com/video/BV1zh411F7vJ/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
+        h5("If the following video fails to play, you can choose to open these links instead."),
+        tags$ol(
+          tags$li(
+            tags$a(href = "https://www.youtube.com/watch?v=KGccNSmjhsk", target = "_blank", "https://www.youtube.com/watch?v=KGccNSmjhsk")
+          ),
+          tags$li(
+            tags$a(href = "https://www.bilibili.com/video/BV1zh411F7vJ/", target = "_blank", "https://www.bilibili.com/video/BV1zh411F7vJ/")
+          ),
+          tags$li(
+            tags$a(href = "https://bio-inf.shinyapps.io/phosmap_video/", target = "_blank", "https://bio-inf.shinyapps.io/phosmap_video/")
+          )
+        ),
+        tags$iframe(width="850", height="700", target = "_blank", src="https://bio-inf.shinyapps.io/phosmap_video/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
         easyClose = T,
         footer = modalButton("OK")
       ))
@@ -3210,35 +3221,36 @@ server<-shinyServer(function(input, output, session){
     if(input$pcamean == TRUE) {
       # PCA
       expr_data_frame = data_frame_normalization_with_control_no_pair
-      expr_ID = as.vector(expr_data_frame[,1])
-      expr_Valule = expr_data_frame[,-1]
-      expr_Valule_mean = NULL
-      expr_Valule_row = nrow(expr_Valule)
-      for(i in 1:expr_Valule_row){
-        x = as.vector(unlist(expr_Valule[i,]))
+      phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
+      phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
+      group = phosphorylation_experiment_design_file$Group
+      group_levels = phosphorylation_groups_labels
+      group = factor(group, levels = group_levels)
+      data_test <- expr_data_frame[, -1]
+      data_test_mean = NULL 
+      for(i in 1:nrow(data_test)){
+        x = as.vector(unlist(data_test[i,]))
         x_m = tapply(x, group, mean)
-        expr_Valule_mean = rbind(expr_Valule_mean, x_m)
+        data_test_mean = rbind(data_test_mean, x_m)
       }
-      colnames(expr_Valule_mean) = group_levels
-      expr_df = data.frame(expr_ID, expr_Valule_mean)
-      
-      expr_ID <- as.vector(expr_df[,1])
-      expr_Valule <- log2(expr_df[,-1]) # have to log
-      testDat <- t(expr_Valule) # row -> sample, col -> variable
-      pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+      pca_result <- prcomp(t(data_test_mean), scale. = TRUE)
+      sample_coordinates <- data.frame(pca_result$x[, 1:2])
+      sample_coordinates$Sample <- rownames(sample_coordinates)
+      merged_data = sample_coordinates
     } else {
       # PCA
       expr_data_frame = data_frame_normalization_with_control_no_pair
-      
-      requireNamespace('stats')
-      requireNamespace('graphics')
-      expr_ID <- as.vector(expr_data_frame[,1])
-      expr_Valule <- log2(expr_data_frame[,-1]) # have to log
-      testDat <- t(expr_Valule) # row -> sample, col -> variable
-      pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+      data_test <- expr_data_frame[, -1]
+      data_test <- log2(data_test)
+      pca_result <- prcomp(t(data_test), scale. = TRUE)
+      sample_coordinates <- data.frame(pca_result$x[, 1:2])
+      sample_coordinates$Sample <- rownames(sample_coordinates)
+      exp_design <- data.frame(Sample = phosphorylation_experiment_design_file$Experiment_Code, Group = phosphorylation_experiment_design_file$Group)
+      merged_data <- merge(exp_design, sample_coordinates, by = "Sample")
+      merged_data$Group = factor(merged_data$Group)
     }
     
-    list(pca, group)
+    pca <- list(pca_result, merged_data)
   })
   
   pca_plot1 <- eventReactive(
@@ -3253,56 +3265,49 @@ server<-shinyServer(function(input, output, session){
   
   pca_plot2 <- eventReactive(
     input$drbt, {
-      pca <- pca()[[1]]
-      group <- pca()[[2]]
-      importance <- summary(pca)$importance
+      PCA <- pca()[[1]]
+      merged_data <- pca()[[2]]
+      importance <- summary(PCA)$importance
       PC1 <- importance[2,1]
       PC2 <- importance[2,2]
       PC1 <- round(PC1, 4)*100
       PC2 <- round(PC2, 4)*100
       
-      pca_predict <- stats::predict(pca)
+      pca_predict <- stats::predict(PCA)
       pca_predict_2d <- pca_predict[,c(1,2)]
-      colors <- grDevices::rainbow(length(unique(group)))
       xlim <- c(floor(min(pca_predict_2d[,1]))-5, ceiling(max(pca_predict_2d[,1]))+5)
       ylim <- c(floor(min(pca_predict_2d[,2]))-5, ceiling(max(pca_predict_2d[,2]))+5)
       xlab <- paste("PC1 (", PC1, "%)", sep = "")
       ylab <- paste("PC2 (", PC2, "%)", sep = "")
       if(input$pcamean == TRUE) {
-        plot.new()
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+        group_colors <- grDevices::rainbow(length(merged_data$Sample))
+        ggplot(merged_data, aes(x = PC1, y = PC2, color = Sample)) +
+          geom_point(size = 1, alpha = 0.8) +
+          scale_color_manual(values = group_colors) +
+          theme_bw() +
+          theme(panel.grid = element_blank(),
+                legend.box.background = element_rect(colour = "black")) +
+          labs(title = input$pcamain,
+               x = xlab,
+               y = ylab,
+               color = input$pcalegend)
       }else{
-        plot.new()
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+        group_levels <- levels(factor(merged_data$Group))
+        group_colors <- grDevices::rainbow(length(group_levels))
+        ggplot(merged_data, aes(x = PC1, y = PC2, color = Group)) +
+          geom_point(size = 1, alpha = 0.8) +
+          scale_color_manual(values = group_colors) +
+          theme_bw() +
+          theme(panel.grid = element_blank(),
+                legend.box.background = element_rect(colour = "black")) +
+          labs(title = input$pcamain,
+               x = xlab,
+               y = ylab,
+               color = input$pcalegend)
       }
-      # legend("topright",title = "Group",inset = 0.01,
-      #        legend = unique(group),pch=16,
-      #        col = colors,bg='white')
-      usr <- par("usr")
-      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
-      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel, title = input$pcalegend, inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
-      pdf(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''))
-      if(input$pcamean == TRUE) {
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
-      }else{
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
-      }
-      # legend("topright",title = "Group",inset = 0.01,
-      #        legend = unique(group),pch=16,
-      #        col = colors,bg='white')
-      usr <- par("usr")
-      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
-      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel, title = input$pcalegend, inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
-      dev.off()
       
-      pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
-                  output = paste('tmp/',userID,'/analysis/pca/joinedpca.pdf',sep=''))
+      # pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
+      #             output = paste('tmp/',userID,'/analysis/pca/joinedpca.pdf',sep=''))
     }
   )
   output$pca1 <- renderPlot(pca_plot1())
@@ -4346,7 +4351,7 @@ server<-shinyServer(function(input, output, session){
       if(input$kseapair == TRUE) {
         result = expr_data_frame1
         for(sample in colnames(result)){
-          pair = phosphorylation_groups_experiment_design_file[phosphorylation_experiment_design_file$Experiment_Code == sample,]$Pair
+          pair = phosphorylation_experiment_design_file[phosphorylation_experiment_design_file$Experiment_Code == sample,]$Pair
           target_sample = phosphorylation_experiment_design_file[phosphorylation_experiment_design_file$Pair == pair &
                                                                    phosphorylation_experiment_design_file$Group == input$kseagroup2,]$Experiment_Code
 
