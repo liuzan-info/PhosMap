@@ -1,5 +1,5 @@
-<img src="https://img.shields.io/github/license/liuzan-info/PhosMap">
-[![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
+
+<img src="https://img.shields.io/github/license/liuzan-info/PhosMap"> [![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
 
 # PhosMap
 A docker image-based tool to accomplish one-stop interactive analysis of quantitative phosphoproteomics.
