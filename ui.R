@@ -308,12 +308,16 @@ ui <- renderUI(
             conditionalPanel(
               condition = "input.loaddatatype == false & input.softwaretype == 2",
               h4("2. Mascot xml file: "),
+              downloadButton("usermascotxmldl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               actionButton("usermascotxmlinstruction", "View Upload Instructions", 
                            style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upmascot", NULL, accept = "application/zip"),
               uiOutput("masui"),
               hr(style = "border-style: dashed;border-color: grey;"),
               h4("3. Phosphoproteomics peptide file: "),
+              downloadButton("usermascotpepdl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               actionButton("usermascotpepinstruction", "View Upload Instructions", 
                            style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("uppeptide", NULL, accept = "application/zip"),
@@ -337,6 +341,8 @@ ui <- renderUI(
               ),
               
               h4("4.2 Profiling file: "),
+              downloadButton("usermascotprodl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               actionButton("usermascotprofilinginstruction", "View Upload Instructions", 
                            style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upprogene", NULL, accept = "application/zip"),
@@ -347,6 +353,8 @@ ui <- renderUI(
             conditionalPanel(
               condition = "input.loaddatatype == false & input.softwaretype == 1",
               h4("2. Phospho (STY)Sites.txt: "),
+              downloadButton("userphosmaxdl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               actionButton("userphosmaxinstruction", "View Upload Instructions", 
                            style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upusermaxphos", NULL, accept = ".txt"),
@@ -376,6 +384,8 @@ ui <- renderUI(
                 )
               ),
               h4("3.2 proteinGroups.txt: "),
+              downloadButton("userpromaxdl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               actionButton("userpromaxinstruction", "View Upload Instructions", 
                            style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
               fileInput("upusermaxpro", NULL, accept = ".txt"),
@@ -1689,7 +1699,7 @@ ui <- renderUI(
               conditionalPanel(
                 condition = "input.anovaphdisplaymode == false",
                 column(1, NULL),
-                column(12, plotlyOutput("anovainterph"))
+                column(12, plotlyOutput("anovainterph", height = "1700px"))
               )
             )
           )
@@ -1783,11 +1793,19 @@ ui <- renderUI(
                 condition = "input.kseamode == 'Two groups'",
                 panel(
                   "",
-                  heading = "ANOVA Parameters Setting [Step 1]",
+                  heading = "Parameters Setting [Step 1]",
                   status = "info",
+                  checkboxInput(
+                    inputId = "kseapair",
+                    label = "Paired data", 
+                    value = FALSE
+                  ),
                   column(6,uiOutput('kseaselect1')),
                   column(6,uiOutput('kseaselect2')),
-                  column(6, numericInput("kseafc", h5("FC threshold:"), 4, min = 1, step = 0.5)),
+                  conditionalPanel(
+                    condition = "input.kseapair == 0",
+                    column(6, numericInput("kseafc", h5("FC threshold:"), 4, min = 1, step = 0.5))
+                  ),
                   column(12, div(actionButton("kseaanalysisbt1", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;"),
                 ),
                 panel(

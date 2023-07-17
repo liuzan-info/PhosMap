@@ -45,75 +45,6 @@ server<-shinyServer(function(input, output, session){
   dir.create(survloc, recursive = TRUE)
   dir.create(motifloc, recursive = TRUE)
   
-  ###download###
-  #maxquant
-  output$demomaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
-  
-  output$demomaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
-  
-  output$usermaxnoproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"), file)})
-  
-  output$usermaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
-  
-  output$usermaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
-  
-  output$demomaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"), file)})
-  
-  output$demomaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
-  
-  output$usermaxnoproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
-  
-  output$usermaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
-  
-  output$usermaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
-  
-  output$demomaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
-  
-  output$demomaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPrePro.csv"),file)})
-  
-  output$usermaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormBasedProSummary.csv"),file)})
-  
-  output$usermaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PrePro.csv"),file)})
-  
-  # mascot
-  output$viewedmerging_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmergingdroppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmerging1nopro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmerging1_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmerging1droppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmapping02_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping02droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping12nopro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping12_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping12droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewednorm01_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
-  
-  output$viewednorm01droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
-  
-  output$viewednorm14_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
-  
-  output$viewednorm14nopro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
-  
-  output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
-  
-  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
-  
-  output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
-  
-  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"),file)})
-  
-  output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
-  
   observeEvent(
     input$viewinstall,{
       showModal(modalDialog(
@@ -609,6 +540,15 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
+  output$userphosmaxdl <- downloadHandler(
+    filename = "Phospho (STY)Sites.txt",
+    content = function(file) {file.copy("examplefile/maxquant/Phospho (STY)Sites.txt", file)}
+  )
+  output$userpromaxdl <- downloadHandler(
+    filename = "proteinGroups.txt",
+    content = function(file) {file.copy("examplefile/maxquant/proteinGroups.txt", file)}
+  )
+  
   observeEvent(
     input$userphosmaxinstruction,{
       showModal(modalDialog(
@@ -655,7 +595,6 @@ server<-shinyServer(function(input, output, session){
   )
   
   # mascot
-  
   observeEvent(
     input$usermascotxmlinstruction,{
       showModal(modalDialog(
@@ -719,6 +658,19 @@ server<-shinyServer(function(input, output, session){
         footer = modalButton("OK")
       ))
     }
+  )
+  
+  output$usermascotxmldl <- downloadHandler(
+    filename = "mascot_xml.zip",
+    content = function(file) {file.copy("examplefile/download/mascot_xml.zip", file)}
+  )
+  output$usermascotpepdl <- downloadHandler(
+    filename = "phosphorylation_peptide_txt.zip",
+    content = function(file) {file.copy("examplefile/download/phosphorylation_peptide_txt.zip", file)}
+  )
+  output$usermascotprodl <- downloadHandler(
+    filename = "profiling_gene_txt.zip",
+    content = function(file) {file.copy("examplefile/download/profiling_gene_txt.zip", file)}
   )
   
   #######################################
@@ -1399,9 +1351,6 @@ server<-shinyServer(function(input, output, session){
           design_file = design_file
         )
         
-        # print('函数调用完毕')
-        # print(phospho_data_filtering_STY_and_normalization_list)
-        
         if (identical(phospho_data_filtering_STY_and_normalization_list, list())) {
           sendSweetAlert(
             session = session,
@@ -1411,7 +1360,6 @@ server<-shinyServer(function(input, output, session){
             btn_labels = "OK"
           )
         } else {
-          # print('执行了后续步骤')
           phospho_data_filtering_STY_and_normalization <-
             phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
 
@@ -3408,7 +3356,6 @@ server<-shinyServer(function(input, output, session){
   tsne_plot <- eventReactive(
     input$drbt, {
       tsne <- tsne()[[3]]
-      print(tsne)
       colors <- tsne()[[5]]
       group <- tsne()[[2]]
       main <- tsne()[[4]]
@@ -4396,11 +4343,26 @@ server<-shinyServer(function(input, output, session){
       group_levels = phosphorylation_groups_labels
       group = factor(group, levels = group_levels)
       
-      dfmean1 <- apply(expr_data_frame1, 1, mean)
-      dfmean2 <- apply(expr_data_frame2, 1, mean)
-      FC <- dfmean2/dfmean1
-      kseafc <- isolate(input$kseafc)
-      result <- expr_data_frame[(FC >= kseafc)|(FC <= 1/kseafc),]
+      if(input$kseapair == TRUE) {
+        result = expr_data_frame1
+        for(sample in colnames(result)){
+          pair = phosphorylation_groups_experiment_design_file[phosphorylation_experiment_design_file$Experiment_Code == sample,]$Pair
+          target_sample = phosphorylation_experiment_design_file[phosphorylation_experiment_design_file$Pair == pair &
+                                                                   phosphorylation_experiment_design_file$Group == input$kseagroup2,]$Experiment_Code
+
+          result[, sample] = expr_data_frame[, sample] / expr_data_frame[, target_sample]
+        }
+        result$ID = expr_data_frame$ID
+        df_without_id <- result[, -ncol(result)]
+        id_col <- result[, ncol(result)]
+        result <- data.frame(ID = id_col, df_without_id)
+      } else {
+        dfmean1 <- apply(expr_data_frame1, 1, mean)
+        dfmean2 <- apply(expr_data_frame2, 1, mean)
+        FC <- dfmean2/dfmean1
+        kseafc <- isolate(input$kseafc)
+        result <- expr_data_frame[(FC >= kseafc)|(FC <= 1/kseafc),]
+      }
       list(result, group)
     }
   )
@@ -4414,16 +4376,25 @@ server<-shinyServer(function(input, output, session){
   
   ksea2 <- eventReactive(input$kseaanalysisbt2,{
     summary_df_list_from_ksea_cluster = get_summary_from_ksea2(ksea1()[[1]], species = input$kseaspecies, log2_label = FALSE, ratio_cutoff = 3) # species参数
-    
     ksea_regulons_activity_df_cluster = summary_df_list_from_ksea_cluster$ksea_regulons_activity_df
-    ksea_id_cluster = as.vector(ksea_regulons_activity_df_cluster[,1])
-    ksea_value_cluster = ksea_regulons_activity_df_cluster[,-1]
+    med <- apply(abs(ksea_regulons_activity_df_cluster[, 2:ncol(ksea_regulons_activity_df_cluster)]), 1, median) # 增加排序方式选项
+    ksea_regulons_activity_df_cluster$median <- med
     
-    annotation_col = data.frame(
-      group =  ksea1()[[2]]
-    )
-    rownames(annotation_col) = colnames(ksea_value_cluster)
+    ksea_regulons_activity_df_cluster_sorted <- ksea_regulons_activity_df_cluster[order(-ksea_regulons_activity_df_cluster$median),]
+    ksea_regulons_activity_df_cluster_sorted <- head(ksea_regulons_activity_df_cluster_sorted, 50)
+    ksea_regulons_activity_df_cluster_sorted$median <- NULL
     
+    ksea_id_cluster = as.vector(ksea_regulons_activity_df_cluster_sorted[,1])
+    ksea_value_cluster = ksea_regulons_activity_df_cluster_sorted[,-1]
+    
+    if(input$kseapair == FALSE) {
+      annotation_col = data.frame(
+        group =  ksea1()[[2]]
+      )
+      rownames(annotation_col) = colnames(ksea_value_cluster)
+    } else {
+      annotation_col = NULL
+    }
     # breaks and colors setting
     breaks_1 = seq(-4, -2, 0.2) 
     colors_1 = colorRampPalette(c('#11264f', '#145b7d'))(length(breaks_1)-1) 
@@ -4503,11 +4474,14 @@ server<-shinyServer(function(input, output, session){
                         show_rownames = T,
                         cluster_cols = F,
                         border_color = 'black',
-                        cellwidth = 12, cellheight = 12,
+                        # cellwidth = 12, cellheight = 12,
+                        cellwidth = 3, cellheight = 3,
                         breaks = breaks,
                         color = color,
-                        fontsize_col = 10,
-                        fontsize_row = 10,
+                        # fontsize_col = 10,
+                        # fontsize_row = 10,
+                        fontsize_col = 2,
+                        fontsize_row = 2,
                         legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
                         legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
                         main = input$kseamain)
@@ -5048,4 +5022,74 @@ server<-shinyServer(function(input, output, session){
     filename = "motif_kinase_relation.xlsx",
     content = function(file) {file.copy("examplefile/download/motif_kinase_relation.xlsx", file)}
   )
+  
+  ###download###
+  #maxquant
+  output$demomaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
+  
+  output$demomaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
+  
+  output$usermaxnoproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"), file)})
+  
+  output$usermaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
+  
+  output$usermaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
+  
+  output$demomaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"), file)})
+  
+  output$demomaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  
+  output$usermaxnoproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  
+  output$usermaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  
+  output$usermaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  
+  output$demomaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
+  
+  output$demomaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPrePro.csv"),file)})
+  
+  output$usermaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormBasedProSummary.csv"),file)})
+  
+  output$usermaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PrePro.csv"),file)})
+  
+  # mascot
+  output$viewedmerging_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmergingdroppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmerging1nopro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmerging1_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmerging1droppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmapping02_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping02droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping12nopro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping12_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping12droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewednorm01_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  
+  output$viewednorm01droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  
+  output$viewednorm14_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  
+  output$viewednorm14nopro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  
+  output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  
+  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
+  
+  output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
+  
+  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"),file)})
+  
+  output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
+  
 })
