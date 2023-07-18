@@ -13,9 +13,7 @@ sapply(list.files(path1), function(x){source(paste0(path1, x))})
 path2 = "./backend/"
 sapply(list.files(path2), function(x){source(paste0(path2, x))})
 
-
 server<-shinyServer(function(input, output, session){
-  
   options(shiny.maxRequestSize=1000*1024^2)
   userID <- "_phosmap"
   maxdemopreloc <- paste0("tmp/", userID, "/maxquant/demo/")
@@ -47,82 +45,24 @@ server<-shinyServer(function(input, output, session){
   dir.create(survloc, recursive = TRUE)
   dir.create(motifloc, recursive = TRUE)
   
-  ###download###
-  #maxquant
-  output$demomaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
-  
-  output$demomaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
-  
-  output$usermaxnoproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"), file)})
-  
-  output$usermaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
-  
-  output$usermaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
-  
-  output$demomaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"), file)})
-  
-  output$demomaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
-  
-  output$usermaxnoproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
-  
-  output$usermaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
-  
-  output$usermaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
-  
-  output$demomaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
-  
-  output$demomaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPrePro.csv"),file)})
-  
-  output$usermaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormBasedProSummary.csv"),file)})
-  
-  output$usermaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PrePro.csv"),file)})
-  
-  # mascot
-  output$viewedmerging_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmergingdroppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmerging1nopro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmerging1_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmerging1droppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
-  
-  output$viewedmapping02_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping02droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping12nopro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping12_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewedmapping12droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
-  
-  output$viewednorm01_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
-  
-  output$viewednorm01droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
-  
-  output$viewednorm14_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
-  
-  output$viewednorm14nopro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
-  
-  output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
-  
-  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
-  
-  output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
-  
-  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"),file)})
-  
-  output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
-  
   observeEvent(
     input$viewinstall,{
       showModal(modalDialog(
         title = "Tutorial video",
         size = "l",
-        h5("If the following video fails to play, you can choose to open this link instead. https://www.youtube.com/watch?v=KGccNSmjhsk"),
-        tags$iframe(width="560", height="400", src="https://www.bilibili.com/video/BV1zh411F7vJ/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
+        h5("If the following video fails to play, you can choose to open these links instead."),
+        tags$ol(
+          tags$li(
+            tags$a(href = "https://www.youtube.com/watch?v=KGccNSmjhsk", target = "_blank", "https://www.youtube.com/watch?v=KGccNSmjhsk")
+          ),
+          tags$li(
+            tags$a(href = "https://www.bilibili.com/video/BV1zh411F7vJ/", target = "_blank", "https://www.bilibili.com/video/BV1zh411F7vJ/")
+          ),
+          tags$li(
+            tags$a(href = "https://bio-inf.shinyapps.io/phosmap_video/", target = "_blank", "https://bio-inf.shinyapps.io/phosmap_video/")
+          )
+        ),
+        tags$iframe(width="850", height="700", target = "_blank", src="https://bio-inf.shinyapps.io/phosmap_video/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
         easyClose = T,
         footer = modalButton("OK")
       ))
@@ -578,6 +518,170 @@ server<-shinyServer(function(input, output, session){
         upproid_()
       })
     }
+  )
+  
+  output$userdesigndl <- downloadHandler(
+    filename = "experimental_design_template.txt",
+    content = function(file) {file.copy("examplefile/maxquant/phosphorylation_exp_design_info.txt", file)}
+  )
+  
+  instruction_design <- HTML("In this file, the <strong>'Experiment_Code'</strong> column and 
+               the <strong>'Group'</strong> column are required, and the column 
+               names cannot be changed. </br> </br>
+                 1. Each item in the <strong>'Experiment_Code'
+               </strong> column can be of any type, but must be unique, and is 
+               considered as the unique identifier for the sample.</br> </br>
+                 2. Each item in the <strong>'Group'</strong> column can be of 
+               any type, and the 
+               same value indicates that the samples belong to the same group. 
+               In the case data, the numbers represent the processing time.</br> </br>
+               The <strong>'Description'</strong> column is optional, and its 
+               content can be anything you enter, such as the original mass 
+               spectrum file name used in the case data.")
+  # maxqunt
+  observeEvent(
+    input$userdesigninstruction,{
+      showModal(modalDialog(
+        title = "Experimental design file",
+        size = "l",
+        tags$p(instruction_design),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$userphosmaxdl <- downloadHandler(
+    filename = "Phospho (STY)Sites.txt",
+    content = function(file) {file.copy("examplefile/maxquant/Phospho (STY)Sites.txt", file)}
+  )
+  output$userpromaxdl <- downloadHandler(
+    filename = "proteinGroups.txt",
+    content = function(file) {file.copy("examplefile/maxquant/proteinGroups.txt", file)}
+  )
+  
+  observeEvent(
+    input$userphosmaxinstruction,{
+      showModal(modalDialog(
+        title = "Phospho (STY)Sites.txt",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of MaxQuant.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$userprodesigndl <- downloadHandler(
+    filename = "proteomics_design_template.txt",
+    content = function(file) {file.copy("examplefile/maxquant/profiling_exp_design_info.txt", file)}
+  )
+  
+  observeEvent(
+    input$userprodesigninstruction,{
+      showModal(modalDialog(
+        title = "Proteomics experimental design file",
+        size = "l",
+        tags$p(instruction_design),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$userpromaxinstruction,{
+      showModal(modalDialog(
+        title = "proteinGroups.txt",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of MaxQuant.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  # mascot
+  observeEvent(
+    input$usermascotxmlinstruction,{
+      showModal(modalDialog(
+        title = "Mascot xml file",
+        size = "l",
+        tags$p(
+          HTML("This compressed file is obtained by compressing the corresponding
+               output of Mascot, for specific details, please refer to the manual
+               in the Tutorial module.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$usermascotpepinstruction,{
+      showModal(modalDialog(
+        title = "Phosphoproteomics peptide file",
+        size = "l",
+        tags$p(
+          HTML("This compressed file is obtained by compressing the corresponding
+               output of Firmiana, for specific details, please refer to the manual
+               in the Tutorial module.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$userpromascotdesigndl <- downloadHandler(
+    filename = "proteomics_design_template.txt",
+    content = function(file) {file.copy("examplefile/maxquant/profiling_exp_design_info.txt", file)}
+  )
+  
+  observeEvent(
+    input$userpromascotdesigninstruction,{
+      showModal(modalDialog(
+        title = "Proteomics experimental design file",
+        size = "l",
+        tags$p(instruction_design),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  observeEvent(
+    input$usermascotprofilinginstruction,{
+      showModal(modalDialog(
+        title = "Profiling file",
+        size = "l",
+        tags$p(
+          HTML("This compressed file is obtained by compressing the corresponding
+               output of Firmiana, for specific details, please refer to the manual
+               in the Tutorial module.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$usermascotxmldl <- downloadHandler(
+    filename = "mascot_xml.zip",
+    content = function(file) {file.copy("examplefile/download/mascot_xml.zip", file)}
+  )
+  output$usermascotpepdl <- downloadHandler(
+    filename = "phosphorylation_peptide_txt.zip",
+    content = function(file) {file.copy("examplefile/download/phosphorylation_peptide_txt.zip", file)}
+  )
+  output$usermascotprodl <- downloadHandler(
+    filename = "profiling_gene_txt.zip",
+    content = function(file) {file.copy("examplefile/download/profiling_gene_txt.zip", file)}
   )
   
   #######################################
@@ -1258,9 +1362,6 @@ server<-shinyServer(function(input, output, session){
           design_file = design_file
         )
         
-        # print('函数调用完毕')
-        # print(phospho_data_filtering_STY_and_normalization_list)
-        
         if (identical(phospho_data_filtering_STY_and_normalization_list, list())) {
           sendSweetAlert(
             session = session,
@@ -1270,7 +1371,6 @@ server<-shinyServer(function(input, output, session){
             btn_labels = "OK"
           )
         } else {
-          # print('执行了后续步骤')
           phospho_data_filtering_STY_and_normalization <-
             phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
 
@@ -1393,7 +1493,15 @@ server<-shinyServer(function(input, output, session){
       updateTabsetPanel(
         session,
         "navbarpage",
-        selected = "Preprocessing"
+        selected = "UPLOAD DATA [ prerequisite ]"
+      )
+      updateRadioGroupButtons(
+        session = session, inputId = "analysisdatatype",
+        selected = 1
+      )
+      updateRadioGroupButtons(
+        session = session, inputId = "analysisdatatype",
+        selected = 2
       )
     }
   )
@@ -1785,7 +1893,7 @@ server<-shinyServer(function(input, output, session){
                 result_list <- list(filled_group_data)
               }
             }
-            
+        
             # 将所有填充后的数据框合并为一个数据框
             df <- Reduce(cbind, result_list)
         }
@@ -2673,8 +2781,8 @@ server<-shinyServer(function(input, output, session){
   #######################################
   # analysis data upload
   analysisouts <- reactive({
-    if(input$analysisdatatype==2){
-      message <- "Data Overview"
+    if(input$analysisdatatype==3){
+      message <- "The example data is loaded"
       designfile = "examplefile/analysistools/phosphorylation_exp_design_info.txt"
       # profilingfile = "examplefile/analysistools/data_frame_normalization_with_control_no_pair.csv"
       # motiffile = "examplefile/analysistools/motifanalysis.csv"
@@ -2710,6 +2818,273 @@ server<-shinyServer(function(input, output, session){
           output$viewedfileanalysis <- renderDataTable(target4)
         }
       )
+    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==2){ # pipe、案例数据、mascot
+      if(input$useprocheck1==1) {
+        file1 = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv")
+      } else {
+        file1 = paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv")
+      }
+      designfile = "examplefile/mascot/phosphorylation_exp_design_info.txt"
+      
+      clinicalfile = "examplefile/analysistools/Clinical_for_Pre.csv"
+      target1 <- read.csv(designfile, sep = "\t")
+      target4 <- read.csv(clinicalfile)
+      if(file.exists(file1)){
+        if(input$useprocheck1==1) {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        }
+        
+        target5 <- read.csv(file1, row.name=1)
+        target2 <- target5[, c(-2, -3, -4)]
+        colnames(target2)[1] <- "ID"
+        target3 <- target5[, -1]
+        output$viewedfileanalysis <- renderDataTable(target1)
+        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+        
+        observeEvent(
+          input$viewanalysispipedesign, {
+            output$viewedfileanalysis <- renderDataTable(target1)
+            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipedf, {
+            output$viewedfileanalysis <- renderDataTable(target5)
+            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipeclin, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3.Clinical data file:")})
+          }
+        )
+      }else {
+        if(input$useprocheck1==1) {
+          message <- "PhosMap does not detect pipeline data comes from [example data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]."
+        } else {
+          message <- "PhosMap does not detect pipeline data comes from [example data]-[Firmiana/mascot]."
+        }
+        target1 <- NULL
+        target4 <- NULL
+        target2 <- NULL
+        target3 <- NULL
+        target5 <- NULL
+        output$viewedfileanalysis <- renderDataTable(NULL)
+        output$viewedfileanalysisui <- renderUI(NULL)
+        
+      }
+    }
+    else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==2){ # # pipe、user、mascot
+      if(is.null(input$useruseprocheck1)) {
+        file1 = paste0(mascotuserpreloc, "NormImputeSummary.csv")
+      } else if(input$useruseprocheck1==0) {
+        file1 = paste0(mascotuserpreloc, "NormImputeSummary.csv")
+      } else {
+        file1 = paste0(mascotuserpreloc, "PreNormBasedProSummary.csv")
+      }
+      designfile = input$updesign
+      clinicalfile = input$annalysisupload24
+      
+      if(file.exists(file1) & !(is.null(designfile))){
+        if(is.null(input$useruseprocheck1)) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if(input$useruseprocheck1==0) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        }
+        
+        target1 <- read.csv(designfile$datapath, sep = "\t")
+        target5 <- read.csv(file1, row.name=1)
+        target2 <- target5[, c(-2, -3, -4)]
+        colnames(target2)[1] <- "ID"
+        target3 <- target5[, -1]
+        if(is.null(clinicalfile)){
+          target4 <- NULL
+        }else {
+          target4 <- read.csv(clinicalfile$datapath)
+        }
+        output$viewedfileanalysis <- renderDataTable(target1)
+        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+        
+        observeEvent(
+          input$viewanalysispipedesign, {
+            output$viewedfileanalysis <- renderDataTable(target1)
+            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipedf, {
+            output$viewedfileanalysis <- renderDataTable(target5)
+            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+          }
+        )
+        
+        observeEvent(
+          input$annalysisupload24, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+            output$viewanalysispipeclinui <- renderUI({actionButton("viewanalysispipeclinuibt", "view")})
+          }
+        )
+        
+        observeEvent(
+          input$viewanalysispipeclinuibt, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+          }
+        )
+      }else{
+        if(is.null(input$useruseprocheck1)) {
+          message <- "PhosMap does not detect pipeline data comes from [your data]-[Firmiana/mascot]."
+        } else if(input$useruseprocheck1==0) {
+          message <- "PhosMap does not detect pipeline data comes from [your data]-[Firmiana/mascot]."
+        } else {
+          message <- "PhosMap does not detect pipeline data comes from [your data]-[Firmiana/mascot]-[Normalizing phosphoproteomics data based on proteomics data]."
+        }
+        target1 <- NULL
+        target2 <- NULL
+        target3 <- NULL
+        target4 <- NULL
+        target5 <- NULL
+        output$viewedfileanalysis <- renderDataTable(NULL)
+        output$viewedfileanalysisui <- renderUI(NULL)
+      }
+    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==1){# pipe、example、maxquant
+      if(input$maxuseprocheck1==1) {
+        file1 = paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv")
+      } else {
+        file1 = paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv")
+      }
+      designfile = "examplefile/maxquant/phosphorylation_exp_design_info.txt"
+      clinicalfile = "examplefile/analysistools/Clinical_for_Pre.csv"
+      if(file.exists(file1)){
+        if(input$maxuseprocheck1==1) {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        }
+        target1 <- read.csv(designfile, sep = "\t")
+        target4 <- read.csv(clinicalfile)
+        target5 <- read.csv(file1, row.name=1)
+        target2 <- target5[, c(-2, -3, -4)]
+        colnames(target2)[1] <- "ID" 
+        target3 <- target5[, -1]
+        
+        output$viewedfileanalysis <- renderDataTable(target1)
+        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+        
+        observeEvent(
+          input$viewanalysispipedesign, {
+            output$viewedfileanalysis <- renderDataTable(target1)
+            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipedf, {
+            output$viewedfileanalysis <- renderDataTable(target5)
+            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipeclin, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+          }
+        )
+      }else{
+        if(input$maxuseprocheck1==1) {
+          message <- "PhosMap does not detect pipeline data comes from [example data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]."
+        } else {
+          message <- "PhosMap does not detect pipeline data comes from [example data]-[MaxQuant]."
+        }
+        target1 <- NULL
+        target2 <- NULL
+        target3 <- NULL
+        target4 <- NULL
+        target5 <- NULL
+        output$viewedfileanalysis <- renderDataTable(NULL)
+        output$viewedfileanalysisui <- renderUI(NULL)
+      }
+    }else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==1){# pipe、user、maxquant
+      if(is.null(input$maxuseruseprocheck)) {
+        file1 = paste0(maxuserpreloc, "PreNormImputeSummary.csv")
+      } else if(input$maxuseruseprocheck==0) {
+        file1 = paste0(maxuserpreloc, "PreNormImputeSummary.csv")
+      } else {
+        file1 = paste0(maxuserpreloc, "PreNormBasedProSummary.csv")
+      }
+      designfile = input$updesign
+      if(file.exists(file1) & !(is.null(designfile))){
+        if(is.null(input$maxuseruseprocheck)) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if(input$maxuseruseprocheck==0) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        }
+        target1 <- read.csv(designfile$datapath, sep = "\t")
+        # target4 <- read.csv(clinicalfile, row.name=1)
+        target5 <- read.csv(file1, row.name=1)
+        target2 <- target5[, c(-2, -3, -4)]
+        colnames(target2)[1] <- "ID"
+        target3 <- target5[, -1]
+        clinicalfile = input$annalysisupload24
+        
+        if(is.null(clinicalfile)){
+          target4 <- NULL
+        }else {
+          target4 <- read.csv(clinicalfile$datapath)
+        }
+        
+        output$viewedfileanalysis <- renderDataTable(target1)
+        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+        
+        observeEvent(
+          input$viewanalysispipedesign, {
+            output$viewedfileanalysis <- renderDataTable(target1)
+            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipedf, {
+            output$viewedfileanalysis <- renderDataTable(target5)
+            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+          }
+        )
+        observeEvent(
+          input$annalysisupload24, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+            output$viewanalysispipeclinui <- renderUI({actionButton("viewanalysispipeclinuibt2", "view")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipeclinuibt2, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+          }
+        )
+        
+      }else{
+        if(is.null(input$maxuseruseprocheck)) {
+          message <- "PhosMap does not detect pipeline data comes from [your data]-[MaxQuant]."
+        } else if(input$maxuseruseprocheck==0) {
+          message <- "PhosMap does not detect pipeline data comes from [your data]-[MaxQuant]."
+        } else {
+          message <- "PhosMap does not detect pipeline data comes from [your data]-[MaxQuant]-[Normalizing phosphoproteomics data based on proteomics data]."
+        }
+        target1 <- NULL
+        target2 <- NULL
+        target3 <- NULL
+        target4 <- NULL
+        target5 <- NULL
+        output$viewedfileanalysis <- renderDataTable(NULL)
+        output$viewedfileanalysisui <- renderUI(NULL)
+      }
     }else if(input$analysisdatatype==1){
       message <- "Data Overview"
       target1 <- NULL
@@ -2737,8 +3112,6 @@ server<-shinyServer(function(input, output, session){
     }
     dataread
   })
-  
-  
   
   observeEvent(
     input$analysisupload11,{
@@ -2811,10 +3184,6 @@ server<-shinyServer(function(input, output, session){
   
   fileset <- reactive({
     if(input$analysisdatatype == 1){
-      validate(
-        need(designfile_analysis(), 'Please check that the experimental design file is uploaded !'),
-        need(profilingfile_analysis(), 'Please check that the phosphorylation data frame is uploaded !')
-      )
       summarydf <- profilingfile_analysis()
       target2 <- summarydf[, c(-2, -3, -4)]
       colnames(target2)[1] <- "ID"
@@ -2834,6 +3203,10 @@ server<-shinyServer(function(input, output, session){
   })
   
   pca <- reactive({
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
@@ -2848,35 +3221,36 @@ server<-shinyServer(function(input, output, session){
     if(input$pcamean == TRUE) {
       # PCA
       expr_data_frame = data_frame_normalization_with_control_no_pair
-      expr_ID = as.vector(expr_data_frame[,1])
-      expr_Valule = expr_data_frame[,-1]
-      expr_Valule_mean = NULL
-      expr_Valule_row = nrow(expr_Valule)
-      for(i in 1:expr_Valule_row){
-        x = as.vector(unlist(expr_Valule[i,]))
+      phosphorylation_groups_labels = names(table(phosphorylation_experiment_design_file$Group))
+      phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
+      group = phosphorylation_experiment_design_file$Group
+      group_levels = phosphorylation_groups_labels
+      group = factor(group, levels = group_levels)
+      data_test <- expr_data_frame[, -1]
+      data_test_mean = NULL 
+      for(i in 1:nrow(data_test)){
+        x = as.vector(unlist(data_test[i,]))
         x_m = tapply(x, group, mean)
-        expr_Valule_mean = rbind(expr_Valule_mean, x_m)
+        data_test_mean = rbind(data_test_mean, x_m)
       }
-      colnames(expr_Valule_mean) = group_levels
-      expr_df = data.frame(expr_ID, expr_Valule_mean)
-      
-      expr_ID <- as.vector(expr_df[,1])
-      expr_Valule <- log2(expr_df[,-1]) # have to log
-      testDat <- t(expr_Valule) # row -> sample, col -> variable
-      pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+      pca_result <- prcomp(t(data_test_mean), scale. = TRUE)
+      sample_coordinates <- data.frame(pca_result$x[, 1:2])
+      sample_coordinates$Sample <- rownames(sample_coordinates)
+      merged_data = sample_coordinates
     } else {
       # PCA
       expr_data_frame = data_frame_normalization_with_control_no_pair
-      
-      requireNamespace('stats')
-      requireNamespace('graphics')
-      expr_ID <- as.vector(expr_data_frame[,1])
-      expr_Valule <- log2(expr_data_frame[,-1]) # have to log
-      testDat <- t(expr_Valule) # row -> sample, col -> variable
-      pca <- stats::prcomp(((testDat)), center = TRUE, scale = TRUE)
+      data_test <- expr_data_frame[, -1]
+      data_test <- log2(data_test)
+      pca_result <- prcomp(t(data_test), scale. = TRUE)
+      sample_coordinates <- data.frame(pca_result$x[, 1:2])
+      sample_coordinates$Sample <- rownames(sample_coordinates)
+      exp_design <- data.frame(Sample = phosphorylation_experiment_design_file$Experiment_Code, Group = phosphorylation_experiment_design_file$Group)
+      merged_data <- merge(exp_design, sample_coordinates, by = "Sample")
+      merged_data$Group = factor(merged_data$Group)
     }
     
-    list(pca, group)
+    pca <- list(pca_result, merged_data)
   })
   
   pca_plot1 <- eventReactive(
@@ -2891,56 +3265,49 @@ server<-shinyServer(function(input, output, session){
   
   pca_plot2 <- eventReactive(
     input$drbt, {
-      pca <- pca()[[1]]
-      group <- pca()[[2]]
-      importance <- summary(pca)$importance
+      PCA <- pca()[[1]]
+      merged_data <- pca()[[2]]
+      importance <- summary(PCA)$importance
       PC1 <- importance[2,1]
       PC2 <- importance[2,2]
       PC1 <- round(PC1, 4)*100
       PC2 <- round(PC2, 4)*100
       
-      pca_predict <- stats::predict(pca)
+      pca_predict <- stats::predict(PCA)
       pca_predict_2d <- pca_predict[,c(1,2)]
-      colors <- grDevices::rainbow(length(unique(group)))
       xlim <- c(floor(min(pca_predict_2d[,1]))-5, ceiling(max(pca_predict_2d[,1]))+5)
       ylim <- c(floor(min(pca_predict_2d[,2]))-5, ceiling(max(pca_predict_2d[,2]))+5)
       xlab <- paste("PC1 (", PC1, "%)", sep = "")
       ylab <- paste("PC2 (", PC2, "%)", sep = "")
       if(input$pcamean == TRUE) {
-        plot.new()
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+        group_colors <- grDevices::rainbow(length(merged_data$Sample))
+        ggplot(merged_data, aes(x = PC1, y = PC2, color = Sample)) +
+          geom_point(size = 1, alpha = 0.8) +
+          scale_color_manual(values = group_colors) +
+          theme_bw() +
+          theme(panel.grid = element_blank(),
+                legend.box.background = element_rect(colour = "black")) +
+          labs(title = input$pcamain,
+               x = xlab,
+               y = ylab,
+               color = input$pcalegend)
       }else{
-        plot.new()
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
+        group_levels <- levels(factor(merged_data$Group))
+        group_colors <- grDevices::rainbow(length(group_levels))
+        ggplot(merged_data, aes(x = PC1, y = PC2, color = Group)) +
+          geom_point(size = 1, alpha = 0.8) +
+          scale_color_manual(values = group_colors) +
+          theme_bw() +
+          theme(panel.grid = element_blank(),
+                legend.box.background = element_rect(colour = "black")) +
+          labs(title = input$pcamain,
+               x = xlab,
+               y = ylab,
+               color = input$pcalegend)
       }
-      # legend("topright",title = "Group",inset = 0.01,
-      #        legend = unique(group),pch=16,
-      #        col = colors,bg='white')
-      usr <- par("usr")
-      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
-      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel, title = input$pcalegend, inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
-      pdf(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''))
-      if(input$pcamean == TRUE) {
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=colors, pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
-      }else{
-        par(xpd = TRUE, mar = c(5, 5, 5, 5.5))
-        graphics::plot(pca_predict_2d, col=rep(colors,table(group)), pch=16, xlim = xlim, ylim = ylim, lwd = 2, xlab = xlab, ylab = ylab, main = input$pcamain)
-      }
-      # legend("topright",title = "Group",inset = 0.01,
-      #        legend = unique(group),pch=16,
-      #        col = colors,bg='white')
-      usr <- par("usr")
-      x_rel <- 1.05 * (usr[2] - usr[1]) + usr[1]
-      y_rel <- 0.95 * (usr[4] - usr[3]) + usr[3]
-      legend(x = x_rel, y = y_rel, title = input$pcalegend, inset = 0.01, legend = unique(group), pch = 16, col = colors, bg = "white")
-      dev.off()
       
-      pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
-                  output = paste('tmp/',userID,'/analysis/pca/joinedpca.pdf',sep=''))
+      # pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
+      #             output = paste('tmp/',userID,'/analysis/pca/joinedpca.pdf',sep=''))
     }
   )
   output$pca1 <- renderPlot(pca_plot1())
@@ -2955,6 +3322,11 @@ server<-shinyServer(function(input, output, session){
   
   tsne <- eventReactive(
     input$drbt, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
+      
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3024,6 +3396,11 @@ server<-shinyServer(function(input, output, session){
   )
   
   umap <- eventReactive(input$drbt,{
+    
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3102,8 +3479,14 @@ server<-shinyServer(function(input, output, session){
     )
   })
   
+  click_counter <- reactiveValues(limma_count = 0, sam_count = 0, anova_count = 0)
   limma <- eventReactive(input$limmabt,
                          {
+                           validate(
+                             need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+                             need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+                           )
+                           
                            phosphorylation_experiment_design_file <- fileset()[[1]]
                            data_frame_normalization_with_control_no_pair <- fileset()[[2]]
                            expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$limmagroup1)+1,which(phosphorylation_experiment_design_file$Group==input$limmagroup2)+1)]
@@ -3148,6 +3531,7 @@ server<-shinyServer(function(input, output, session){
                            
                            test_data_plot <- data.frame(limmaph_df[,-c(1,2)])
                            rownames(test_data_plot) <- limmaph_df$ID
+                           click_counter$limma_count = 1
                            list(test_data_plot, group_test, rowname_test, limma_results_df)
                            
                            
@@ -3155,20 +3539,43 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$limmaphbt, {
-      if(nrow(limma()[[1]] > 0)) {
-        ph <- pheatmap(limma()[[1]],
-                     scale = input$limmaphscale,
-                     cluster_rows = input$limmaphcluster,
-                     cluster_cols = FALSE,
-                     annotation_col = limma()[[2]],
-                     annotation_row = limma()[[3]],
-                     show_rownames = input$limmaphrowname,
-                     clustering_distance_rows = input$limmaphdistance,
-                     clustering_method = input$limmaphclusmethod
-                     )
-        dev.off()
+      if(click_counter$limma_count) {
+        if(nrow(limma()[[1]] > 0)){
+          ph <- pheatmap(limma()[[1]],
+                         scale = input$limmaphscale,
+                         cluster_rows = input$limmaphcluster,
+                         cluster_cols = FALSE,
+                         annotation_col = limma()[[2]],
+                         annotation_row = limma()[[3]],
+                         show_rownames = input$limmaphrowname,
+                         clustering_distance_rows = input$limmaphdistance,
+                         clustering_method = input$limmaphclusmethod
+          )
+          dev.off()
+          output$limmaph <- renderPlot(ph)
+          output$limmainterph <- renderPlotly(
+            heatmaply(
+              limma()[[1]],
+              scale = input$limmaphscale,
+              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                low = "blue",
+                high = "red"
+              ),
+              Rowv = input$limmaphcluster,
+              Colv = FALSE,
+              hclust_method = input$limmaphclusmethod,
+              distance_method = input$limmaphdistance
+            )
+          )
+        }
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the 'Analysis' button first.",
+          type = "info"
+        )
       }
-      output$limmaph <- renderPlot(ph)
     }
   )
   
@@ -3229,6 +3636,10 @@ server<-shinyServer(function(input, output, session){
   })
   
   sam <- eventReactive(input$sambt,{
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     data_frame_normalization_with_control_no_pair <- fileset()[[2]]
     expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$samgroup1)+1,which(phosphorylation_experiment_design_file$Group==input$samgroup2)+1)]
@@ -3352,6 +3763,7 @@ server<-shinyServer(function(input, output, session){
     test_change <- ifelse(sam_results$Fold.Change < 1, 'DOWN','UP')
     rowname_test <- data.frame(test_change, row.names = sam_results$ID)
     colnames(rowname_test) <- 'Change'
+    click_counter$sam_count = 1
     list(samr_obj, delta, expr_data_frame_plot, group_test, rowname_test)
     
   })
@@ -3375,18 +3787,43 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$samphbt, {
-      ph <- pheatmap(sam()[[3]],
-                     scale = input$samphscale,
-                     cluster_rows = input$samphcluster,
-                     cluster_cols = FALSE,
-                     annotation_col = sam()[[4]],
-                     annotation_row = sam()[[5]],
-                     show_rownames = input$samphrowname,
-                     clustering_distance_rows = input$samphdistance,
-                     clustering_method = input$samphclusmethod
-      )
-      dev.off()
-      output$samph <- renderPlot(ph)
+      if(click_counter$sam_count) {
+        if(nrow(sam()[[3]]> 0)){
+          ph <- pheatmap(sam()[[3]],
+                         scale = input$samphscale,
+                         cluster_rows = input$samphcluster,
+                         cluster_cols = FALSE,
+                         annotation_col = sam()[[4]],
+                         annotation_row = sam()[[5]],
+                         show_rownames = input$samphrowname,
+                         clustering_distance_rows = input$samphdistance,
+                         clustering_method = input$samphclusmethod
+          )
+          dev.off()
+          output$samph <- renderPlot(ph)
+          output$samphinter <- renderPlotly(
+            heatmaply(
+              sam()[[3]],
+              scale = input$samphscale,
+              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                low = "blue",
+                high = "red"
+              ),
+              Rowv = input$samphcluster,
+              Colv = FALSE,
+              hclust_method = input$samphclusmethod,
+              distance_method = input$samphdistance
+            )
+          )
+        }
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the 'Analysis' button first.",
+          type = "info"
+        )
+      }
     }
   )
   
@@ -3398,6 +3835,10 @@ server<-shinyServer(function(input, output, session){
 
   # anova
   anova <- eventReactive(input$anovabt,{
+    validate(
+      need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+      need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+    )
     phosphorylation_experiment_design_file <- fileset()[[1]]
     expr_data_frame <- fileset()[[2]]
     
@@ -3418,31 +3859,55 @@ server<-shinyServer(function(input, output, session){
     
     group_test <- data.frame(as.character(phosphorylation_experiment_design_file[,2]), row.names = phosphorylation_experiment_design_file[,1])
     colnames(group_test) <- "Group"
+    click_counter$anova_count = 1
     list(expr_data_frame_plot,group_test,df)
   })
   observeEvent(input$anovabt, {output$anovaresult <- renderDataTable(anova()[[3]])})
   observeEvent(
     input$anovaphbt, {
-      if(nrow(anova()[[1]] > 0)) {
-        ph <- pheatmap(anova()[[1]],
-                     scale = input$anovaphscale,
-                     cluster_rows = input$anovaphcluster,
-                     cluster_cols = FALSE,
-                     annotation_col = anova()[[2]],
-                     show_rownames = input$anovaphrowname,
-                     clustering_distance_rows = input$anovaphdistance,
-                     clustering_method = input$anovaphclusmethod
-                     )
-        dev.off()
-      } 
-      output$anovaph <- renderPlot(ph)
-      output$anovaphdlbt <- downloadHandler(
-        filename = function(){paste("anovaph_result", userID,".pdf",sep="")},
-        content = function(file){
-          p <- as.ggplot(ph)
-          ggsave(filename = file,plot = p,width = 9,height = 5)
-        }
-      )
+      if(click_counter$anova_count) {
+        if(nrow(anova()[[1]] > 0)) {
+          ph <- pheatmap(anova()[[1]],
+                         scale = input$anovaphscale,
+                         cluster_rows = input$anovaphcluster,
+                         cluster_cols = FALSE,
+                         annotation_col = anova()[[2]],
+                         show_rownames = input$anovaphrowname,
+                         clustering_distance_rows = input$anovaphdistance,
+                         clustering_method = input$anovaphclusmethod
+          )
+          dev.off()
+          output$anovaph <- renderPlot(ph)
+          output$anovaphdlbt <- downloadHandler(
+            filename = function(){paste("anovaph_result", userID,".pdf",sep="")},
+            content = function(file){
+              p <- as.ggplot(ph)
+              ggsave(filename = file,plot = p,width = 9,height = 5)
+            }
+          )
+          output$anovainterph <- renderPlotly(
+            heatmaply(
+              anova()[[1]],
+              scale = input$anovaphscale,
+              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                low = "blue",
+                high = "red"
+              ),
+              Rowv = input$anovaphcluster,
+              Colv = FALSE,
+              hclust_method = input$anovaphclusmethod,
+              distance_method = input$anovaphdistance,
+            )
+          )
+        } 
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the 'Analysis' button first.",
+          type = "info"
+        )
+      }
     }
   )
   
@@ -3454,17 +3919,6 @@ server<-shinyServer(function(input, output, session){
     anova_plot()
   })
   
-  observeEvent(
-    input$limmaphbt, {
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("limmaph"),
-        uiOutput('limmaphdl')
-      ))
-    }
-  )
-  output$limmaphdl <- renderUI({div(downloadButton("limmaphdlbt"), style = "display:flex; justify-content:center; align-item:center;")})
   output$limmaphdlbt <- downloadHandler(
     filename = function(){paste("limmaph_result", userID,".pdf",sep="")},
     content = function(file){
@@ -3495,20 +3949,6 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
-  observeEvent(
-    input$samphbt, {
-      if(nrow(sam()[[3]]) > 0) {
-        showModal(modalDialog(
-          title = "Heatmap",
-          size = "l",
-          plotOutput("samph"),
-          uiOutput('samphdl')
-        ))
-      }
-    }
-  )
-  
-  output$samphdl <- renderUI({div(downloadButton("samphdlbt"), style = "display:flex; justify-content:center; align-item:center;")})
   output$samphdlbt <- downloadHandler(
     
     filename = function(){paste("samph_result", userID,".pdf",sep="")},
@@ -3544,21 +3984,13 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
-  observeEvent(
-    input$anovaphbt, {
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("anovaph"),
-        uiOutput('anovaphdl')
-      ))
-    }
-  )
-  output$anovaphdl <- renderUI({div(downloadButton("anovaphdlbt"), style = "display:flex; justify-content:center; align-item:center;")})
-  
   # Time course
   tc <- eventReactive(
     input$tcanalysis, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3660,6 +4092,10 @@ server<-shinyServer(function(input, output, session){
   # Kinase-substrate enrichment analysis (KSEA)
   kap1 <- eventReactive(
     input$kapanalysisbt1, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       expr_data_frame = data_frame_normalization_with_control_no_pair
@@ -3848,6 +4284,22 @@ server<-shinyServer(function(input, output, session){
           ggsave(filename = file, p,width = 12,height = 12)
         }
       )
+      output$kapstep2plotinter <- renderPlotly(
+        heatmaply(
+          ksea_value_cluster,
+          main = input$kapmain,
+          scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+            low = "blue", 
+            high = "red", 
+            limits = c(-4, 4)
+          ),
+          scale = input$kapscale,
+          # row_dendrogram = TRUE,  
+          Colv = FALSE, 
+          hclust_method = input$kapclusmethod, 
+          distance_method = input$kapdistance,
+        )
+      )
       output$kapstep2df <- renderDataTable(ksea_value_cluster)
       updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
     }
@@ -3874,6 +4326,10 @@ server<-shinyServer(function(input, output, session){
   
   ksea1 <- eventReactive(
     input$kseaanalysisbt1, {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
+      )
       phosphorylation_experiment_design_file <- fileset()[[1]]
       data_frame_normalization_with_control_no_pair <- fileset()[[2]]
       
@@ -3892,11 +4348,26 @@ server<-shinyServer(function(input, output, session){
       group_levels = phosphorylation_groups_labels
       group = factor(group, levels = group_levels)
       
-      dfmean1 <- apply(expr_data_frame1, 1, mean)
-      dfmean2 <- apply(expr_data_frame2, 1, mean)
-      FC <- dfmean2/dfmean1
-      kseafc <- isolate(input$kseafc)
-      result <- expr_data_frame[(FC >= kseafc)|(FC <= 1/kseafc),]
+      if(input$kseapair == TRUE) {
+        result = expr_data_frame1
+        for(sample in colnames(result)){
+          pair = phosphorylation_experiment_design_file[phosphorylation_experiment_design_file$Experiment_Code == sample,]$Pair
+          target_sample = phosphorylation_experiment_design_file[phosphorylation_experiment_design_file$Pair == pair &
+                                                                   phosphorylation_experiment_design_file$Group == input$kseagroup2,]$Experiment_Code
+
+          result[, sample] = expr_data_frame[, sample] / expr_data_frame[, target_sample]
+        }
+        result$ID = expr_data_frame$ID
+        df_without_id <- result[, -ncol(result)]
+        id_col <- result[, ncol(result)]
+        result <- data.frame(ID = id_col, df_without_id)
+      } else {
+        dfmean1 <- apply(expr_data_frame1, 1, mean)
+        dfmean2 <- apply(expr_data_frame2, 1, mean)
+        FC <- dfmean2/dfmean1
+        kseafc <- isolate(input$kseafc)
+        result <- expr_data_frame[(FC >= kseafc)|(FC <= 1/kseafc),]
+      }
       list(result, group)
     }
   )
@@ -3910,16 +4381,25 @@ server<-shinyServer(function(input, output, session){
   
   ksea2 <- eventReactive(input$kseaanalysisbt2,{
     summary_df_list_from_ksea_cluster = get_summary_from_ksea2(ksea1()[[1]], species = input$kseaspecies, log2_label = FALSE, ratio_cutoff = 3) # species参数
-    
     ksea_regulons_activity_df_cluster = summary_df_list_from_ksea_cluster$ksea_regulons_activity_df
-    ksea_id_cluster = as.vector(ksea_regulons_activity_df_cluster[,1])
-    ksea_value_cluster = ksea_regulons_activity_df_cluster[,-1]
+    med <- apply(abs(ksea_regulons_activity_df_cluster[, 2:ncol(ksea_regulons_activity_df_cluster)]), 1, median) # 增加排序方式选项
+    ksea_regulons_activity_df_cluster$median <- med
     
-    annotation_col = data.frame(
-      group =  ksea1()[[2]]
-    )
-    rownames(annotation_col) = colnames(ksea_value_cluster)
+    ksea_regulons_activity_df_cluster_sorted <- ksea_regulons_activity_df_cluster[order(-ksea_regulons_activity_df_cluster$median),]
+    ksea_regulons_activity_df_cluster_sorted <- head(ksea_regulons_activity_df_cluster_sorted, 50)
+    ksea_regulons_activity_df_cluster_sorted$median <- NULL
     
+    ksea_id_cluster = as.vector(ksea_regulons_activity_df_cluster_sorted[,1])
+    ksea_value_cluster = ksea_regulons_activity_df_cluster_sorted[,-1]
+    
+    if(input$kseapair == FALSE) {
+      annotation_col = data.frame(
+        group =  ksea1()[[2]]
+      )
+      rownames(annotation_col) = colnames(ksea_value_cluster)
+    } else {
+      annotation_col = NULL
+    }
     # breaks and colors setting
     breaks_1 = seq(-4, -2, 0.2) 
     colors_1 = colorRampPalette(c('#11264f', '#145b7d'))(length(breaks_1)-1) 
@@ -3954,6 +4434,23 @@ server<-shinyServer(function(input, output, session){
         breaks <- ksea2()[[3]]
         color <- ksea2()[[4]]
         
+        output$kapstep2plottwogroupinter <- renderPlotly(
+          heatmaply(
+            ksea_value_cluster,
+            main = input$kseamain,
+            scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+              low = "blue", 
+              high = "red", 
+              limits = c(-4, 4)
+            ),
+            scale = input$kseascale,
+            # row_dendrogram = TRUE,  
+            Colv = FALSE, 
+            hclust_method = input$kseaclusmethod, 
+            distance_method = input$kseadistance,
+          )
+        )
+        
         if(nrow(ksea_value_cluster) < 37) {
           output$kseastep2plotui <- renderUI({plotOutput("kseastep2plot")})
           ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
@@ -3982,11 +4479,14 @@ server<-shinyServer(function(input, output, session){
                         show_rownames = T,
                         cluster_cols = F,
                         border_color = 'black',
-                        cellwidth = 12, cellheight = 12,
+                        # cellwidth = 12, cellheight = 12,
+                        cellwidth = 3, cellheight = 3,
                         breaks = breaks,
                         color = color,
-                        fontsize_col = 10,
-                        fontsize_row = 10,
+                        # fontsize_col = 10,
+                        # fontsize_row = 10,
+                        fontsize_col = 2,
+                        fontsize_row = 2,
                         legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
                         legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
                         main = input$kseamain)
@@ -4033,6 +4533,13 @@ server<-shinyServer(function(input, output, session){
           dev.off()
           output$kseastep2plotxs <- renderPlot(ph)
         }
+        output$kaptwogroupplotdl <- downloadHandler(
+          filename = function(){paste("kinase_activity_pred", userID,".pdf",sep="")},
+          content = function(file){
+            p <- as.ggplot(ph)
+            ggsave(filename = file, p,width = 12,height = 12)
+          }
+        )
         output$kseastep2df <- renderDataTable(ksea_value_cluster)
         updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
       }
@@ -4043,6 +4550,8 @@ server<-shinyServer(function(input, output, session){
   surplots <- eventReactive(
     input$survivalanalysis, {
       validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
         need(fileset()[[4]],'Please check that the clinical data file is uploaded !')
       )
       Clinical <- fileset()[[4]]
@@ -4101,7 +4610,7 @@ server<-shinyServer(function(input, output, session){
       })
       output$survivalui <- renderUI({
         tagList(
-          selectInput("survivalsig", h5("Select a Psite:"), choices = surplots()[[2]])
+          selectInput("survivalsig", h5("Select a statistically significant Psite:"), choices = surplots()[[2]])
         )
       })
     }
@@ -4109,51 +4618,63 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$survivalplotbt1, {
-      if(length(surplots()[[2]] > 0)) {
+      if ((input$sa_text_input %in% surplots()[[1]]$Feature) | (length(surplots()[[2]] > 0))){
+        if (input$sa_text_input %in% surplots()[[1]]$Feature) {
+          feature <- isolate(input$sa_text_input)
+        } else {
+          feature <- isolate(input$survivalsig)
+        }
         fit_km <- surplots()[[3]]
-      feature <- isolate(input$survivalsig)
-      fit_km[feature] <- as.numeric(surplots()[[4]][feature, ])
+        fit_km[feature] <- as.numeric(surplots()[[4]][feature, ])
       
-      res.cut <- surv_cutpoint(fit_km,
-                               time = colnames(fit_km)[2], event = colnames(fit_km)[1],
-                               variables = feature
-      )
-      
-      res.cat <- surv_categorize(res.cut)
-      res.cat[, 3] <- ifelse(fit_km[feature] > res.cut$cutpoint$cutpoint, "high", "low")
-      colnames(res.cat) <- c("time", "status", "Group")
-      
-      lowcol <- isolate(input$survivallowcol)
-      highcol <- isolate(input$survivalhighcol)
-      pdf(file = paste('tmp/',userID,'/analysis/surv/suv1.pdf',sep=''))#survivalplot1
-      print(plot(res.cut, feature, palette = c(lowcol, highcol)),newpage=F)
-      dev.off()
-      pdf(file = paste('tmp/',userID,'/analysis/surv/suv2.pdf',sep=''))#survivalplot1
-      print(ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
-                       linetype = c("solid", "solid"),
-                       surv.median.line = "hv", surv.scale = "percent",
-                       pval = T, risk.table = T,
-                       conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
-                       risk.table.y.text = T,
-                       palette = c(lowcol, highcol),
-                       xlab = "Survival time"
-      ),newpage=F)
-      dev.off()
-
-      output$survivalplot1 <- renderPlot({
-        plot(res.cut, feature, palette = c(lowcol, highcol))
+        res.cut <- surv_cutpoint(fit_km,
+                                 time = colnames(fit_km)[2], event = colnames(fit_km)[1],
+                                 variables = feature
+        )
         
-      })
-      
-      output$survivalplot2 <- renderPlot({ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
-                                                     linetype = c("solid", "solid"),
-                                                     surv.median.line = "hv", surv.scale = "percent",
-                                                     pval = T, risk.table = T,
-                                                     conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
-                                                     risk.table.y.text = T,
-                                                     palette = c(lowcol, highcol),
-                                                     xlab = "Survival time"
-      )})
+        res.cat <- surv_categorize(res.cut)
+        res.cat[, 3] <- ifelse(fit_km[feature] > res.cut$cutpoint$cutpoint, "high", "low")
+        colnames(res.cat) <- c("time", "status", "Group")
+        
+        lowcol <- isolate(input$survivallowcol)
+        highcol <- isolate(input$survivalhighcol)
+        pdf(file = paste('tmp/',userID,'/analysis/surv/suv1.pdf',sep=''))#survivalplot1
+        print(plot(res.cut, feature, palette = c(lowcol, highcol)),newpage=F)
+        dev.off()
+        pdf(file = paste('tmp/',userID,'/analysis/surv/suv2.pdf',sep=''))#survivalplot1
+        print(ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
+                         linetype = c("solid", "solid"),
+                         surv.median.line = "hv", surv.scale = "percent",
+                         pval = T, risk.table = T,
+                         conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
+                         risk.table.y.text = T,
+                         palette = c(lowcol, highcol),
+                         xlab = "Survival time"
+        ),newpage=F)
+        dev.off()
+  
+        output$survivalplot1 <- renderPlot({
+          plot(res.cut, feature, palette = c(lowcol, highcol))
+          
+        })
+        
+        output$survivalplot2 <- renderPlot({ggsurvplot(do.call(survfit, list(Surv(res.cat[, 1], res.cat[, 2]) ~ Group, data = res.cat)),
+                                                       linetype = c("solid", "solid"),
+                                                       surv.median.line = "hv", surv.scale = "percent",
+                                                       pval = T, risk.table = T,
+                                                       conf.int = T, conf.int.alpha = 0.1, conf.int.style = "ribbon",
+                                                       risk.table.y.text = T,
+                                                       palette = c(lowcol, highcol),
+                                                       xlab = "Survival time"
+        )})
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Error...",
+          text = "Please select an item from the feature column in the right table to input.",
+          type = "error",
+          btn_labels = "OK"
+        )
       }
       
     }
@@ -4178,16 +4699,23 @@ server<-shinyServer(function(input, output, session){
 
   observeEvent(
     input$motifanalysisbt, {
-      if(input$analysisdatatype == 2) {
+      validate(
+        need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
+        need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
+        need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
+      )
+      if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
         ask_confirmation(
           inputId = "myconfirmation",
           title = "Attention...",
-          text = "To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. Do you confirm run?"
+          text = sprintf("The value of the parameter 'fasta type' is set to %s. Please make sure this value is correct, otherwise the program will report an error. 
+                         To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. Do you confirm run?", input$motiffastatype)
         )
       } else {
         ask_confirmation(
           inputId = "myconfirmation",
-          title = "This step will take several hours.",
+          title = sprintf("The value of the parameter 'fasta type' is set to %s. Please make sure this value is correct, otherwise the program will report an error.
+                          This step will take several hours.", input$motiffastatype),
           text = "Do you confirm run? "
         )
       }
@@ -4240,13 +4768,8 @@ server<-shinyServer(function(input, output, session){
         # construct foreground and background
         foreground = as.vector(foreground_df$aligned_seq)
         background = as.vector(background_df$Aligned_Seq)
-        if(input$analysisdatatype == 2) {
-          # if(length(foreground) > 500) {
-          #   # foreground <- foreground[sample(length(foreground), 500)]
-          #   foreground <- head(foreground, 500)
-          # }
+        if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
           foreground <- tail(foreground, 300)
-          # background <- background[sample(length(background), 1000)]
           background <- tail(background, 800)
         }
         motifs_list = mea_based_on_background(foreground, AA_in_protein, background, motifx_pvalue)
@@ -4413,22 +4936,28 @@ server<-shinyServer(function(input, output, session){
                           main = input$motifmain)
           }
           dev.off()
-        }
+          showModal(modalDialog(
+            title = "Heatmap",
+            size = "l",
+            plotOutput("motifenrich2"),
+            div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
+            
+          ))
+          output$motifenrich2 <- renderPlot(ph)
+          output$motifphdl <- downloadHandler(
+            filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
+            content = function(file){
+              ggsave(ph, filename = file,width = 9,height = 9)
+          })
+        } 
+      } else {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "No motif meets the criteria, please reduce the 'matched seqs threshold' parameter.",
+          type = "info"
+        )
       }
-      
-      showModal(modalDialog(
-        title = "Heatmap",
-        size = "l",
-        plotOutput("motifenrich2"),
-        div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
-        
-      ))
-      output$motifenrich2 <- renderPlot(ph)
-      output$motifphdl <- downloadHandler(
-        filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
-        content = function(file){
-          ggsave(ph, filename = file,width = 9,height = 9)
-        })
     }
   )
   
@@ -4498,4 +5027,74 @@ server<-shinyServer(function(input, output, session){
     filename = "motif_kinase_relation.xlsx",
     content = function(file) {file.copy("examplefile/download/motif_kinase_relation.xlsx", file)}
   )
+  
+  ###download###
+  #maxquant
+  output$demomaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
+  
+  output$demomaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})
+  
+  output$usermaxnoproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"), file)})
+  
+  output$usermaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
+  
+  output$usermaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
+  
+  output$demomaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"), file)})
+  
+  output$demomaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  
+  output$usermaxnoproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  
+  output$usermaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  
+  output$usermaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  
+  output$demomaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
+  
+  output$demomaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPrePro.csv"),file)})
+  
+  output$usermaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormBasedProSummary.csv"),file)})
+  
+  output$usermaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PrePro.csv"),file)})
+  
+  # mascot
+  output$viewedmerging_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmergingdroppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmerging1nopro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmerging1_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmerging1droppro_dl <- downloadHandler(filename = function(){paste("merge_df_with_phospho_peptides", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "merge_df_with_phospho_peptides.csv"),file)})
+  
+  output$viewedmapping02_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping02droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping12nopro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping12_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewedmapping12droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
+  
+  output$viewednorm01_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  
+  output$viewednorm01droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  
+  output$viewednorm14_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  
+  output$viewednorm14nopro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  
+  output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  
+  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
+  
+  output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
+  
+  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"),file)})
+  
+  output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
+  
 })
