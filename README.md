@@ -1,9 +1,28 @@
 
-<img src="https://img.shields.io/github/license/liuzan-info/PhosMap"> [![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
+<div align="center">
+  <img src="www/logo.svg" width="200"/>
+  <div>&nbsp;</div>
+  <b>A docker image-based tool to accomplish one-stop interactive analysis of quantitative phosphoproteomics.</b>
+  <div>&nbsp;</div>
+  
+[![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
+<img src="https://img.shields.io/github/license/liuzan-info/PhosMap">
 
-# PhosMap
-A docker image-based tool to accomplish one-stop interactive analysis of quantitative phosphoproteomics.
-<img src="www/main.svg" width = 70%>
+[![R](https://img.shields.io/badge/-R%20package-276DC3?style=flat-square&logo=R&logoColor=white)](https://github.com/ecnuzdd/PhosMap) | 
+[![Web](https://img.shields.io/badge/-Web%20server-FF7139?style=flat-square&logo=Google-Chrome&logoColor=white)](https://bio-inf.shinyapps.io/phosmap/) | 
+[![Docker](https://img.shields.io/badge/-Docker%20image-2496ED?style=flat-square&logo=Docker&logoColor=white)](https://hub.docker.com/r/liuzandh/phosmap/tags)
+
+<a href="https://www.youtube.com/watch?v=KGccNSmjhsk" style="text-decoration:none;">
+  <img src="https://user-images.githubusercontent.com/25839884/218346691-ceb2116a-465a-40af-8424-9f30d2348ca9.png" width="3%" alt="" /></a>
+<img src="https://user-images.githubusercontent.com/25839884/218346358-56cc8e2f-a2b8-487f-9088-32480cceabcf.png" width="3%" alt="" />
+<a href="https://www.bilibili.com/video/BV1zh411F7vJ/" style="text-decoration:none;">
+  <img src="https://user-images.githubusercontent.com/25839884/219026751-d7d14cce-a7c9-4e82-9942-8375fca65b99.png" width="3%" alt="" /></a>
+<img src="https://user-images.githubusercontent.com/25839884/218346358-56cc8e2f-a2b8-487f-9088-32480cceabcf.png" width="3%" alt="" />
+
+</div>
+
+
+
 
 ## Brief Description
 PhosMap supports multiple function modules for full landscape of 
@@ -20,6 +39,8 @@ This server is single-thread and of low-level hardware, we do recommend
 users to analyze the data using the demo server with small data sets. 
 An upgraded hardware is necessary, according to the possible computational
 cost of the data, to reach the potential of PhosMap.
+
+<img src="www/main.svg" width = 70%>
 
 ## How to install
 There are two different ways to launch PhosMap:
@@ -50,7 +71,8 @@ This tool is developed with R, so if you want to run it locally, you may do some
 - [2] **Install RStudio.** You can download RStudio from here: https://www.rstudio.com/.
 - [3] **Download the source code from github.**
 - [4] **Download the necessary data.** Please download "PhosMap_datasets.zip" from module "Download" on https://bio-inf.shinyapps.io/phosmap/. Then unzip this file to phosmap folder like this pic.
-  <img src="www/unzip.jpg" width=30%>
+
+<img src="www/unzip.jpg" width=30%>
 
 - [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf","pcaMethods","impute","rrcovNA","e1071"). 
 
