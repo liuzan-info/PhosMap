@@ -24,7 +24,7 @@
 ## Table of Contents
 - [Brief Description](#brief-description)
 - [How to install](#how-to-install)
-  - [Docker-based installation](installdocker)
+  - [Docker-based installation](#installdocker)
   - [R-based installation](#installr)
 - [How to use](#how-to-use)
 - [Detail of R package "PhosMap"](#rpackage)
