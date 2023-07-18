@@ -12,6 +12,9 @@
 [![Web](https://img.shields.io/badge/-Web%20server-FF7139?style=flat-square&logo=Google-Chrome&logoColor=white)](https://bio-inf.shinyapps.io/phosmap/) | 
 [![Docker](https://img.shields.io/badge/-Docker%20image-2496ED?style=flat-square&logo=Docker&logoColor=white)](https://hub.docker.com/r/liuzandh/phosmap/tags)
 
+[📘Doc for R package](https://github.com/liuzan-info/PhosMap/blob/main/www/package_manual.pdf)
+[📙Doc for Web server and Docker image](https://github.com/liuzan-info/PhosMap/blob/main/www/manual.pdf)
+
 <a href="https://www.youtube.com/watch?v=KGccNSmjhsk" style="text-decoration:none;">
   <img src="https://user-images.githubusercontent.com/25839884/218346691-ceb2116a-465a-40af-8424-9f30d2348ca9.png" width="3%" alt="" /></a>
 <img src="https://user-images.githubusercontent.com/25839884/218346358-56cc8e2f-a2b8-487f-9088-32480cceabcf.png" width="3%" alt="" />
