@@ -1196,6 +1196,16 @@ ui <- renderUI(
               hr(style = "border-color: grey;"),
               conditionalPanel(
                 condition = "input.analysisdatatype == 3",
+                radioGroupButtons(
+                  inputId = "analysisdemodata",
+                  label = "",
+                  choices = c("case1", 
+                              "case2"),
+                  justified = TRUE,
+                  checkIcon = list(
+                    yes = icon("ok", 
+                               lib = "glyphicon"))
+                ),
                 h4("1. Experimental design file: "),
                 actionButton("viewanalysisexamdesign", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
@@ -1205,7 +1215,6 @@ ui <- renderUI(
                 h4("3. Clinical data file[optional]: "),
                 actionButton("viewanalysisexamclin", "view", icon("eye"))
               ),
-              
               
               conditionalPanel(
                 # pipeline
