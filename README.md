@@ -4,7 +4,8 @@
   <div>&nbsp;</div>
   <b>A docker image-based tool to accomplish one-stop interactive analysis of quantitative phosphoproteomics.</b>
   <div>&nbsp;</div>
-  
+
+[![Web Server CD](https://github.com/liuzan-info/PhosMap/actions/workflows/shinyapp.yml/badge.svg)](https://github.com/liuzan-info/PhosMap/actions/workflows/shinyapp.yml)
 [![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
 <img src="https://img.shields.io/github/license/liuzan-info/PhosMap">
 
