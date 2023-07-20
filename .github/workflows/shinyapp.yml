@@ -39,7 +39,7 @@ jobs:
           mv phosmap_online_data PhosMap_datasets
       - 
         name: Deploy
-        uses: liuzan-info/shinyapps-deploy-github-action@v1.0.3
+        uses: liuzan-info/shinyapps-deploy-github-action@v1.0.4
         with:
           # account and application name (https://<accountName>.shinyapps.io/<appName>)
           appName: PhosMap
@@ -48,3 +48,4 @@ jobs:
           # token and secret obtained from https://www.shinyapps.io/admin/#/tokens
           accountToken: ${{ secrets.SHINYAPPS_TOKEN }}
           accountSecret: ${{ secrets.SHINYAPPS_SECRET }}
+          githubPAT: ${{ secrets.PAT_GITHUB }}
