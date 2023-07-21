@@ -1,13 +1,11 @@
+online = TRUE
+
 #
 # This is the server logic of a Shiny web application. You can run the
 # application by clicking 'Run App' above.
 #
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
-#source functions
+# Source functions
 path1 = "./appearance/"
 sapply(list.files(path1), function(x){source(paste0(path1, x))})
 path2 = "./backend/"
@@ -191,6 +189,18 @@ server<-shinyServer(function(input, output, session){
       output$viewedfile2 <- renderDataTable({
         datatable(designfile(), options = list(pageLength = 10))
       })
+      if(online) {
+        data <- designfile()
+        if(nrow(data)>9){
+          sendSweetAlert(
+            session = session,
+            title = "Attention...",
+            text = "The sample size is too large. It is recommended to use the local version.",
+            type = "info",
+            btn_labels = "OK"
+          )
+        }
+      }
     }
   )
 
@@ -1039,146 +1049,155 @@ server<-shinyServer(function(input, output, session){
 
   observeEvent(
     input$parserbt01,{
-      mascot_txt_dir <- paste0(mascotdemopreloc, "demomascottxt_data")
-      # Convert the suffix, convert again after extraction for reading
-      file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
-      file2 = list.files(file1, full.names = T)
-      for (f in file2){
-        tmpname <- substring(f, 0, nchar(f)-4)
-        newname <- sub("$", ".xml", tmpname)
-        file.rename(f, newname)
-      }
-      if(dir.exists(mascot_txt_dir)){
-        unlink(mascot_txt_dir, recursive = T)
-      }
-      dir.create(mascot_txt_dir)
-      
-      withProgress(message = 'Step1:Paser', style = "notification", detail = "processing...",
-                   value = 0,max = 2,{
-                     for(i in 1:2){
-                       if(i == 1){
-                         extract_psites_score(phosphorylation_exp_design_info_file_path, mascot_xml_dir, mascot_txt_dir)
-                         
-                         file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
-                         file2 = list.files(file1, full.names = T)
-                         for (f in file2){
-                           tmpname <- substring(f, 0, nchar(f)-4)
-                           newname <- sub("$", ".txt", tmpname)
-                           file.rename(f, newname)
-                         }
-                       }
-                       if(i == 2){
-                         withProgress(message = "Generating CSV files of phosphorylation sites with confidence score", style = "notification", detail = "This may take a while...", value = 0, {
-                           BASE_DIR <- getwd()
-                           psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
-                           if(dir.exists(psites_score_dir)){
-                             unlink(psites_score_dir, recursive = T)
-                           }
-                           dir.create(psites_score_dir)
-                           firmiana_peptide_dir <- phosphorylation_peptide_dir
-                           mascot_txt_dir_paths <- list.dirs(mascot_txt_dir)
-                           mascot_txt_dir_paths <- mascot_txt_dir_paths[-1]
-                           mascot_txt_dir_paths_expNames <- list.files(mascot_txt_dir)
+      if(online) {
+        sendSweetAlert(
+          session = session,
+          title = "Attention...",
+          text = "Due to limited hardware resources, please use the local version.",
+          type = "info",
+          btn_labels = "OK"
+        )
+      } else {
+        mascot_txt_dir <- paste0(mascotdemopreloc, "demomascottxt_data")
+        # Convert the suffix, convert again after extraction for reading
+        file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
+        file2 = list.files(file1, full.names = T)
+        for (f in file2){
+          tmpname <- substring(f, 0, nchar(f)-4)
+          newname <- sub("$", ".xml", tmpname)
+          file.rename(f, newname)
+        }
+        if(dir.exists(mascot_txt_dir)){
+          unlink(mascot_txt_dir, recursive = T)
+        }
+        dir.create(mascot_txt_dir)
+        
+        withProgress(message = 'Step1:Paser', style = "notification", detail = "processing...",
+                     value = 0,max = 2,{
+                       for(i in 1:2){
+                         if(i == 1){
+                           extract_psites_score(phosphorylation_exp_design_info_file_path, mascot_xml_dir, mascot_txt_dir)
                            
-                           firmiana_txt_file_names <- list.files(firmiana_peptide_dir)
-                           firmiana_txt_file_names_expNames <- apply(data.frame(firmiana_txt_file_names), 1, function(x){
-                             x <- strsplit(x, split = '_')[[1]]
-                             x[1]
+                           file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
+                           file2 = list.files(file1, full.names = T)
+                           for (f in file2){
+                             tmpname <- substring(f, 0, nchar(f)-4)
+                             newname <- sub("$", ".txt", tmpname)
+                             file.rename(f, newname)
+                           }
+                         }
+                         if(i == 2){
+                           withProgress(message = "Generating CSV files of phosphorylation sites with confidence score", style = "notification", detail = "This may take a while...", value = 0, {
+                             BASE_DIR <- getwd()
+                             psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
+                             if(dir.exists(psites_score_dir)){
+                               unlink(psites_score_dir, recursive = T)
+                             }
+                             dir.create(psites_score_dir)
+                             firmiana_peptide_dir <- phosphorylation_peptide_dir
+                             mascot_txt_dir_paths <- list.dirs(mascot_txt_dir)
+                             mascot_txt_dir_paths <- mascot_txt_dir_paths[-1]
+                             mascot_txt_dir_paths_expNames <- list.files(mascot_txt_dir)
+                             
+                             firmiana_txt_file_names <- list.files(firmiana_peptide_dir)
+                             firmiana_txt_file_names_expNames <- apply(data.frame(firmiana_txt_file_names), 1, function(x){
+                               x <- strsplit(x, split = '_')[[1]]
+                               x[1]
+                             })
+                             
+                             mascot_txt_dir_paths_len <- length(mascot_txt_dir_paths)
+                             cat('\n Total file: ', mascot_txt_dir_paths_len)
+                             cat('\n It will take a little while.')
+                             for(i in seq_len(mascot_txt_dir_paths_len)){
+                               mascot_txt_dir_path <- mascot_txt_dir_paths[i]
+                               mascot_txt_dir_path_expName <- mascot_txt_dir_paths_expNames[i]
+                               mascot_txt_dir_path_expName_path <- list.files(mascot_txt_dir_path)
+                               mascot_txt_dir_path_expName_path <- normalizePath(
+                                 file.path(mascot_txt_dir_path, mascot_txt_dir_path_expName_path)
+                               )
+                               
+                               match_index <- match(mascot_txt_dir_path_expName, firmiana_txt_file_names_expNames)
+                               firmiana_txt_file_name <- firmiana_txt_file_names[match_index]
+                               firmiana_peptide_dir_path_expName_path <- normalizePath(
+                                 file.path(firmiana_peptide_dir, firmiana_txt_file_name)
+                               )
+                               
+                               outputName <- normalizePath(
+                                 file.path(psites_score_dir, paste(mascot_txt_dir_path_expName, '_psites_score.csv', sep = '')),
+                                 mustWork = FALSE
+                               )
+                               expName <- mascot_txt_dir_path_expName
+                               write_csv_pep_seq_conf(expName, outputName, mascot_txt_dir_path_expName_path, firmiana_peptide_dir_path_expName_path)
+                               
+                               cat('\n Completed file: ', i, '/', mascot_txt_dir_paths_len)
+                               incProgress(1/seq_len(mascot_txt_dir_paths_len), detail = paste0('\n Completed file: ', i, '/', mascot_txt_dir_paths_len))
+                             }
                            })
                            
-                           mascot_txt_dir_paths_len <- length(mascot_txt_dir_paths)
-                           cat('\n Total file: ', mascot_txt_dir_paths_len)
-                           cat('\n It will take a little while.')
-                           for(i in seq_len(mascot_txt_dir_paths_len)){
-                             mascot_txt_dir_path <- mascot_txt_dir_paths[i]
-                             mascot_txt_dir_path_expName <- mascot_txt_dir_paths_expNames[i]
-                             mascot_txt_dir_path_expName_path <- list.files(mascot_txt_dir_path)
-                             mascot_txt_dir_path_expName_path <- normalizePath(
-                               file.path(mascot_txt_dir_path, mascot_txt_dir_path_expName_path)
+                           
+                           
+                           output$demomascotparserui <- renderUI({
+                             tagList(
+                               selectInput(
+                                 "demomascotparserresultid",
+                                 NULL,
+                                 choices = get_target_name(psites_score_dir, 1)
+                               ),
+                               dataTableOutput("demomascotparserresultdt")
                              )
-                             
-                             match_index <- match(mascot_txt_dir_path_expName, firmiana_txt_file_names_expNames)
-                             firmiana_txt_file_name <- firmiana_txt_file_names[match_index]
-                             firmiana_peptide_dir_path_expName_path <- normalizePath(
-                               file.path(firmiana_peptide_dir, firmiana_txt_file_name)
+                           })
+                           output$demomascotdropproparserui <- renderUI({
+                             tagList(
+                               selectInput(
+                                 "demomascotdropproparserresultid",
+                                 NULL,
+                                 choices = get_target_name(psites_score_dir, 1)
+                               ),
+                               dataTableOutput("demomascotdropproparserresultdt")
                              )
-                             
-                             outputName <- normalizePath(
-                               file.path(psites_score_dir, paste(mascot_txt_dir_path_expName, '_psites_score.csv', sep = '')),
-                               mustWork = FALSE
-                             )
-                             expName <- mascot_txt_dir_path_expName
-                             write_csv_pep_seq_conf(expName, outputName, mascot_txt_dir_path_expName_path, firmiana_peptide_dir_path_expName_path)
-                             
-                             cat('\n Completed file: ', i, '/', mascot_txt_dir_paths_len)
-                             incProgress(1/seq_len(mascot_txt_dir_paths_len), detail = paste0('\n Completed file: ', i, '/', mascot_txt_dir_paths_len))
-                           }
-                         })
-                         
-                         
-                         
-                         output$demomascotparserui <- renderUI({
-                           tagList(
-                             selectInput(
-                               "demomascotparserresultid",
-                               NULL,
-                               choices = get_target_name(psites_score_dir, 1)
-                             ),
-                             dataTableOutput("demomascotparserresultdt")
-                           )
-                         })
-                         output$demomascotdropproparserui <- renderUI({
-                           tagList(
-                             selectInput(
-                               "demomascotdropproparserresultid",
-                               NULL,
-                               choices = get_target_name(psites_score_dir, 1)
-                             ),
-                             dataTableOutput("demomascotdropproparserresultdt")
-                           )
-                         })
+                           })
+                         }
+                         incProgress(1, detail = "")
                        }
-                       incProgress(1, detail = "")
-                     }
-                   })
-      updateTabsetPanel(session, "resultnav", selected = "demomascotstep1val")
-      updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep1val")
-      
-      observeEvent(
-        input$demomascotparserresultid,{
-          output$demomascotparserresultdt <- renderDataTable({
-            id <- input$demomascotparserresultid
-            psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
-            # Determine the file path based on the relative index position
-            index = which(get_target_name(psites_score_dir, 1) == id)
-            path <- list.files(psites_score_dir, full.names = T)[index]
-            dataread <- read.csv(path, header = T)
-          })
+                     })
+        updateTabsetPanel(session, "resultnav", selected = "demomascotstep1val")
+        updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep1val")
+        
+        observeEvent(
+          input$demomascotparserresultid,{
+            output$demomascotparserresultdt <- renderDataTable({
+              id <- input$demomascotparserresultid
+              psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
+              # Determine the file path based on the relative index position
+              index = which(get_target_name(psites_score_dir, 1) == id)
+              path <- list.files(psites_score_dir, full.names = T)[index]
+              dataread <- read.csv(path, header = T)
+            })
+          }
+        )
+        observeEvent(
+          input$demomascotdropproparserresultid,{
+            output$demomascotdropproparserresultdt <- renderDataTable({
+              id <- input$demomascotdropproparserresultid
+              psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
+              # Determine the file path based on the relative index position
+              index = which(get_target_name(psites_score_dir, 1) == id)
+              path <- list.files(psites_score_dir, full.names = T)[index]
+              dataread <- read.csv(path, header = T)
+            })
+          }
+        )
+        updateActionButton(session, "parserbt01", icon = icon("rotate-right"))
+        updateActionButton(session, "mergingbt0", icon = icon("play"))
+        updateActionButton(session, "mappingbt01", icon = icon("play"))
+        updateActionButton(session, "normalizationbt01", icon = icon("play"))
+        updateActionButton(session, "normalizationbt02", icon = icon("play"))
+        if(input$useprocheck1 == 1) {
+          updateProgressBar(session = session, id = "preprobar", value = 20)
+        } else {
+          updateProgressBar(session = session, id = "preprobar", value = 25)
         }
-      )
-      observeEvent(
-        input$demomascotdropproparserresultid,{
-          output$demomascotdropproparserresultdt <- renderDataTable({
-            id <- input$demomascotdropproparserresultid
-            psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
-            # Determine the file path based on the relative index position
-            index = which(get_target_name(psites_score_dir, 1) == id)
-            path <- list.files(psites_score_dir, full.names = T)[index]
-            dataread <- read.csv(path, header = T)
-          })
-        }
-      )
-      updateActionButton(session, "parserbt01", icon = icon("rotate-right"))
-      updateActionButton(session, "mergingbt0", icon = icon("play"))
-      updateActionButton(session, "mappingbt01", icon = icon("play"))
-      updateActionButton(session, "normalizationbt01", icon = icon("play"))
-      updateActionButton(session, "normalizationbt02", icon = icon("play"))
-      if(input$useprocheck1 == 1) {
-        updateProgressBar(session = session, id = "preprobar", value = 20)
-      } else {
-        updateProgressBar(session = session, id = "preprobar", value = 25)
       }
-      
     }
   )
   
@@ -2779,7 +2798,30 @@ server<-shinyServer(function(input, output, session){
   #######################################
   #######     analysis tools      #######
   #######################################
-  # analysis data upload
+  # Disable some tools for case2
+  observeEvent(c(input$analysisdatatype, input$analysisdemodata),{
+    if((input$analysisdatatype == 3) & (input$analysisdemodata == 'case2')) {
+      disable("tcanalysis")
+      disable("kapanalysisbt1")
+      disable("motifanalysisbt")
+      disable("motifseqdownload")
+      sendSweetAlert(
+        session = session,
+        title = "Tip",
+        text = HTML("Due to the fact that there are only <u>two sample groups</u> in the data 
+        and the 'Phosphorylation data frame' does <u>not contain sequence information</u>, 
+        <br><span style='color:red'>some of the tools have been disabled</span>."),
+        type = "info",
+        html = TRUE
+      )
+    } else {
+      enable("tcanalysis")
+      enable("kapanalysisbt1")
+      enable("motifanalysisbt")
+      enable("motifseqdownload")
+    }
+  })
+  # Analysis data upload
   analysisouts <- reactive({
     if(input$analysisdatatype==3){
       message <- "The example data is loaded"
@@ -2791,10 +2833,6 @@ server<-shinyServer(function(input, output, session){
         designfile = "examplefile/analysistools/case2/phosphorylation_exp_design_info_with_pair.txt"
         clinicalfile = "examplefile/analysistools/case2/clinical.csv"
         summarydf = "examplefile/analysistools/case2/phosphorylation.csv"
-        disable("tcanalysis")
-        disable("kapanalysisbt1")
-        disable("motifanalysisbt")
-        disable("motifseqdownload")
       }
       
       target1 <- read.csv(designfile, sep = "\t")
@@ -2825,7 +2863,7 @@ server<-shinyServer(function(input, output, session){
           output$viewedfileanalysis <- renderDataTable(target4)
         }
       )
-    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==2){ # pipe、案例数据、mascot
+    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==2){ # pipe、demo、mascot
       if(input$useprocheck1==1) {
         file1 = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv")
       } else {
@@ -2960,7 +2998,7 @@ server<-shinyServer(function(input, output, session){
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
-    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==1){# pipe、example、maxquant
+    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==1){# pipe、demo、maxquant
       if(input$maxuseprocheck1==1) {
         file1 = paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv")
       } else {
@@ -3106,7 +3144,14 @@ server<-shinyServer(function(input, output, session){
   })
   
   output$htmlanalysis <- renderUI({
-    wellPanel(analysisouts()[1], class = "warning")
+    string  <- analysisouts()[[1]]
+    matches <- gregexpr("(?<=\\[)[^\\[\\]]+(?=\\])", string, perl = TRUE)
+    result <- regmatches(string, matches)
+    for (i in seq_along(result[[1]])) {
+      html <- paste0("<span style='color:red'>", result[[1]][i], "</span>")
+      string <- gsub(result[[1]][i], html, string)
+    }
+    wellPanel(HTML(string), class = "warning")
   })
   
   # display uploadded designfile
@@ -3125,6 +3170,18 @@ server<-shinyServer(function(input, output, session){
       output$viewedfileanalysisuiuser <- renderUI(h4("1. Experimental design file :"))
       output$viewanalysisyourdesign <- renderUI({actionButton("viewanalysisyourdesignbt", "view")})
       output$viewedfileanalysisuser <- renderDataTable({designfile_analysis()})
+      if(online) {
+        data <- designfile_analysis()
+        if(nrow(data)>39){
+          sendSweetAlert(
+            session = session,
+            title = "Attention...",
+            text = "The sample size is too large. It is recommended to use the local version.",
+            type = "info",
+            btn_labels = "OK"
+          )
+        }
+      }
     }
   )
   
@@ -3192,11 +3249,16 @@ server<-shinyServer(function(input, output, session){
   fileset <- reactive({
     if(input$analysisdatatype == 1){
       summarydf <- profilingfile_analysis()
-      target2 <- summarydf[, c(-2, -3, -4)]
-      colnames(target2)[1] <- "ID"
-      target3 <- summarydf[, -1]
-      # avoid isoform
-      target2 <- target2[!duplicated(target2$ID), ]
+      if(!is.null(summarydf)) {
+        target2 <- summarydf[, c(-2, -3, -4)]
+        colnames(target2)[1] <- "ID"
+        target3 <- summarydf[, -1]
+        # avoid isoform
+        target2 <- target2[!duplicated(target2$ID), ]
+      } else {
+        target2 <- NULL
+        target3 <- NULL
+      }
       dflist <- list(designfile_analysis(), target2, target3, clinicalfile_analysis())
       dflist
     }else{
@@ -4334,19 +4396,6 @@ server<-shinyServer(function(input, output, session){
     )
   })
   
-  # # Disable pair mode when "Pair" item is not in design file
-  # observe({
-  #   # 使用validate()和need()函数验证fileset()是否为空
-  #   validate(
-  #     need(fileset(), "请先上传文件")
-  #   )
-  #   # 检查数据框中是否存在名为Pair的列，以及该列是否为空
-  #   if (!("Pair" %in% names(fileset()[[1]])) || all(is.na(fileset()[[1]]$Pair) | fileset()[[1]]$Pair == "")) {
-  #     # 如果不存在该列或该列为空，则禁用名为kseapair的控件
-  #     disable("kseapair")
-  #   }
-  # })
-  # 
   ksea1 <- eventReactive(
     input$kseaanalysisbt1, {
       validate(
@@ -4742,20 +4791,38 @@ server<-shinyServer(function(input, output, session){
         need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !'),
         need(fileset()[[3]],'Please check that the motif analysis file is uploaded !')
       )
-      if(input$analysisdatatype == 3 | (input$analysisdatatype == 2 & input$loaddatatype == TRUE)) {
+      if(input$analysisdatatype == 3 | ((input$analysisdatatype == 2) & (input$loaddatatype == TRUE))) {
+        if(input$analysisdatatype == 3) {
+          updateSelectInput(session, "motiffastatype", selected = "refseq")
+        } else if(input$softwaretype == 1) {
+          updateSelectInput(session, "motiffastatype", selected = "uniprot")
+        } else if(input$softwaretype == 2) {
+          updateSelectInput(session, "motiffastatype", selected = "refseq")
+        }
         ask_confirmation(
           inputId = "myconfirmation",
           title = "Attention...",
-          text = sprintf("The value of the parameter 'fasta type' is set to %s. Please make sure this value is correct, otherwise the program will report an error. 
-                         To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. Do you confirm run?", input$motiffastatype)
+          text = HTML(sprintf("The value of the parameter <u>'fasta type'</u> is set to <span style='color:red'>%s</span>. Please make sure this value is correct, otherwise the program will report an error. 
+                         <br>To quickly present the case data, we sampled the original data to obtain smaller background data and foreground data. <br>Do you confirm run?", input$motiffastatype)),
+          html = TRUE
         )
       } else {
-        ask_confirmation(
-          inputId = "myconfirmation",
-          title = sprintf("The value of the parameter 'fasta type' is set to %s. Please make sure this value is correct, otherwise the program will report an error.
-                          This step will take several hours.", input$motiffastatype),
-          text = "Do you confirm run? "
-        )
+        if(online) {
+          sendSweetAlert(
+            session = session,
+            title = "Attention...",
+            text = "Due to limited hardware resources, please use the local version.",
+            type = "info",
+            btn_labels = "OK"
+          )
+        } else {
+          ask_confirmation(
+            inputId = "myconfirmation",
+            title = HTML(sprintf("The value of the parameter <u>'fasta type'</u> is set to <span style='color:red'>%s</span>. Please make sure this value is correct, otherwise the program will report an error.
+                            <br>This step will take several hours.", input$motiffastatype)),
+            text = "Do you confirm run? "
+          )
+        }
       }
     }
   )

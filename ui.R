@@ -1964,7 +1964,7 @@ ui <- renderUI(
                 column(6, numericInput("motifpvalue", h5("pvalue threshold:"), 0.01, max = 0.05, min = 0.0000001, step = 0.0000001)),
                 column(12, div(
                   dropdownButton(
-                    h5("using rmotifx algorithm"),
+                    h5("Using motif-x algorithm"),
                     actionButton("motifanalysisbt", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton"),
                     br(),
                     h5("There are many algorithms available for motif analysis, such as STREME. Depending on your specific needs and data characteristics, you may choose to explore other algorithms. To meet this demand, we provide the currently matched motif-centered sequences."),
@@ -2169,10 +2169,6 @@ ui <- renderUI(
         hr(),
         # h4("4. Motif-kinase relation table:"),
         # downloadButton("dlmotifkinase", "motif-kinase"),
-      ),
-      tabPanel(
-        "Test",
-        # plotlyOutput("limmainterph")
       ),
       nav_item(a(target="_blank",  href="https://github.com/liuzan-info/PhosMap", icon("github"))),
       collapsible = TRUE
