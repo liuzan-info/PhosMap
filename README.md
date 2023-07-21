@@ -33,6 +33,8 @@
 - [Detail of R package "PhosMap"](#rpackage)
 - [Friendly suggestion](#suggestion)
 - [Reporting issues](#issues)
+- [Contributing](#contributing)
+- [Citation](#citation)
 
 <p id="brief-description"></p>
 
@@ -53,7 +55,9 @@ users to analyze the data using the demo server with small data sets.
 An upgraded hardware is necessary, according to the possible computational
 cost of the data, to reach the potential of PhosMap.
 
-<img src="www/main.svg" width = 70%>
+<div align="center">
+  <img src="www/main.svg" width = 70%>
+</div>
 
 <p id="how-to-install"></p>
 
@@ -74,14 +78,14 @@ Create a docker container containing PhosMap:
 ```linux
 docker run  -p HostPort:3838 liuzandh/phosmap:1.0.0
 ```
-Then, you can enter PhosMap by visiting `HostIP:HostPort/PhosMap`.
+Then, you can enter PhosMap by visiting `HostIP:HostPort`.
 
 For example: HostPort could be set to 8083. This parameter can be changed according to user needs. 
 such as,
 ```linux
 docker run -p 8083:3838 liuzandh/phosmap:1.0.0
 ```
-Next, open `127.0.0.1:8083/PhosMap` in the local browser or `remotely access ip:8083/PhosMap` (you should ensure that the machine can be accessed remotely).
+Next, open `127.0.0.1:8083` in the local browser or `remotely access ip:8083` (you should ensure that the machine can be accessed remotely).
 
 <p id="installr"></p>
 
@@ -91,11 +95,11 @@ This tool is developed with R, so if you want to run it locally, you may do some
 - [1] **Install R.** You can download R from here: https://www.r-project.org/.
 - [2] **Install RStudio.** You can download RStudio from here: https://www.rstudio.com/.
 - [3] **Download the source code from github.**
-- [4] **Download the necessary data.** Please download "PhosMap_datasets.zip" from module "Download" on https://bio-inf.shinyapps.io/phosmap/. Then unzip this file to phosmap folder like this pic.
+- [4] **Download the necessary data.**
+  <img src="www/unzip.jpg" width=18% align="right">
+  Please download "PhosMap_datasets.zip" from https://github.com/liuzan-info/PhosMap_datasets. Using 'git clone' is recommended. If you are not familiar with Git or experience network issues, you may download from <a href="https://pan.baidu.com/s/1o3CVRjvCIHnqfY0Bh9X-qw?pwd=7d2k" target="_blank">here</a> instead.  Then unzip this file to phosmap folder like this pic.
 
-<img src="www/unzip.jpg" width=30%>
-
-- [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf","pcaMethods","impute","rrcovNA","e1071"). 
+- [5] **Check packages.** After installing R and RStudio, you should check whether you have installed these packages ("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","readr","dplyr","DT","png","svglite","ggplotify","bslib","ksea","rmotifx","PhosMap","qpdf","pcaMethods","impute","rrcovNA","e1071","heatmaply"). 
 
   You can run the codes below to install them:
   ```linux
@@ -103,7 +107,7 @@ This tool is developed with R, so if you want to run it locally, you may do some
 
   BiocManager::install(c("pcaMethods", "impute"))
 
-  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071"))
+  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply"))
 
   install.packages('devtools')
   require(devtools)
@@ -134,3 +138,16 @@ https://github.com/ecnuzdd/PhosMap
 
 ## Reporting issues
 You could push an issue on this github if you have any problems.
+
+<p id="contributing"></p>
+
+## Contributing
+We welcome community contributions, especially improvements to documentation. We appreciate your valuable contributions! Please feel free to submit a pull request, and we will respond promptly to review and merge it.
+
+<p id="citation"></p>
+
+## Citation
+If you find this project useful in your research, please consider cite:
+```
+Forthcoming...
+```
