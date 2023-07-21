@@ -5073,6 +5073,17 @@ server<-shinyServer(function(input, output, session){
     })
   
   #######################################
+  #######        Tutorial         #######
+  #######################################
+  output$dockermanual <- renderUI({
+    readme <- readLines("README.md")
+    md_start <- grep("^### 1\\. Docker-based installation", readme)
+    md_end <- grep("^### 2\\. R-based installation", readme)
+    md_section <- paste(readme[(md_start + 1) : (md_end - 1)], collapse = "\n")
+    markdown(md_section)
+  })
+  
+  #######################################
   #######    FAQ and Download     #######
   #######################################
   output$designtemplate <- downloadHandler(
@@ -5082,11 +5093,6 @@ server<-shinyServer(function(input, output, session){
   output$clinicaltemplate <- downloadHandler(
     filename = "clinical_file_template.csv",
     content = function(file) {file.copy("examplefile/analysistools/Clinical_for_Demo.csv", file)}
-  )
-
-  output$dldatasets <- downloadHandler(
-    filename = "PhosMap_datasets.zip",
-    content = function(file) {file.copy("PhosMap_datasets.zip", file)}
   )
 
   output$dlphosdesign <- downloadHandler(
@@ -5124,10 +5130,10 @@ server<-shinyServer(function(input, output, session){
     filename = "anaysis_demo.zip",
     content = function(file) {file.copy("examplefile/download/anaysis_demo.zip", file)}
   )
-  output$dlanalysisexamplefirmiana <- downloadHandler(
-    filename = "firmiana_mascot_39sample.zip",
-    content = function(file) {file.copy("mascot_39sample.zip", file)}
-  )
+  # output$dlanalysisexamplefirmiana <- downloadHandler(
+  #   filename = "firmiana_mascot_39sample.zip",
+  #   content = function(file) {file.copy("mascot_39sample.zip", file)}
+  # )
   output$dlmotifkinase <- downloadHandler(
     filename = "motif_kinase_relation.xlsx",
     content = function(file) {file.copy("examplefile/download/motif_kinase_relation.xlsx", file)}
