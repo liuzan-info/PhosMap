@@ -1196,6 +1196,16 @@ ui <- renderUI(
               hr(style = "border-color: grey;"),
               conditionalPanel(
                 condition = "input.analysisdatatype == 3",
+                radioGroupButtons(
+                  inputId = "analysisdemodata",
+                  label = "",
+                  choices = c("case1", 
+                              "case2"),
+                  justified = TRUE,
+                  checkIcon = list(
+                    yes = icon("ok", 
+                               lib = "glyphicon"))
+                ),
                 h4("1. Experimental design file: "),
                 actionButton("viewanalysisexamdesign", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
@@ -1205,7 +1215,6 @@ ui <- renderUI(
                 h4("3. Clinical data file[optional]: "),
                 actionButton("viewanalysisexamclin", "view", icon("eye"))
               ),
-              
               
               conditionalPanel(
                 # pipeline
@@ -1955,7 +1964,7 @@ ui <- renderUI(
                 column(6, numericInput("motifpvalue", h5("pvalue threshold:"), 0.01, max = 0.05, min = 0.0000001, step = 0.0000001)),
                 column(12, div(
                   dropdownButton(
-                    h5("using rmotifx algorithm"),
+                    h5("Using motif-x algorithm"),
                     actionButton("motifanalysisbt", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton"),
                     br(),
                     h5("There are many algorithms available for motif analysis, such as STREME. Depending on your specific needs and data characteristics, you may choose to explore other algorithms. To meet this demand, we provide the currently matched motif-centered sequences."),
@@ -2087,7 +2096,7 @@ ui <- renderUI(
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Docker'",
-          column(10, includeMarkdown("www/docker_manual.md")),
+          column(10, uiOutput("dockermanual"))
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'R Package'",
@@ -2138,10 +2147,7 @@ ui <- renderUI(
         "Download",
         h2("Download", style="align: center;"),
         hr(style = "border-color: grey;"),
-        h4("1. PhosMap_datasets.zip for local version:"),
-        downloadButton("dldatasets", "PhosMap_datasets.zip"),
-        hr(),
-        h4("2. 'Preprocessing' example data:"),
+        h4("1. 'Preprocessing' example data:"),
         h5("Shared design file:"),
         downloadButton("dlphosdesign", "experimental design file"),
         downloadButton("dlprodesign", "proteomics experimental design file"),
@@ -2153,17 +2159,13 @@ ui <- renderUI(
         downloadButton("masexampledl2", "Phosphoproteomics peptide file"),
         downloadButton("masexampledl3", "Profiling file"),
         hr(),
-        h4("3. 'Analysis' example data:"),
+        h4("2. 'Analysis' example data:"),
         downloadButton("dlanalysisexample", "analysis data"),
-        h5("The data was obtained by processing the following 39 samples data."),
-        downloadButton("dlanalysisexamplefirmiana", "firmiana data"),
-        hr(),
+        # h5("The data was obtained by processing the following 39 samples data."),
+        # downloadButton("dlanalysisexamplefirmiana", "firmiana data"),
+        # hr(),
         # h4("4. Motif-kinase relation table:"),
         # downloadButton("dlmotifkinase", "motif-kinase"),
-      ),
-      tabPanel(
-        "Test",
-        # plotlyOutput("limmainterph")
       ),
       nav_item(a(target="_blank",  href="https://github.com/liuzan-info/PhosMap", icon("github"))),
       collapsible = TRUE
