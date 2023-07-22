@@ -34,7 +34,7 @@
 - [Detail of R package "PhosMap"](#rpackage)
 - [Friendly suggestion](#suggestion)
 - [Reporting issues](#issues)
-- [Contributing](#contributing)
+- [Contributing](#contributing)🥰
 - [Citation](#citation)
 
 <p id="brief-description"></p>
@@ -142,8 +142,10 @@ You could push an issue on this github if you have any problems.
 
 <p id="contributing"></p>
 
-## Contributing
-We welcome community contributions, especially improvements to documentation. We appreciate your valuable contributions! Please feel free to submit a pull request, and we will respond promptly to review and merge it.
+## Contributing 
+The data input/output (IO) stream adhering to the PhosMap standard ensures the scalability of the functionality. Although we have already included well-established phosphoproteomics methods, there are still many algorithms being continuously developed, and therefore, we appreciate your valuable contributions! 
+
+Please feel free to submit a pull request, and we will respond promptly to review and merge it.
 
 <p id="citation"></p>
 
