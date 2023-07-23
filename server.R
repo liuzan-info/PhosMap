@@ -3494,32 +3494,24 @@ server<-shinyServer(function(input, output, session){
       ylab <- paste("PC2 (", PC2, "%)", sep = "")
       if(input$pcamean == TRUE) {
         group_colors <- grDevices::rainbow(length(merged_data$Sample))
-        p <- ggplot(merged_data, aes(x = PC1, y = PC2, color = Sample)) +
-          geom_point(size = 1, alpha = 0.8) +
-          scale_color_manual(values = group_colors) +
-          theme_bw() +
-          theme(panel.grid = element_blank(),
-                legend.box.background = element_rect(colour = "black")) +
-          labs(title = input$pcamain,
-               x = xlab,
-               y = ylab,
-               color = input$pcalegend)
-        ggsave(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''), p, height = 7, width = 7) 
-      }else{
+        color = "Sample"
+      } else {
         group_levels <- levels(factor(merged_data$Group))
         group_colors <- grDevices::rainbow(length(group_levels))
-        p <- ggplot(merged_data, aes(x = PC1, y = PC2, color = Group)) +
-          geom_point(size = 1, alpha = 0.8) +
-          scale_color_manual(values = group_colors) +
-          theme_bw() +
-          theme(panel.grid = element_blank(),
-                legend.box.background = element_rect(colour = "black")) +
-          labs(title = input$pcamain,
-               x = xlab,
-               y = ylab,
-               color = input$pcalegend)
-        ggsave(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''), p, height = 7, width = 7) 
+        color = "Group"
       }
+      p <- ggplot(merged_data, aes_string(x = "PC1", y = "PC2", color = color)) +
+        geom_point(size = 1, alpha = 0.8) +
+        scale_color_manual(values = group_colors) +
+        theme_bw() +
+        theme(panel.grid = element_blank(),
+              legend.box.background = element_rect(colour = "black"),
+              plot.title = element_text(hjust = 0.5, face = "bold")) +
+        labs(title = input$pcamain,
+             x = xlab,
+             y = ylab,
+             color = input$pcalegend)
+      ggsave(paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep=''), p, height = 7, width = 7) 
       
       pdf_combine(c(paste('tmp/',userID,'/analysis/pca/pca1.pdf',sep=''),paste('tmp/',userID,'/analysis/pca/pca2.pdf',sep='')),
                   output = paste('tmp/',userID,'/analysis/pca/joinedpca.pdf',sep=''))
