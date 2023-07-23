@@ -79,6 +79,10 @@ ui <- renderUI(
           .plotbutton{color: #fff; background-color:#da5151; border-color: #ffacae; width:150px; height:40px; }
           .warningbutton {color: #fff; background-color: #F01616; border-color: #ffacae;}
           .runbuttondiv {text-align: right;}
+          .dropdown:hover .dropdown-menu {
+             display: block;
+             margin-top: 0;
+          }
           
           #limmastatic{height:70vh !important;}
           #limmainter{height:70vh !important;}
@@ -128,14 +132,14 @@ ui <- renderUI(
             "",
             heading = "Update Log",
             status = "warning",
-            h5("PhosMap 1.0.0 was released in April 2023.")
+            h5("PhosMap 1.0.0 was released in July 2023.")
           ),
           panel(
             "",
             heading = "Notice",
             status = "info",
-            h5("This server is single-thread and of low-level hardware, we do recommend\
-               users to analyze the data using the demo server with small data sets. \
+            HTML("This server is single-thread and of low-level hardware, we do recommend\
+               users to analyze the data using the demo server with <b>small data sets</b>. \
                An upgraded hardware is necessary, according to the possible computational\
                cost of the data, to reach the potential of PhosMap."),
             actionButton("viewinstall", "Tutorial video", icon("video")),
@@ -183,24 +187,28 @@ ui <- renderUI(
             "",
             heading = "Introduction",
             status = "success",
-            h5("PhosMap supports multiple function modules for full landscape of \
-               phosphoproteomics data analyses including quality control, phosphosite \
-               mapping, dimension reduction analysis, time course analysis, kinase \
-               activity analysis and survival analysis. Various of publication ready \
-               figures and tables could be generated via PhosMap. We provided a downloadable\
-               R package for local customized analysis of massive data in the R shiny environment\
-               deploying on the Docker upon the Windows, Linux, and Mac system."),
-            HTML("<b>Related links:</b><br><p>R package:<a href='https://github.com/ecnuzdd/PhosMap'>https://github.com/ecnuzdd/PhosMap</a></p>
-            <p>docker image:<a href='https://hub.docker.com/r/liuzandh/phosmap'>https://hub.docker.com/r/liuzandh/phosmap</a></p>
-            <p>source code:<a href='https://github.com/liuzan-info/PhosMap'>https://github.com/liuzan-info/PhosMap</a></p>
-                 ")
+            HTML("<p>PhosMap supports multiple function modules for full landscape of 
+               phosphoproteomics data analyses including quality control, phosphosite 
+               mapping, dimension reduction analysis, time course analysis, kinase 
+               activity analysis and survival analysis. Various of publication ready 
+               figures and tables could be generated via PhosMap. </p>
+               <p>- For users without bioinformatics skills, <b>web server</b> can be 
+               used for analysis when the data volume is small. For larger data volumes, 
+               <a href='https://github.com/liuzan-info/PhosMap' target='_blank'>a local version</a> of PhosMap can be utilized. 
+               <p>- For users with bioinformatics skills, a downloadable <b><a href='https://github.com/liuzan-info/PhosMap' target='_blank'>R package</a></b>
+               is provided for more flexible analysis. 
+               <p>Furthermore, our data flow is standardized, ensuring its strong scalability.
+               Therefore, if users have other analysis requirements, they are welcome to submit PR or issue on <a href='https://github.com/liuzan-info/PhosMap' target='_blank'>GitHub</a>.</p>"),
+            # HTML("<b>Related links:</b><br><p>R package:<a href='https://github.com/ecnuzdd/PhosMap'>https://github.com/ecnuzdd/PhosMap</a></p>
+            # <p>docker image:<a href='https://hub.docker.com/r/liuzandh/phosmap'>https://hub.docker.com/r/liuzandh/phosmap</a></p>
+            # <p>source code:<a href='https://github.com/liuzan-info/PhosMap'>https://github.com/liuzan-info/PhosMap</a></p>
+            #      ")
           )
         ),
         column(
           9,
           # h1(style = "text-align: center;", "PhosMap"),
-          h3(style = "text-align: center;", "PhosMap: a docker image-based tool to \
-             accomplish one-stop interactive analysis of quantitative phosphoproteomics"),
+          h3(style = "text-align: center;", "PhosMap: an ensemble bioinformatic platform to empower one-stop interactive analysis of quantitative phosphoproteomics"),
           div(style = "text-align:center;", img(src = "main.svg", height = "700px", width = "900px", style = "")),
           
         ),
@@ -596,21 +604,22 @@ ui <- renderUI(
                 column(12,
                        prettyToggle(
                          inputId = "democountbygroup",
-                         label_on = "separately imputing by group",
+                         label_on = "impute by group",
                          icon_on = icon("check"),
                          status_on = "info",
                          status_off = "warning",
-                         label_off = "imputing jointly ",
+                         label_off = "impute globally ",
                          icon_off = icon("xmark"),
                          value = FALSE
                        )
                 ),
-                pickerInput(
-                  inputId = "mascotimputemethod",
-                  label = "imputation method: ", 
+                selectInput(
+                  "mascotimputemethod",
+                  label = "imputation method: ",
                   choices = list(
-                    only_joint= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
-                    separate_or_joint = c("bpca", "lls", "knnmethod", "rowmedian")),
+                    "globally"= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    "globally_or_bygroup" = c("bpca", "lls", "knnmethod", "rowmedian")
+                  ),
                   selected = "minimum/10"
                 ),
                 # selectInput("mascotimputemethod", label = "imputation method: ", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
@@ -929,21 +938,22 @@ ui <- renderUI(
                 column(12,
                        prettyToggle(
                          inputId = "maxdemocountbygroup",
-                         label_on = "separately imputing by group",
+                         label_on = "impute by group",
                          icon_on = icon("check"),
                          status_on = "info",
                          status_off = "warning",
-                         label_off = "imputing jointly ",
+                         label_off = "impute globally ",
                          icon_off = icon("xmark"),
                          value = FALSE
                        )
                 ),
-                pickerInput(
-                  inputId = "maxphosimputemethod",
-                  label = "imputation method: ", 
+                selectInput(
+                  "maxphosimputemethod",
+                  label = "imputation method: ",
                   choices = list(
-                    only_joint= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
-                    separate_or_joint = c("bpca", "lls", "knnmethod", "rowmedian")),
+                    "globally"= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    "globally_or_bygroup" = c("bpca", "lls", "knnmethod", "rowmedian")
+                  ),
                   selected = "minimum/10"
                 ),
                 # selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
@@ -1261,6 +1271,10 @@ ui <- renderUI(
                 uiOutput("viewanalysisyourexpre"),
                 hr(style = "border-style: dashed;border-color: grey;"),
                 h4("3. Clinical data file[optional]: "),
+                downloadButton("clinicaldl", "Download Template", icon = NULL,
+                               style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+                actionButton("clinicalinstruction", "View Upload Instructions", 
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
                 fileInput(
                   inputId = "analysisupload14",
                   label = NULL,

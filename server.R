@@ -1,4 +1,4 @@
-online = TRUE
+online = FALSE
 
 #
 # This is the server logic of a Shiny web application. You can run the
@@ -545,9 +545,15 @@ server<-shinyServer(function(input, output, session){
                any type, and the 
                same value indicates that the samples belong to the same group. 
                In the case data, the numbers represent the processing time.</br> </br>
+               
                The <strong>'Description'</strong> column is optional, and its 
                content can be anything you enter, such as the original mass 
-               spectrum file name used in the case data.")
+               spectrum file name used in the case data.</br> </br>
+               
+               The <strong>'Pair'</strong> column is optional.If there is no pair 
+               information, leave it blank. Otherwise, 'Pair' numbers of paired 
+               samples should be the same. Click the button to download the 
+               template with 'Pair' information.")
   # maxqunt
   observeEvent(
     input$userdesigninstruction,{
@@ -555,10 +561,22 @@ server<-shinyServer(function(input, output, session){
         title = "Experimental design file",
         size = "l",
         tags$p(instruction_design),
+        downloadBttn(
+          outputId = "pairedtemplatedl",
+          label = "",
+          style = "material-flat",
+          color = "default",
+          size = "sm"
+        ),
         easyClose = T,
         footer = modalButton("OK")
       ))
     }
+  )
+  
+  output$pairedtemplatedl <- downloadHandler(
+    filename = "design_file_with_Pair.txt",
+    content = function(file) {file.copy("examplefile/analysistools/case2/phosphorylation_exp_design_info_with_pair.txt", file)}
   )
   
   output$userphosmaxdl <- downloadHandler(
@@ -595,10 +613,22 @@ server<-shinyServer(function(input, output, session){
         title = "Proteomics experimental design file",
         size = "l",
         tags$p(instruction_design),
+        downloadBttn(
+          outputId = "pairedtemplatedl2",
+          label = "",
+          style = "material-flat",
+          color = "default",
+          size = "sm"
+        ),
         easyClose = T,
         footer = modalButton("OK")
       ))
     }
+  )
+  
+  output$pairedtemplatedl2 <- downloadHandler(
+    filename = "design_file_with_Pair.txt",
+    content = function(file) {file.copy("examplefile/analysistools/case2/phosphorylation_exp_design_info_with_pair.txt", file)}
   )
   
   observeEvent(
@@ -623,7 +653,7 @@ server<-shinyServer(function(input, output, session){
         size = "l",
         tags$p(
           HTML("This compressed file is obtained by compressing the corresponding
-               output of Mascot, for specific details, please refer to the manual
+               output of Mascot. For specific details, please refer to the manual
                in the Tutorial module.")
         ),
         easyClose = T,
@@ -639,7 +669,7 @@ server<-shinyServer(function(input, output, session){
         size = "l",
         tags$p(
           HTML("This compressed file is obtained by compressing the corresponding
-               output of Firmiana, for specific details, please refer to the manual
+               output of Firmiana. For specific details, please refer to the manual
                in the Tutorial module.")
         ),
         easyClose = T,
@@ -659,12 +689,24 @@ server<-shinyServer(function(input, output, session){
         title = "Proteomics experimental design file",
         size = "l",
         tags$p(instruction_design),
+        downloadBttn(
+          outputId = "pairedtemplatedl3",
+          label = "",
+          style = "material-flat",
+          color = "default",
+          size = "sm"
+        ),
         easyClose = T,
         footer = modalButton("OK")
       ))
     }
   )
   
+  output$pairedtemplatedl3 <- downloadHandler(
+    filename = "design_file_with_Pair.txt",
+    content = function(file) {file.copy("examplefile/analysistools/case2/phosphorylation_exp_design_info_with_pair.txt", file)}
+  )
+
   observeEvent(
     input$usermascotprofilinginstruction,{
       showModal(modalDialog(
@@ -672,7 +714,7 @@ server<-shinyServer(function(input, output, session){
         size = "l",
         tags$p(
           HTML("This compressed file is obtained by compressing the corresponding
-               output of Firmiana, for specific details, please refer to the manual
+               output of Firmiana. For specific details, please refer to the manual
                in the Tutorial module.")
         ),
         easyClose = T,
@@ -803,10 +845,9 @@ server<-shinyServer(function(input, output, session){
         )
       }
       else{
-        design_file <- read.table("examplefile/maxquant/phosphorylation_exp_design_info.txt",header=T)
+        design_file <- read.csv("examplefile/maxquant/phosphorylation_exp_design_info.txt",header=T,sep = '\t')
         newdata3out <- read.csv(paste0(maxdemopreloc, "DemoPreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxdemopreloc, "DemoPreQcForMotifAnalysis.csv"))
-        
         normmethod <- "global" # median  
         if(input$maxphosnormmethod == "global") {
           newdata4 <- sweep(newdata3out[-1],2,apply(newdata3out[-1],2,sum,na.rm=T),FUN="/")
@@ -819,6 +860,7 @@ server<-shinyServer(function(input, output, session){
         # added by lja
         errorlabel = FALSE
         errorlabel_values <- c()
+        
         if (input$maxdemocountbygroup == FALSE) {
           df <- fill_missing_values(nadata = newdata4, method = input$maxphosimputemethod)
         } else {
@@ -854,7 +896,7 @@ server<-shinyServer(function(input, output, session){
               } else {
                 result_list <- list(filled_group_data)
               }
-        }
+            }
         
             # 将所有填充后的数据框合并为一个数据框
             df <- Reduce(cbind, result_list)
@@ -877,8 +919,13 @@ server<-shinyServer(function(input, output, session){
         colnames(summarydf) <- c("Position", colnames(phospho_data_topX_for_motifanalysis))
         rownames(summarydf) <- rownames(phospho_data_topX)
         
-        output$demomaxresult2 <- renderDataTable(summarydf)
-        output$demomaxdropproresult2 <- renderDataTable(summarydf)
+        summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+        summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+        row.names(summarydf_view) <- NULL
+        
+        output$demomaxresult2 <- renderDataTable(summarydf_view)
+        write.csv(summarydf_view, paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv"), row.names = FALSE)
+        output$demomaxdropproresult2 <- renderDataTable(summarydf_view)
         write.csv(summarydf, paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"))
         updateTabsetPanel(session, "demomaxresultnav", selected = "demomaxstep2val")
         updateTabsetPanel(session, "demomaxdropproresultnav", selected = "demomaxdropprostep2val")
@@ -1003,9 +1050,14 @@ server<-shinyServer(function(input, output, session){
         colnames(summarydf) <- c("Position", colnames(data_frame_normalization_with_control_no_pair_for_motifanalysis))
         rownames(summarydf) <- rownames(data_frame_normalization_with_control_no_pair)
         
-        output$demomaxresult3 <- renderDataTable(summarydf)
+        summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+        summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+        row.names(summarydf_view) <- NULL
+        
+        output$demomaxresult3 <- renderDataTable(summarydf_view)
         output$demomaxresult3pro <- renderDataTable(df2)
         
+        write.csv(summarydf_view, paste0(maxdemopreloc, "DemoPreNormBasedProSummary_v.csv"), row.names = FALSE)
         write.csv(summarydf, paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv"), row.names = T)
         write.csv(df2, paste0(maxdemopreloc, "DemoPrePro.csv"), row.names = F)
         updateTabsetPanel(session, "demomaxresultnav", selected = "demomaxstep3val")
@@ -1312,7 +1364,7 @@ server<-shinyServer(function(input, output, session){
     }
     else{
       summary_df_of_unique_proteins_with_sites <- read.csv(paste0(mascotdemopreloc, "summary_df_of_unique_proteins_with_sites.csv"), row.names = 1)
-      design_file <- read.table("examplefile/mascot/phosphorylation_exp_design_info.txt",header=T)
+      design_file <- read.csv("examplefile/mascot/phosphorylation_exp_design_info.txt",header=T,sep = '\t')
       if (input$democountbygroup == FALSE) {
         phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites3(
         summary_df_of_unique_proteins_with_sites,
@@ -1347,9 +1399,14 @@ server<-shinyServer(function(input, output, session){
       colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
       rownames(summarydf) <- rownames(phospho_data_topX)
       
-      output$viewednorm01 <- renderDataTable(summarydf)
-      output$viewednorm01droppro <- renderDataTable(summarydf)
+      summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+      summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+      row.names(summarydf_view) <- NULL
       
+      output$viewednorm01 <- renderDataTable(summarydf_view)
+      output$viewednorm01droppro <- renderDataTable(summarydf_view)
+      
+      write.csv(summarydf_view, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary_v.csv'), row.names = F)
       write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
       
       updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
@@ -1413,10 +1470,15 @@ server<-shinyServer(function(input, output, session){
           summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
           colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
           rownames(summarydf) <- rownames(phospho_data_topX)
-
-          output$viewednorm01 <- renderDataTable(summarydf)
-          output$viewednorm01droppro <- renderDataTable(summarydf)
-
+          
+          summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+          summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+          row.names(summarydf_view) <- NULL
+          
+          output$viewednorm01 <- renderDataTable(summarydf_view)
+          output$viewednorm01droppro <- renderDataTable(summarydf_view)
+          
+          write.csv(summarydf_view, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary_v.csv'), row.names = F)
           write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
 
           updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
@@ -1462,7 +1524,7 @@ server<-shinyServer(function(input, output, session){
       profiling_exp_design_info_file_path <- 'examplefile/mascot/profiling_exp_design_info.txt'
       
       profiling_data = merge_profiling_file_from_Firmiana(profiling_gene_dir, US_cutoff = input$masuscutoff, profiling_exp_design_info_file_path)
-      experiment_code <- utils::read.table(profiling_exp_design_info_file_path, header = TRUE, sep = '\t', stringsAsFactors = NA)
+      experiment_code <- utils::read.csv(profiling_exp_design_info_file_path, header = TRUE, sep = '\t', stringsAsFactors = NA)
       NAnumthre <- length(experiment_code$Experiment_Code) - input$masproNAthre
       if(NAnumthre < 0) { NAnumthre = 0}
       NAnumthresig <- c()
@@ -1487,10 +1549,15 @@ server<-shinyServer(function(input, output, session){
       colnames(summarydf) <- c("Position", colnames(data_frame_normalization_with_control_no_pair_for_motifanalysis))
       rownames(summarydf) <- rownames(data_frame_normalization_with_control_no_pair)
       
-      output$viewednorm02 <- renderDataTable(summarydf)
+      summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+      summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+      row.names(summarydf_view) <- NULL
+      
+      output$viewednorm02 <- renderDataTable(summarydf_view)
       
       output$viewednorm02pro <- renderDataTable(profiling_data)
       
+      write.csv(summarydf_view, paste0(mascotdemopreloc, "DemoPreNormBasedProSummary_v.csv"), row.names = F)
       write.csv(summarydf, paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"), row.names = T)
       write.csv(profiling_data, paste0(mascotdemopreloc, "DemoPrePro.csv"), row.names = F)
       
@@ -1861,7 +1928,7 @@ server<-shinyServer(function(input, output, session){
           type = "info"
         )
       } else {
-        design_file <- read.table(input$updesign$datapath,header = T)
+        design_file <- read.csv(input$updesign$datapath,header = T,sep = '\t')
         newdata3out <- read.csv(paste0(maxuserpreloc, "PreQc.csv"), row.names = 1)
         newdata3motif <- read.csv(paste0(maxuserpreloc, "PreQcForMotifAnalysis.csv"))
         if(input$maxphosnormmethod == "global") {
@@ -1941,10 +2008,15 @@ server<-shinyServer(function(input, output, session){
         colnames(summarydf) <- c("Position", colnames(phospho_data_topX_for_motifanalysis))
         rownames(summarydf) <- rownames(phospho_data_topX)
         
-        output$usermaxresult2 <- renderDataTable(summarydf)
-        output$usermaxnoproresult2 <- renderDataTable(summarydf)
-        output$usermaxdropproresult2 <- renderDataTable(summarydf)
+        summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+        summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+        row.names(summarydf_view) <- NULL
         
+        output$usermaxresult2 <- renderDataTable(summarydf_view)
+        output$usermaxnoproresult2 <- renderDataTable(summarydf_view)
+        output$usermaxdropproresult2 <- renderDataTable(summarydf_view)
+        
+        write.csv(summarydf_view, paste0(maxuserpreloc, "PreNormImputeSummary.csv"), row.names = F)
         write.csv(summarydf, paste0(maxuserpreloc, "PreNormImputeSummary.csv"))
 
         updateTabsetPanel(session, "usermaxresultnav", selected = "usermaxstep2val")
@@ -2076,9 +2148,14 @@ server<-shinyServer(function(input, output, session){
         colnames(summarydf) <- c("Position", colnames(data_frame_normalization_with_control_no_pair_for_motifanalysis))
         rownames(summarydf) <- rownames(data_frame_normalization_with_control_no_pair)
         
-        output$usermaxresult3 <- renderDataTable(summarydf)
+        summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+        summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+        row.names(summarydf_view) <- NULL
+        
+        output$usermaxresult3 <- renderDataTable(summarydf_view)
         output$usermaxresult3pro <- renderDataTable(df2)
         
+        write.csv(summarydf_view, paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv"), row.names = F)
         write.csv(summarydf, paste0(maxuserpreloc, "PreNormBasedProSummary.csv"), row.names = T)
         write.csv(df2, paste0(maxuserpreloc, "PrePro.csv"), row.names = F)
         updateTabsetPanel(session, "usermaxresultnav", selected = "usermaxstep3val")
@@ -2436,10 +2513,15 @@ server<-shinyServer(function(input, output, session){
       colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
       rownames(summarydf) <- rownames(phospho_data_topX)
       
-      output$viewednorm14 <- renderDataTable(summarydf)
-      output$viewednorm14nopro <- renderDataTable(summarydf)
-      output$viewednorm14droppro <- renderDataTable(summarydf)
+      summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+      summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+      row.names(summarydf_view) <- NULL
       
+      output$viewednorm14 <- renderDataTable(summarydf_view)
+      output$viewednorm14nopro <- renderDataTable(summarydf_view)
+      output$viewednorm14droppro <- renderDataTable(summarydf_view)
+      
+      write.csv(summarydf_view, paste0(mascotuserpreloc, 'NormImputeSummary_v.csv'), row.names = F)
       write.csv(summarydf, paste0(mascotuserpreloc, 'NormImputeSummary.csv'), row.names = T)
       
       updateTabsetPanel(session, "usermascotresultnav", selected = "usermascotstep4val")
@@ -2477,7 +2559,7 @@ server<-shinyServer(function(input, output, session){
   proaval <- reactive(is.null(input$upprodesign) | is.null(input$upprogene))
   
   grouplabel <- reactive({
-    phosphorylation_experiment_design_file = read.table(input$updesign$datapath, 
+    phosphorylation_experiment_design_file = read.csv(input$updesign$datapath, 
                                                         header = T, sep = '\t', stringsAsFactors = NA)
     unique(phosphorylation_experiment_design_file$Group)
   })
@@ -2506,12 +2588,6 @@ server<-shinyServer(function(input, output, session){
             wellPanel(
               h5("Proteomics data preprocessing parameters", style = "color: grey;"),
               numericInput("usermasuscutoff", label = "US cutoff: ", value = 1),
-              # bsTooltip(
-              #   "usermasuscutoff", 
-              #   # "xxxxx",
-              #   placement = "right", 
-              #   options = list(container = "body")
-              # ),
               numericInput("usermasproNAthre", label = "minimum detection frequency: ", value = 1, min = 0),
               bsTooltip(
                 "usermasproNAthre",
@@ -2749,7 +2825,7 @@ server<-shinyServer(function(input, output, session){
       profiling_gene_dir <- list.files(paste0(mascotuserpreloc, 'proteomics_data'), full.names = T)
       profiling_exp_design_info_file_path <- input$upprodesign$datapath
       profiling_data = merge_profiling_file_from_Firmiana(profiling_gene_dir, US_cutoff = input$usermasuscutoff, profiling_exp_design_info_file_path)
-      experiment_code <- utils::read.table(profiling_exp_design_info_file_path, header = TRUE, sep = '\t', stringsAsFactors = NA)
+      experiment_code <- utils::read.csv(profiling_exp_design_info_file_path, header = TRUE, sep = '\t', stringsAsFactors = NA)
       NAnumthre <- length(experiment_code$Experiment_Code) - input$usermasproNAthre
       if(NAnumthre < 0) {NAnumthre = 0}
       NAnumthresig <- c()
@@ -2775,9 +2851,14 @@ server<-shinyServer(function(input, output, session){
       colnames(summarydf) <- c("Position", colnames(data_frame_normalization_with_control_no_pair_for_motifanalysis))
       rownames(summarydf) <- rownames(data_frame_normalization_with_control_no_pair)
       
-      output$viewednorm15 <- renderDataTable(summarydf)
+      summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+      summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+      row.names(summarydf_view) <- NULL
+      
+      output$viewednorm15 <- renderDataTable(summarydf_view)
       output$viewednorm15pro <- renderDataTable(profiling_data)
       
+      write.csv(summarydf_view, paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv"), row.names = F)
       write.csv(summarydf, paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"), row.names = T)
       write.csv(profiling_data, paste0(mascotuserpreloc, "PrePro.csv"), row.names = F)
       updateTabsetPanel(session, "usermascotresultnav", selected = "usermascotstep5val")
@@ -2798,6 +2879,33 @@ server<-shinyServer(function(input, output, session){
   #######################################
   #######     analysis tools      #######
   #######################################
+  
+  output$clinicaldl <- downloadHandler(
+    filename = "clinical_file_template.csv",
+    content = function(file) {file.copy("examplefile/analysistools/Clinical_for_Demo.csv", file)}
+  )
+  
+  observeEvent(
+    input$clinicalinstruction,{
+      showModal(modalDialog(
+        title = "Clinical data file",
+        size = "l",
+        tags$p(HTML("In this file, the <strong>'PatientID'</strong> column, the 
+        <strong>'status'</strong> column and the <strong>'time'</strong> column
+        are required, and the column names cannot be changed. </br> </br>
+        1. <strong>PatientID</strong> corresponds to the 'Experiment_Code' in the 'Experimental 
+        design file'.</br> </br>
+        2. <strong>time</strong> refers to the length of time until a specific event occurs, such 
+        as death or disease recurrence.</br> </br>
+        3. <strong>status</strong> refers to whether or not the event of interest has occurred 
+        for each individual in the study, with a value of 1 indicating that the 
+        event has occurred and a value of 0 indicating that it has not.")),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
   # Disable some tools for case2
   observeEvent(c(input$analysisdatatype, input$analysisdemodata),{
     if((input$analysisdatatype == 3) & (input$analysisdemodata == 'case2')) {
@@ -2821,6 +2929,7 @@ server<-shinyServer(function(input, output, session){
       enable("motifseqdownload")
     }
   })
+  
   # Analysis data upload
   analysisouts <- reactive({
     if(input$analysisdatatype==3){
@@ -2834,13 +2943,22 @@ server<-shinyServer(function(input, output, session){
         clinicalfile = "examplefile/analysistools/case2/clinical.csv"
         summarydf = "examplefile/analysistools/case2/phosphorylation.csv"
       }
+      # Extract information from summarydf
+      summarydf <- read.csv(summarydf)
+      target_summarydf <- summarydf
+      upsID_parts <- as.data.frame(do.call(rbind, strsplit(as.character(target_summarydf$upsID), "_")))
+      colnames(upsID_parts) <- c("ID", "Position", "AA_in_protein")
+      upsID_parts$Position <- paste(upsID_parts[,2], upsID_parts[,3], sep = '_')
+      rownames(target_summarydf) <- target_summarydf$upsID
+      target_summarydf <- subset(target_summarydf, select = -upsID)
+      target_summarydf <- cbind(upsID_parts[,c(2,3)],target_summarydf$Sequence, upsID_parts[,1],target_summarydf[,2:ncol(target_summarydf)])
+      colnames(target_summarydf)[1:4] <- c("Position", "AA_in_protein", "Sequence", "ID")
       
       target1 <- read.csv(designfile, sep = "\t")
       target4 <- read.csv(clinicalfile)
-      target5 <- read.csv(summarydf, row.name=1)
-      target2 <- target5[, c(-2, -3, -4)]
+      target2 <- target_summarydf[, c(-2, -3, -4)]
       colnames(target2)[1] <- "ID"
-      target3 <- target5[, -1]
+      target3 <- target_summarydf[, -1]
   
       output$viewedfileanalysisui <- renderUI(h4("1. Experimental design file:"))
       output$viewedfileanalysis <- renderDataTable(target1)
@@ -2854,7 +2972,7 @@ server<-shinyServer(function(input, output, session){
       observeEvent(
         input$viewanalysisexamdf,{
           output$viewedfileanalysisui <- renderUI(h4("2. Phosphorylation data frame:"))
-          output$viewedfileanalysis <- renderDataTable(target5)
+          output$viewedfileanalysis <- renderDataTable(summarydf)
         }
       )
       observeEvent(
@@ -2896,7 +3014,12 @@ server<-shinyServer(function(input, output, session){
         )
         observeEvent(
           input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
+            if(input$useprocheck1==1) {
+              file1_v = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary_v.csv")
+            } else {
+              file1_v = paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv")
+            }
+            output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
             output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
           }
         )
@@ -2916,7 +3039,6 @@ server<-shinyServer(function(input, output, session){
         target4 <- NULL
         target2 <- NULL
         target3 <- NULL
-        target5 <- NULL
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
         
@@ -2963,7 +3085,14 @@ server<-shinyServer(function(input, output, session){
         )
         observeEvent(
           input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
+            if(is.null(input$useruseprocheck1)) {
+              file1_v = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
+            } else if(input$useruseprocheck1==0) {
+              file1_v = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
+            } else {
+              file1_v = paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv")
+            }
+            output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
             output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
           }
         )
@@ -2994,7 +3123,6 @@ server<-shinyServer(function(input, output, session){
         target2 <- NULL
         target3 <- NULL
         target4 <- NULL
-        target5 <- NULL
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
@@ -3030,7 +3158,12 @@ server<-shinyServer(function(input, output, session){
         )
         observeEvent(
           input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
+            if(input$maxuseprocheck1==1) {
+              file1_v = paste0(maxdemopreloc, "DemoPreNormBasedProSummary_v.csv")
+            } else {
+              file1_v = paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv")
+            }
+            output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
             output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
           }
         )
@@ -3050,7 +3183,6 @@ server<-shinyServer(function(input, output, session){
         target2 <- NULL
         target3 <- NULL
         target4 <- NULL
-        target5 <- NULL
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
@@ -3096,7 +3228,14 @@ server<-shinyServer(function(input, output, session){
         )
         observeEvent(
           input$viewanalysispipedf, {
-            output$viewedfileanalysis <- renderDataTable(target5)
+            if(is.null(input$maxuseruseprocheck)) {
+              file1_v = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
+            } else if(input$maxuseruseprocheck==0) {
+              file1_v = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
+            } else {
+              file1_v = paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv")
+            }
+            output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
             output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
           }
         )
@@ -3126,7 +3265,6 @@ server<-shinyServer(function(input, output, session){
         target2 <- NULL
         target3 <- NULL
         target4 <- NULL
-        target5 <- NULL
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
@@ -3136,7 +3274,6 @@ server<-shinyServer(function(input, output, session){
       target2 <- NULL
       target3 <- NULL
       target4 <- NULL
-      target5 <- NULL
       output$viewedfileanalysisuiuser <- renderUI(NULL)
     }
     files <- list(message, target1, target2, target3, target4)
@@ -3198,7 +3335,7 @@ server<-shinyServer(function(input, output, session){
     if(is.null(files)){
       dataread <- NULL
     }else{
-      dataread <- read.csv(files$datapath, header=T, sep=",", row.names = 1)
+      dataread <- read.csv(files$datapath)
     }
     dataread
   })
@@ -3250,6 +3387,14 @@ server<-shinyServer(function(input, output, session){
     if(input$analysisdatatype == 1){
       summarydf <- profilingfile_analysis()
       if(!is.null(summarydf)) {
+        upsID_parts <- as.data.frame(do.call(rbind, strsplit(as.character(summarydf$upsID), "_")))
+        colnames(upsID_parts) <- c("ID", "Position", "AA_in_protein")
+        upsID_parts$Position <- paste(upsID_parts[,2], upsID_parts[,3], sep = '_')
+        rownames(summarydf) <- summarydf$upsID
+        summarydf <- subset(summarydf, select = -upsID)
+        summarydf <- cbind(upsID_parts[,c(2,3)],summarydf$Sequence, upsID_parts[,1],summarydf[,2:ncol(summarydf)])
+        colnames(summarydf)[1:4] <- c("Position", "AA_in_protein", "Sequence", "ID")
+        
         target2 <- summarydf[, c(-2, -3, -4)]
         colnames(target2)[1] <- "ID"
         target3 <- summarydf[, -1]
@@ -4868,7 +5013,7 @@ server<-shinyServer(function(input, output, session){
         
         # get background data frame
         motif_library_dir = "./PhosMap_datasets/motif_library/"
-        background_df = utils::read.table((paste0(motif_library_dir, fasta_type, "/", species, "/STY_background_of_", fasta_type, "_",  species, "_for_motif_enrichment.txt")), sep = '\t', header = TRUE)
+        background_df = utils::read.csv((paste0(motif_library_dir, fasta_type, "/", species, "/STY_background_of_", fasta_type, "_",  species, "_for_motif_enrichment.txt")), sep = '\t', header = TRUE)
         
         # construct foreground and background
         foreground = as.vector(foreground_df$aligned_seq)
@@ -5151,21 +5296,21 @@ server<-shinyServer(function(input, output, session){
   
   output$usermaxdropproresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreQc.csv"),file)})
   
-  output$demomaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"), file)})
+  output$demomaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv"), file)})
   
-  output$demomaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  output$demomaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv"),file)})
   
-  output$usermaxnoproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  output$usermaxnoproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary_v.csv"),file)})
   
-  output$usermaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  output$usermaxresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary_v.csv"),file)})
   
-  output$usermaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary.csv"),file)})
+  output$usermaxdropproresult2_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormImputeSummary_v.csv"),file)})
   
-  output$demomaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
+  output$demomaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreNormBasedProSummary_v.csv"),file)})
   
   output$demomaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPrePro.csv"),file)})
   
-  output$usermaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormBasedProSummary.csv"),file)})
+  output$usermaxresult3_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv"),file)})
   
   output$usermaxresult3pro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxuserpreloc, "PrePro.csv"),file)})
   
@@ -5190,21 +5335,21 @@ server<-shinyServer(function(input, output, session){
   
   output$viewedmapping12droppro_dl <- downloadHandler(filename = function(){paste("summary_df_of_unique_proteins_with_sites", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "summary_df_of_unique_proteins_with_sites.csv"),file)})
   
-  output$viewednorm01_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  output$viewednorm01_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv"),file)})
   
-  output$viewednorm01droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary.csv"),file)})
+  output$viewednorm01droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv"),file)})
   
-  output$viewednorm14_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  output$viewednorm14_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary_v.csv"),file)})
   
-  output$viewednorm14nopro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  output$viewednorm14nopro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary_v.csv"),file)})
   
-  output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary.csv"),file)})
+  output$viewednorm14droppro_dl <- downloadHandler(filename = function(){paste("normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "NormImputeSummary_v.csv"),file)})
   
-  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv"),file)})
+  output$viewednorm02_dl <- downloadHandler(filename = function(){paste("norm_based_pro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPreNormBasedProSummary_v.csv"),file)})
   
   output$viewednorm02pro_dl <- downloadHandler(filename = function(){paste("pro_normalization_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotdemopreloc, "DemoPrePro.csv"),file)})
   
-  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary.csv"),file)})
+  output$viewednorm15_dl <- downloadHandler(filename = function(){paste("PreNormBasedProSummary", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv"),file)})
   
   output$viewednorm15pro_dl <- downloadHandler(filename = function(){paste("PrePro", userID,".csv",sep="")},content = function(file){file.copy(paste0(mascotuserpreloc, "PrePro.csv"),file)})
   
