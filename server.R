@@ -1373,59 +1373,59 @@ server<-shinyServer(function(input, output, session){
         normmethod = input$mascotnormmethod,
         imputemethod = input$mascotimputemethod,
         topN = NA, mod_types = c('S', 'T', 'Y')
-      )
-
-      phospho_data_filtering_STY_and_normalization <-
-        phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
-      
-      ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
-                  phospho_data_filtering_STY_and_normalization$AA_in_protein,
-                  sep = '_')
-      Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
-      phospho_data <- data.frame(ID, Value)
-      phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
-                                     phospho_data_filtering_STY_and_normalization$GeneSymbol,
-                                     phospho_data_filtering_STY_and_normalization$AA_in_protein,
-                                     sep = '_')
-      rownames(phospho_data) <- phospho_data_rownames
-      
-      phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
-      # Further filter phosphoproteomics data..
-      phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
-      phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
-      colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
-      
-      summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
-      colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
-      rownames(summarydf) <- rownames(phospho_data_topX)
-      
-      summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
-      summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
-      row.names(summarydf_view) <- NULL
-      
-      output$viewednorm01 <- renderDataTable(summarydf_view)
-      output$viewednorm01droppro <- renderDataTable(summarydf_view)
-      
-      write.csv(summarydf_view, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary_v.csv'), row.names = F)
-      write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
-      
-      updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
-      updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep4val")
-      
-      updateActionButton(session, "normalizationbt01", icon = icon("rotate-right"))
-      updateActionButton(session, "normalizationbt02", icon = icon("play"))
-      if(input$useprocheck1 == 1) {
-        updateProgressBar(session = session, id = "preprobar", value = 80)
-      } else {
-        updateProgressBar(session = session, id = "preprobar", value = 100)
-        sendSweetAlert(
-          session = session,
-          title = "All Done",
-          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
-          type = "success",
-          btn_labels = "OK"
         )
-      }
+
+        phospho_data_filtering_STY_and_normalization <-
+          phospho_data_filtering_STY_and_normalization_list$ptypes_fot5_df_with_id
+        
+        ID <- paste(phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                    phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                    sep = '_')
+        Value <- phospho_data_filtering_STY_and_normalization[,-seq(1,6)]
+        phospho_data <- data.frame(ID, Value)
+        phospho_data_rownames <- paste(phospho_data_filtering_STY_and_normalization$ID,
+                                       phospho_data_filtering_STY_and_normalization$GeneSymbol,
+                                       phospho_data_filtering_STY_and_normalization$AA_in_protein,
+                                       sep = '_')
+        rownames(phospho_data) <- phospho_data_rownames
+        
+        phospho_data_for_motifanalysis <- cbind(phospho_data_filtering_STY_and_normalization$AA_in_protein, phospho_data_filtering_STY_and_normalization$Sequence, phospho_data_filtering_STY_and_normalization$ID, phospho_data[-1])
+        # Further filter phosphoproteomics data..
+        phospho_data_topX = keep_psites_with_max_in_topX(phospho_data, percent_of_kept_sites = input$top/100)
+        phospho_data_for_motifanalysis2 = keep_psites_with_max_in_topX2(phospho_data_for_motifanalysis, percent_of_kept_sites = input$top/100)
+        colnames(phospho_data_for_motifanalysis2) <- c("AA_in_protein", "Sequence", "ID", colnames(phospho_data_for_motifanalysis2)[-c(1,2,3)])
+        
+        summarydf <- data.frame(phospho_data_topX$ID, phospho_data_for_motifanalysis2)
+        colnames(summarydf) <- c("Position", colnames(phospho_data_for_motifanalysis2))
+        rownames(summarydf) <- rownames(phospho_data_topX)
+        
+        summarydf_view <- subset(summarydf, select = -c(Position, AA_in_protein, ID))
+        summarydf_view <- cbind(upsID = row.names(summarydf_view), summarydf_view)
+        row.names(summarydf_view) <- NULL
+        
+        output$viewednorm01 <- renderDataTable(summarydf_view)
+        output$viewednorm01droppro <- renderDataTable(summarydf_view)
+        
+        write.csv(summarydf_view, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary_v.csv'), row.names = F)
+        write.csv(summarydf, paste0(mascotdemopreloc, 'DemoPreNormImputeSummary.csv'), row.names = T)
+        
+        updateTabsetPanel(session, "resultnav", selected = "demomascotstep4val")
+        updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep4val")
+        
+        updateActionButton(session, "normalizationbt01", icon = icon("rotate-right"))
+        updateActionButton(session, "normalizationbt02", icon = icon("play"))
+        if(input$useprocheck1 == 1) {
+          updateProgressBar(session = session, id = "preprobar", value = 80)
+        } else {
+          updateProgressBar(session = session, id = "preprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        }
       } else {
         
         phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites4(
