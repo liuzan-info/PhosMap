@@ -3795,8 +3795,9 @@ server<-shinyServer(function(input, output, session){
       
       specifiedpoints <- input$limmalabelspec
       specifiedpoints <- strsplit(specifiedpoints, "\n")[[1]]
-      if(identical(strsplit("", "\n")[[1]], character(0))){specifiedpoints <- "abcdefghij"}
-      limma_results_df$sign <- ifelse((limma_results_df$pvalue < input$limmalabelpvalue & abs(limma_results_df$logFC) > log2(input$limmalabelfc)) | limma_results_df$ID == specifiedpoints,limma_results_df$ID,NA)
+      if(identical(specifiedpoints, character(0))){specifiedpoints <- "abcdefghij"}
+      print(specifiedpoints)
+      limma_results_df$sign <- ifelse((limma_results_df$pvalue < input$limmalabelpvalue & abs(limma_results_df$logFC) > log2(input$limmalabelfc)) | limma_results_df$ID %in% specifiedpoints,limma_results_df$ID,NA)
       p <- ggplot(data = limma_results_df, aes(x = logFC, y = -log10(pvalue), text = paste("ID:", ID))) +
         geom_point(aes(color = change), alpha=0.6, size=2) +
         theme_bw(base_size = 15) +
