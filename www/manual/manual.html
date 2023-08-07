@@ -1,0 +1,1058 @@
+<!DOCTYPE html><html><head>
+      <title>manual_3_use_picutre2</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <style>
+      /**
+ * prism.js Github theme based on GitHub's theme.
+ * @author Sam Clarke
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #333;
+  background: none;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.4;
+
+  -moz-tab-size: 8;
+  -o-tab-size: 8;
+  tab-size: 8;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: .8em;
+  overflow: auto;
+  /* border: 1px solid #ddd; */
+  border-radius: 3px;
+  /* background: #fff; */
+  background: #f5f5f5;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+  background: #f5f5f5;
+}
+
+.token.comment,
+.token.blockquote {
+  color: #969896;
+}
+
+.token.cdata {
+  color: #183691;
+}
+
+.token.doctype,
+.token.punctuation,
+.token.variable,
+.token.macro.property {
+  color: #333;
+}
+
+.token.operator,
+.token.important,
+.token.keyword,
+.token.rule,
+.token.builtin {
+  color: #a71d5d;
+}
+
+.token.string,
+.token.url,
+.token.regex,
+.token.attr-value {
+  color: #183691;
+}
+
+.token.property,
+.token.number,
+.token.boolean,
+.token.entity,
+.token.atrule,
+.token.constant,
+.token.symbol,
+.token.command,
+.token.code {
+  color: #0086b3;
+}
+
+.token.tag,
+.token.selector,
+.token.prolog {
+  color: #63a35c;
+}
+
+.token.function,
+.token.namespace,
+.token.pseudo-element,
+.token.class,
+.token.class-name,
+.token.pseudo-class,
+.token.id,
+.token.url-reference .token.variable,
+.token.attr-name {
+  color: #795da3;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+.token.title,
+.token.title .token.punctuation {
+  font-weight: bold;
+  color: #1d3e81;
+}
+
+.token.list {
+  color: #ed6a43;
+}
+
+.token.inserted {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.token.deleted {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+
+/* JSON */
+.language-json .token.property {
+  color: #183691;
+}
+
+.language-markup .token.tag .token.punctuation {
+  color: #333;
+}
+
+/* CSS */
+code.language-css,
+.language-css .token.function {
+  color: #0086b3;
+}
+
+/* YAML */
+.language-yaml .token.atrule {
+  color: #63a35c;
+}
+
+code.language-yaml {
+  color: #183691;
+}
+
+/* Ruby */
+.language-ruby .token.function {
+  color: #333;
+}
+
+/* Markdown */
+.language-markdown .token.url {
+  color: #795da3;
+}
+
+/* Makefile */
+.language-makefile .token.symbol {
+  color: #795da3;
+}
+
+.language-makefile .token.variable {
+  color: #183691;
+}
+
+.language-makefile .token.builtin {
+  color: #0086b3;
+}
+
+/* Bash */
+.language-bash .token.keyword {
+  color: #0086b3;
+}
+
+/* highlight */
+pre[data-line] {
+  position: relative;
+  padding: 1em 0 1em 3em;
+}
+pre[data-line] .line-highlight-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: transparent;
+  display: block;
+  width: 100%;
+}
+
+pre[data-line] .line-highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: inherit 0;
+  margin-top: 1em;
+  background: hsla(24, 20%, 50%,.08);
+  background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 70%, hsla(24, 20%, 50%,0));
+  pointer-events: none;
+  line-height: inherit;
+  white-space: pre;
+}
+
+pre[data-line] .line-highlight:before, 
+pre[data-line] .line-highlight[data-end]:after {
+  content: attr(data-start);
+  position: absolute;
+  top: .4em;
+  left: .6em;
+  min-width: 1em;
+  padding: 0 .5em;
+  background-color: hsla(24, 20%, 50%,.4);
+  color: hsl(24, 20%, 95%);
+  font: bold 65%/1.5 sans-serif;
+  text-align: center;
+  vertical-align: .3em;
+  border-radius: 999px;
+  text-shadow: none;
+  box-shadow: 0 1px white;
+}
+
+pre[data-line] .line-highlight[data-end]:after {
+  content: attr(data-end);
+  top: auto;
+  bottom: .4em;
+}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ul,html body>ol{margin-bottom:16px}html body ul,html body ol{padding-left:2em}html body ul.no-list,html body ol.no-list{padding:0;list-style-type:none}html body ul ul,html body ul ol,html body ol ol,html body ol ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:bold;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:bold}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em !important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::before,html body code::after{letter-spacing:-0.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em !important;word-break:normal;white-space:pre;background:transparent;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em !important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:before,html body pre tt:before,html body pre code:after,html body pre tt:after{content:normal}html body p,html body blockquote,html body ul,html body ol,html body dl,html body pre{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body pre,html body code{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .pagebreak,.markdown-preview .newpage{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center !important}.markdown-preview:not([for="preview"]) .code-chunk .btn-group{display:none}.markdown-preview:not([for="preview"]) .code-chunk .status{display:none}.markdown-preview:not([for="preview"]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0}@media screen and (min-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{font-size:14px !important;padding:1em}}@media print{html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,0.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p,html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% -  300px);padding:2em calc(50% - 457px -  300px/2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+    </head>
+    <body for="html-export">
+      <div class="mume markdown-preview  ">
+      <h1 class="mume-header" id="procedure">PROCEDURE</h1>
+
+<h2 class="mume-header" id="notice">Notice</h2>
+
+<p>The web version of PhosMap is for quick start of visualization only due to the low-level hardware of R shiny server. It is single-threaded and we recommend users to analyze small data sets using the demo server. For larger datasets, upgraded hardware is necessary according to the possible computational cost of the data. We recommend users to use the local docker version of PhosMap.</p>
+<h2 class="mume-header" id="introduction-of-example-data">Introduction of example data</h2>
+
+<div align="left">
+Here, we reanalysis (phospho)proteomic profilings of WiDr colorectal cancer cells harbouring the BRAF(V600E) mutation after treatment using vemurafenibin a time course of 0, 2, 6, 24, and 48 hour<sup>[1]</sup>. The raw files were deposited in ProteomeXchange Consortium(PXD007740).
+The raw data were processed in Firmiana, a one-stop proteomic cloud platform<sup>[2]</sup>, to obtain quantitative peptide and protein files. 
+You can download example data in <font color="blue">https://github.com/liuzan-info/PhosMap/tree/master/examplefile/mascot</font> and <font color="blue">https://github.com/liuzan-info/PhosMap/tree/master/examplefile/maxquant</font>.     
+</div>
+<h2 class="mume-header" id="preprocessing-for-maxquant-data">Preprocessing for Maxquant data</h2>
+
+<h3 class="mume-header" id="import-maxquant-data">Import MaxQuant data</h3>
+
+<h4 class="mume-header" id="how-to-import-your-maxquant-data">How to import your MaxQuant data</h4>
+
+<ol>
+<li>Go to the &#x2018;Import data&#x2019; tab.</li>
+<li>Choose &apos;Maxquant&apos; to start with data from Maxquant.</li>
+<li>Click &#x2018;Browse&#x2019; to upload phosphoproteomics experimental design file in .txt format, and phospho (STY)Sites.txt. Proteomics experimental design file is optional.</li>
+<li>Uploaded data will be shown in the &apos;Data Overview&apos; secondary tab.</li>
+<li>You can also choose &#x2018;load exmaple data&#x2019; to use exmaple files.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_maxquant/import_maxquant_data.png" width="100%">
+</div>
+<h3 class="mume-header" id="quality-control-and-merging">Quality control and merging</h3>
+
+<h4 class="mume-header" id="function">Function</h4>
+
+<p>Generate merged phosphoproteomics data frame based on peptides files.</p>
+<div align="center">
+<img src="manual_picture2/qcstep.png" width="50%">
+</div>
+<div align="center">
+<img src="manual_picture2/spc.png" width="25%">
+</div>
+<h4 class="mume-header" id="how-to-get-analysis-results">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Preprocessing&#x2019; tab.</li>
+<li>Modify the parameters in Step1 according to your needs.</li>
+<li>Click the running button in Step1 and the file will apear on the right.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_maxquant/qc.png" width="100%">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results">Interpretation of analysis results</h4>
+
+<p>We performed quality control for identified phosphopeptides using PhosMap, those phosphopeptides that met 1% FDR at peptide level and had ion score greater than 20 and the highest confidence probabilities of p-sites computed by Mascot, were kept. We merged phosphopeptides list with quantitative value from all experiments to generate a matrix for analysis.</p>
+<h3 class="mume-header" id="data-normalization">Data normalization</h3>
+
+<h4 class="mume-header" id="function-1">Function</h4>
+
+<p>PhosMap provides two kinds of normalizations, a total sum scaling normalization and normalizing phosphoproteomics data based on proteomics data.</p>
+<div align="center">
+<img src="manual_picture2/normalizationstep.png" width="50%">
+</div>
+<h4 class="mume-header" id="how-to-get-analysis-results-1">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Preprocessing&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the running button in the Step2 and the normalized data of p-sites based on a total sum scaling will apear on the right.</li>
+<li>Click the running button in Step3 and normalized data of p-sites based on proteomics data will apear on the right.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_maxquant/norm1.png" width="100%">
+</div>
+<div align="center">
+<img src="manual_picture2/preprocessing_maxquant/norm2.png" width="100%">
+</div>
+<h2 class="mume-header" id="preprocessing-for-firmiana-data">Preprocessing for Firmiana data</h2>
+
+<h3 class="mume-header" id="import-firmiana-data">Import Firmiana data</h3>
+
+<h4 class="mume-header" id="how-to-import-your-firmiana-data">How to import your Firmiana data</h4>
+
+<ol>
+<li>Go to the &#x2018;Import data&#x2019; tab.</li>
+<li>Choose &apos;Firmiana&apos; to start with data from Firmiana.</li>
+<li>Click &#x2018;Browse&#x2019; to upload phosphoproteomics experimental design file in .txt format.</li>
+<li>Zip your Mascot xml files and Phosphoproteomics peptide files, and then upload. The folder tree is shown below. File names of Mascot xml files and Phosphoproteomics peptide files must be consistent with &#x2019;Experiment_Code&#x2019; of phosphoproteomics experimental design file.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/tree1.png" width="25%">
+<img src="manual_picture2/phosphorylation_exp_design_info_csv.png" width="50%">
+</div>
+<ol start="6">
+<li>Proteomics data is optional. Click &#x2018;Browse&#x2019; to upload proteomics experimental design file in .txt format. Zip your Profiling_gene_txt and upload. The folder tree is shown below. File names of Profiling_gene_txt must be consistent with &#x2018;Expriment_Code&#x2019; of proteomics experimental design file.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/tree2.png" width="25%">
+<img src="manual_picture2/profiling_exp_design_info_csv.png" width="50%">
+</div>
+<ol start="7">
+<li>Uploaded data will be shown in the &apos;Data Overview&apos; secondary tab.</li>
+<li>You can also choose &#x2018;load exmaple data&#x2019; to use exmaple files.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_firmiana/import_firmiana_data.png" width="100%">
+</div>
+<h3 class="mume-header" id="parser">Parser</h3>
+
+<h4 class="mume-header" id="function-2">Function</h4>
+
+<p>If you start with .xml files from mascot results, you can run this button to parser them to sites score files, based on which .csv files of phosphorylation sites with confidence score will be genereated.</p>
+<div align="center">
+<img src="manual_picture2/parserstep.png" width="25%">
+</div>
+<h4 class="mume-header" id="how-to-get-analysis-results-2">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &apos;Preprocessing&apos; tab.</li>
+<li>Click the running button in Step1 and the file will apear on the right.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_firmiana/parser.png" width="100%">
+</div>
+<h3 class="mume-header" id="quality-control-and-merging-1">Quality control and merging</h3>
+
+<h4 class="mume-header" id="function-3">Function</h4>
+
+<p>Generate merged phosphoproteomics data frame based on peptides files.</p>
+<div align="center">
+<img src="manual_picture2/qcstep.png" width="50%">
+</div>
+<div align="center">
+<img src="manual_picture2/spc.png" width="25%">
+</div>
+<h4 class="mume-header" id="how-to-get-analysis-results-3">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Preprocessing&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the running button in Step2 and the file will apear on the right.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_firmiana/qc.png" width="100%">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results-1">Interpretation of analysis results</h4>
+
+<p>We performed quality control for identified phosphopeptides using PhosMap, those phosphopeptides that met 1% FDR at peptide level and had ion score greater than 20 and the highest confidence probabilities of p-sites computed by Mascot, were kept. We merged phosphopeptides list with quantitative value from all experiments to generate a matrix for analysis.</p>
+<h3 class="mume-header" id="mapping-p-sites-to-protein">Mapping p-sites to protein</h3>
+
+<h4 class="mume-header" id="function-4">Function</h4>
+
+<p>Mapping protein gi number to gene symbol and outputing expression profile matrix with gene symbol.<br>
+Constructing the data frame with unique phosphorylation site for each protein sequence.</p>
+<div align="center">
+<img src="manual_picture2/mappingstep.png" width="50%">
+</div>
+<h4 class="mume-header" id="how-to-get-analysis-results-4">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Preprocessing&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the running button in Step3 and the file will apear on the right.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_firmiana/mapping.png" width="100%">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results-2">Interpretation of analysis results</h4>
+
+<p>Combining the phosphopeptides sequence, modification position, attached protein ID and the built-in human protein reference database of PhosMap, all p-sites were mapped to the corresponding protein sequence and represented by unique p-sites identifier (upsID) that consisted of a protein GI number/accession, gene symbol and location of the p-site in the protein sequence. In addition, the matched proteome data with phosphoproteome were collected at each time point in Ressa, et al. study. Finally, 3,649 unique p-sites were obtained and their quantitative values were normalized by matched protein profiling data using PhosMap.</p>
+<h3 class="mume-header" id="data-normalization-1">Data normalization</h3>
+
+<h4 class="mume-header" id="function-5">Function</h4>
+
+<p>PhosMap provides two kinds of normalizations, a total sum scaling normalization and normalizing phosphoproteomics data based on proteomics data.</p>
+<div align="center">
+<img src="manual_picture2/normalizationstep.png" width="50%">
+</div>
+<h4 class="mume-header" id="how-to-get-analysis-results-5">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Preprocessing&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the running button in the Step4 and the normalized data of p-sites based on a total sum scaling will apear on the right.</li>
+<li>Click the running button in Step5 and normalized data of p-sites based on proteomics data will apear on the right.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/preprocessing_firmiana/norm1.png" width="100%">
+</div>
+<div align="center">
+<img src="manual_picture2/preprocessing_firmiana/norm2.png" width="100%">
+</div>
+<h2 class="mume-header" id="analysis-and-visualization">Analysis and visualization</h2>
+
+<p>PhosMap incorporated six analysis modules: dimension reduction analysis, differential expression analysis, time course analysis, kinase activity prediction, phosphorylation motif enrichment analysis and survival analysis.</p>
+<h3 class="mume-header" id="upload-data">Upload data</h3>
+
+<h4 class="mume-header" id="function-6">Function</h4>
+
+<p>In this step, you can upload your preprocessed data to PhosMap, such as the phosphorylation dataframe. If you have not preprocessed your data, you must preprocess it with PhosMap (go to the &#x2018;Preprocessing&#x2019; tab) or do it yourself.</p>
+<h4 class="mume-header" id="how-to-upload-your-data">How to upload your data</h4>
+
+<ol>
+<li>Go to the &apos;Analysis Data Upload&apos; under &apos;Analysis&apos; tab.</li>
+<li>Choose &apos;example data&apos; or follow the prompts to upload your own corresponding three files.</li>
+</ol>
+<div align="center">
+<img src="manual_picture2/analysis/import_data.png" width="100%">
+</div>
+<h3 class="mume-header" id="dimension-reduction-analysis">Dimension reduction analysis</h3>
+
+<h4 class="mume-header" id="function-7">Function</h4>
+
+<p>In PhosMap, Dimension reduction analysis methods allowed for PCA, t-SNE and UMAP.</p>
+<h4 class="mume-header" id="the-meaning-of-the-parameters">The meaning of the parameters</h4>
+
+<ol>
+<li>&#x2018;Title&#x2019; refers to the main title of the plot.</li>
+<li>&#x2018;Legend title&#x2019; refers to the title of the legend in the plot.</li>
+<li>&#x2018;Random seed&#x2019; is a parameter for t-SNE that sets the seed for the random number generator. This can be used to ensure reproducibility of results.</li>
+<li>&#x2018;Perplexity&#x2019; is a numerical value for t-SNE, with a default value of 2. It balances the focus between preserving the local and global structure of the data.</li>
+<li>&#x2018;Neighbors&#x2019; is a parameter for UMAP that refers to the size of the local neighborhood (in terms of the number of neighboring sample points) used for manifold approximation. Larger values result in more global views of the manifold, while smaller values result in more local data being preserved.</li>
+</ol>
+<h4 class="mume-header" id="how-to-get-analysis-results-6">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &apos;Dimension reduction analysis&apos; under &#x2018;Analysis&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the &#x2018;Analysis&#x2019; button.</li>
+<li>The PCA, t-SNE and UMAP plot after running will appear on the right.</li>
+<li>Click the download button to download the plot file.</li>
+</ol>
+<div style="text-align: center;">
+  <img src="manual_picture2/analysis/dimensionreductionanalysis.png" style="max-width: 100%;">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results-3">Interpretation of analysis results</h4>
+
+<p>To extract an overview of the effect of the different time course treatments, we performed PCA analysis in the downstream analysis module of PhosMap. We could see that phosphorylation expression profiles of colorectal cancer cells after longer (24h and 48h) vemurafenibin treatment were quite different from those after short treatment (2h and 6h). In addition, it shows that principal component 1 (PC1), with 31.77%, is superior to 20% from original literature and demonstrates phosphorylation expression profile normalized by matched proteomics data has an advantage over representing the variation over time in the BRAFi-treated samples.</p>
+<h3 class="mume-header" id="differential-expression-analysis">Differential expression analysis</h3>
+
+<h4 class="mume-header" id="function-8">Function</h4>
+
+<p>In PhosMap, differential expression analysis methods allowed for limma, SAM and ANOVA Data analysis.</p>
+<h4 class="mume-header" id="the-meaning-of-the-parameters-1">The meaning of the parameters</h4>
+
+<ol>
+<li>
+<p>&#x2018;Control&#x2019; refers to the control group in the experiment.</p>
+</li>
+<li>
+<p>&#x2018;Experiment&#x2019; refers to the experimental group in the experiment.</p>
+</li>
+<li>
+<p>&#x2018;P-value threshold&#x2019; is the threshold for determining statistical significance based on the p-value.</p>
+</li>
+<li>
+<p>&#x2018;P-value adjust method&#x2019; is the method used to adjust p-values for multiple comparisons.</p>
+</li>
+<li>
+<p>&#x2018;FC threshold&#x2019; is the fold change threshold for determining significant changes in phosphorylation levels.</p>
+</li>
+<li>
+<p>&#x2018;nperms&#x2019; is a parameter for the SAM method that specifies the number of permutations to perform.</p>
+</li>
+<li>
+<p>&#x2018;Minimum FDR&#x2019; is the minimum false discovery rate threshold for determining statistical significance.</p>
+</li>
+<li>
+<p>&#x2018;Clustering distance rows&#x2019; is a parameter for heatmap generation that specifies the distance metric used for clustering rows.</p>
+</li>
+<li>
+<p>&#x2018;Clustering method&#x2019; is a parameter for heatmap generation that specifies the clustering method used to cluster rows and columns.</p>
+</li>
+</ol>
+<h4 class="mume-header" id="how-to-get-analysis-results-7">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &apos;Differential Expression Analysis&apos; under &#x2018;Analysis&#x2019; tab.</li>
+<li>Go to the &apos;limma&apos;, &apos;SAM&apos; or &apos;ANOVA&apos; secondary tab.</li>
+<li>Choose Control and Experiment used for differential Expression Analysis.</li>
+<li>Choose &apos;Interactive mode&apos; and click the &apos;Analysis&#x2019; button. The interactive plot after running will appear on the right.</li>
+<li>Choose &apos;Static mode&apos; and click the &apos;Analysis&#x2019; button. The static plot after running will appear on the right.</li>
+<li>Click &#x2018;Plot Heatmap&#x2019; button. The heatmap will apear in the pop-up window.</li>
+<li>Click the download button to download the plot file.</li>
+</ol>
+<div style="text-align: center;">
+  <img src="manual_picture2/analysis/limma1.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/limma2.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/limma3.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/sam1.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/sam2.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/anova1.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/anova2.png" style="max-width: 100%;">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results-4">Interpretation of analysis results</h4>
+
+<p>In order to show differential expression analysis between two experimental conditions. We use the limma method integrated into differential expression analysis module of PhosMap to identify 128 significant differently expressed p-sites (DEPs) between the samples with BRAFi-treated for two hours and control samples (P value &lt; 0.05 and fold change &gt; 2). 139 p-sites were up-regulated in the BRAFi-treated samples. The most disparate difference is observed in DAP_S51, whose phosphoserine is related to the MTOR pathway. 99 p-sites were down-regulated in the BRAFi-treated samples.</p>
+<p>For the multiple experimental conditions, we leveraged the embedded ANOVA analysis of PhosMap and identified 548 DEPs among the five time points (P value &lt; 0.1 and fold change &gt; 2).</p>
+<h3 class="mume-header" id="time-course-analysis">Time Course Analysis</h3>
+
+<h4 class="mume-header" id="function-9">Function</h4>
+
+<p>Fuzzy clustering was applied to time course analysis for discovering patterns associated with time points in PhosMap.The corresponding line chart combined with membership for each cluster was also drawn.</p>
+<h4 class="mume-header" id="the-meaning-of-the-parameters-2">The meaning of the parameters</h4>
+
+<ol>
+<li>&#x2018;Minimum membership value&#x2019; is a threshold for determining the minimum membership value for a data point to be included in a cluster.</li>
+<li>&#x2018;Iteration&#x2019; is the number of iterations to perform in the clustering algorithm.</li>
+<li>&#x2018;Number of clusters&#x2019; is the number of clusters to generate in the clustering algorithm.</li>
+</ol>
+<h4 class="mume-header" id="how-to-get-analysis-results-8">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Time course Analysis (fuzzy clustering)&#x2019; under &#x2018;Analysis&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the &#x2018;Analysis&#x2019; button. The plot after running will appear on the right.</li>
+<li>Click the download button to download the plot file.</li>
+</ol>
+<h4 class="mume-header" id="interpretation-of-analysis-results-5">Interpretation of analysis results</h4>
+
+<p>These 548 DEPs were used as inputs in the time course analysis module of PhosMap, then 9 strong expression patterns were generated. Two major clusters show significant downregulation at the phosphoproteomics signalling level upon BRAFi treatment in line with the original literature. Cluster 1 responds within 2 hours, an early treatment response. Cluster 2 responds within 24 hours, a late treatment response.</p>
+<div style="text-align: center;">
+  <img src="manual_picture2/analysis/timecourse.png" style="max-width: 100%;">
+</div>
+<h3 class="mume-header" id="kinase-activity-prediction-ksea">Kinase activity prediction (KSEA)</h3>
+
+<h4 class="mume-header" id="function-10">Function</h4>
+
+<p>In PhosMap, KSEA was used to predict kinase activity.</p>
+<h4 class="mume-header" id="the-meaning-of-the-parameters-3">The meaning of the parameters</h4>
+
+<ol>
+<li>&#x2018;Control&#x2019; refers to the control group in the experiment.</li>
+<li>&#x2018;Experiment&#x2019; refers to the experimental group in the experiment.</li>
+<li>&#x2018;Species&#x2019; refers to the species of the organism being studied.</li>
+<li>&#x2018;Scale&#x2019; is a parameter for scaling the data before generating the heatmap.</li>
+<li>&#x2018;Clustering distance rows&#x2019; is a parameter for heatmap generation that specifies the distance metric used for clustering rows.</li>
+<li>&#x2018;Clustering method&#x2019; is a parameter for heatmap generation that specifies the clustering method used to cluster rows and columns.</li>
+</ol>
+<h4 class="mume-header" id="how-to-get-analysis-results-9">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Kinase-Substrate Enrichment Analysis&#x2019; under &#x2018;Analysis&#x2019; tab.</li>
+<li>Select &#x2018;Multiple groups&#x2019; or &#x2018;Two groups&#x2019; according to the number of groups of your data.</li>
+<li>Click the first &apos;Analysis&apos; button. If &#x2018;Multiple groups&#x2019; is selected, after running, the plot will appear on the right. Click &#x2018;view result&#x2019; to view and download the kinase prediction time course result. If &#x2018;Two groups&#x2019; is selected, only the phoshorylation dataframe will appear on the right.</li>
+<li>Select a cluster if &#x2018;Multiple groups&#x2019; is selected. Click the second &#x2018;Analysis&#x2019; button. After running, the heatmap will appear on the right.</li>
+<li>Click the download button to download the plot file.</li>
+</ol>
+<div style="text-align: center;">
+  <img src="manual_picture2/analysis/kap1.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/kap2.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/kap3.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/kap4.png" style="max-width: 100%;">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results-6">Interpretation of analysis results</h4>
+
+<p>Afterwards, the substrates from the two clusters are imported into the KSEA module of PhosMap to infer kinase activities. The results indicate that CDK1/2, MAPK1/3 and AKT1 are suppressed during BRAFi treatment.</p>
+<h3 class="mume-header" id="motif-enrichment-analysis">Motif enrichment analysis</h3>
+
+<h4 class="mume-header" id="function-11">Function</h4>
+
+<p>PhosMap allowed for performing MEA on user defined phosphopeptides lists to provide clues for finding candidate kinases that are not present in the database.</p>
+<h4 class="mume-header" id="the-meaning-of-parameters">The meaning of parameters</h4>
+
+<ol>
+<li>&#x2018;Fasta type&#x2019; refers to the type of fasta file used as input for the analysis.</li>
+<li>&#x2018;Selected row number for plotting motif logo&#x2019; is the number of rows to be selected for generating the motif logo plot.</li>
+<li>&#x2018;Matched seqs threshold&#x2019; is the threshold for determining the minimum number of matched sequences required for a motif to be considered significant.</li>
+<li>&#x2018;Scale&#x2019; is a parameter for scaling the data before generating the heatmap.</li>
+<li>&#x2018;Distance metric&#x2019; is a parameter for heatmap generation that specifies the distance metric used for clustering rows.</li>
+<li>&#x2018;Clustering method&#x2019; is a parameter for heatmap generation that specifies the clustering method used to cluster rows and columns.</li>
+</ol>
+<h4 class="mume-header" id="how-to-get-analysis-results-10">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2018;Motif Enrichment Analysis&#x2019; under &#x2018;Analysis&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the &#x2018;Analysis&#x2019; button.</li>
+<li>The foreground dataframe mapped to motifs is shown on the right after running.</li>
+<li>Select row number for plotting logo.</li>
+<li>Click the first &#x2018;Plot&#x2019; button, and the logo will appear on the right.</li>
+<li>Modify the parameters below.</li>
+<li>Click the second &#x2018;Plot&#x2019; button.</li>
+<li>The heatmap will appear on the right.</li>
+<li>Click the download button to download the plot file.</li>
+</ol>
+<div style="text-align: center;">
+  <img src="manual_picture2/analysis/motif1.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/motif2.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/motif3.png" style="max-width: 100%;">
+</div>
+<h4 class="mume-header" id="interpretation-of-analysis-results-7">Interpretation of analysis results</h4>
+
+<p>The 3,649 identified phosphor-peptides as foreground sequences are used for MEA of PhosMap and the results further strengthen the evidence of CDK and MAPK pathway deactivation in BRAF mutant CRC cells in response to BRAFi treatment.</p>
+<h3 class="mume-header" id="survival-analysis">Survival analysis</h3>
+
+<h4 class="mume-header" id="function-12">Function</h4>
+
+<p>This module is used to identify phosphorylation sites or kinases  associated with clinical outcomes of patients. Using kinases or phosphorylation locations files and patients&#x2019; survival information as input matrices, coxph function from survival R package was used to calculate the hazard ratio (HR) and P-value.</p>
+<h4 class="mume-header" id="how-to-get-analysis-results-11">How to get analysis results</h4>
+
+<ol>
+<li>Go to the &#x2019;Survival Analysis&#x2019; under &#x2018;Analysis&#x2019; tab.</li>
+<li>Modify the parameters according to your needs.</li>
+<li>Click the &#x2018;Analysis&#x2019; button.</li>
+<li>The summary dataframe list will appear on the right.</li>
+<li>Click the &#x2018;Plot&#x2019; button.</li>
+<li>The plot after running will appear on the right.</li>
+<li>Click the download button to download the plot file.</li>
+</ol>
+<div style="text-align: center;">
+  <img src="manual_picture2/analysis/surv1.png" style="max-width: 100%;">
+  <img src="manual_picture2/analysis/surv2.png" style="max-width: 100%;">
+</div>
+<h2 class="mume-header" id="references">References</h2>
+
+<ol>
+<li>Feng, J., Ding, C., Qiu, N., Ni, X., Zhan, D., Liu, W., Xia, X., Li, P., Lu, B. and Zhao, Q. (2017) Firmiana: towards a one-stop proteomic cloud platform for data processing and analysis. Nature biotechnology, 35, 409-412.</li>
+<li>Ressa, A., Bosdriesz, E., De Ligt, J., Mainardi, S., Maddalo, G., Prahallad, A., Jager, M., De La Fonteijne, L., Fitzpatrick, M. and Groten, S. (2018) A system-wide approach to monitor responses to synergistic BRAF and EGFR inhibition in colorectal cancer cells. Molecular &amp; Cellular Proteomics, 17, 1892-1908.</li>
+</ol>
+
+      </div>
+      <div class="md-sidebar-toc">
+<div class="md-toc">
+<details style="padding:0;;padding-left:0px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#procedure" class="md-toc-link"><p>PROCEDURE</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#notice" class="md-toc-link">
+            <p>Notice</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#introduction-of-example-data" class="md-toc-link">
+            <p>Introduction of example data</p>
+
+          </a></div><details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#preprocessing-for-maxquant-data" class="md-toc-link"><p>Preprocessing for Maxquant data</p>
+</a>
+          </summary>
+        <div>
+          <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#import-maxquant-data" class="md-toc-link"><p>Import MaxQuant data</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-import-your-maxquant-data" class="md-toc-link">
+            <p>How to import your MaxQuant data</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#quality-control-and-merging" class="md-toc-link"><p>Quality control and merging</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#data-normalization" class="md-toc-link"><p>Data normalization</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-1" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-1" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#preprocessing-for-firmiana-data" class="md-toc-link"><p>Preprocessing for Firmiana data</p>
+</a>
+          </summary>
+        <div>
+          <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#import-firmiana-data" class="md-toc-link"><p>Import Firmiana data</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-import-your-firmiana-data" class="md-toc-link">
+            <p>How to import your Firmiana data</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#parser" class="md-toc-link"><p>Parser</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-2" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-2" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#quality-control-and-merging-1" class="md-toc-link"><p>Quality control and merging</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-3" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-3" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-1" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#mapping-p-sites-to-protein" class="md-toc-link"><p>Mapping p-sites to protein</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-4" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-4" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-2" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#data-normalization-1" class="md-toc-link"><p>Data normalization</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-5" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-5" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#analysis-and-visualization" class="md-toc-link"><p>Analysis and visualization</p>
+</a>
+          </summary>
+        <div>
+          <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#upload-data" class="md-toc-link"><p>Upload data</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-6" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-upload-your-data" class="md-toc-link">
+            <p>How to upload your data</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#dimension-reduction-analysis" class="md-toc-link"><p>Dimension reduction analysis</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-7" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#the-meaning-of-the-parameters" class="md-toc-link">
+            <p>The meaning of the parameters</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-6" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-3" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#differential-expression-analysis" class="md-toc-link"><p>Differential expression analysis</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-8" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#the-meaning-of-the-parameters-1" class="md-toc-link">
+            <p>The meaning of the parameters</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-7" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-4" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#time-course-analysis" class="md-toc-link"><p>Time Course Analysis</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-9" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#the-meaning-of-the-parameters-2" class="md-toc-link">
+            <p>The meaning of the parameters</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-8" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-5" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#kinase-activity-prediction-ksea" class="md-toc-link"><p>Kinase activity prediction (KSEA)</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-10" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#the-meaning-of-the-parameters-3" class="md-toc-link">
+            <p>The meaning of the parameters</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-9" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-6" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#motif-enrichment-analysis" class="md-toc-link"><p>Motif enrichment analysis</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-11" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#the-meaning-of-parameters" class="md-toc-link">
+            <p>The meaning of parameters</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-10" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#interpretation-of-analysis-results-7" class="md-toc-link">
+            <p>Interpretation of analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    <details style="padding:0;;padding-left:24px;" open>
+        <summary class="md-toc-link-wrapper">
+          <a href="#survival-analysis" class="md-toc-link"><p>Survival analysis</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#function-12" class="md-toc-link">
+            <p>Function</p>
+
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#how-to-get-analysis-results-11" class="md-toc-link">
+            <p>How to get analysis results</p>
+
+          </a></div>
+        </div>
+      </details>
+    
+        </div>
+      </details>
+    <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#references" class="md-toc-link">
+            <p>References</p>
+
+          </a></div>
+        </div>
+      </details>
+    
+</div>
+</div>
+      <a id="sidebar-toc-btn">&#x2261;</a>
+    
+    
+    
+    
+    
+    
+    
+    
+<script>
+document.body.setAttribute('html-show-sidebar-toc', true)
+var sidebarTOCBtn = document.getElementById('sidebar-toc-btn')
+sidebarTOCBtn.addEventListener('click', function(event) {
+  event.stopPropagation()
+  if (document.body.hasAttribute('html-show-sidebar-toc')) {
+    document.body.removeAttribute('html-show-sidebar-toc')
+  } else {
+    document.body.setAttribute('html-show-sidebar-toc', true)
+  }
+})
+</script>
+      
+  
+    </body></html>

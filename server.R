@@ -1,4 +1,4 @@
-online = FALSE
+online = F
 
 #
 # This is the server logic of a Shiny web application. You can run the
@@ -51,16 +51,16 @@ server<-shinyServer(function(input, output, session){
         h5("If the following video fails to play, you can choose to open these links instead."),
         tags$ol(
           tags$li(
-            tags$a(href = "https://www.youtube.com/watch?v=KGccNSmjhsk", target = "_blank", "https://www.youtube.com/watch?v=KGccNSmjhsk")
+            tags$a(href = "https://youtu.be/2ZlMqMJjNU8", target = "_blank", "https://youtu.be/2ZlMqMJjNU8")
           ),
           tags$li(
-            tags$a(href = "https://www.bilibili.com/video/BV1zh411F7vJ/", target = "_blank", "https://www.bilibili.com/video/BV1zh411F7vJ/")
+            tags$a(href = "https://www.bilibili.com/video/BV1tj411z7Fe/", target = "_blank", "https://www.bilibili.com/video/BV1tj411z7Fe/")
           ),
           tags$li(
             tags$a(href = "https://bio-inf.shinyapps.io/phosmap_video/", target = "_blank", "https://bio-inf.shinyapps.io/phosmap_video/")
           )
         ),
-        tags$iframe(width="850", height="700", target = "_blank", src="https://bio-inf.shinyapps.io/phosmap_video/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
+        tags$iframe(width="850", height="700", src="https://bio-inf.shinyapps.io/phosmap_video/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
         easyClose = T,
         footer = modalButton("OK")
       ))
@@ -551,7 +551,8 @@ server<-shinyServer(function(input, output, session){
                spectrum file name used in the case data.</br> </br>
                
                The <strong>'Pair'</strong> column is optional.If there is no pair 
-               information, leave it blank. Otherwise, 'Pair' numbers of paired 
+               information, you can either fill the 'Pair' column with 0, or leave
+               it blank. Otherwise, 'Pair' numbers of paired 
                samples should be the same. Click the button to download the 
                template with 'Pair' information.")
   # maxqunt
@@ -1105,7 +1106,7 @@ server<-shinyServer(function(input, output, session){
         sendSweetAlert(
           session = session,
           title = "Attention...",
-          text = "Due to limited hardware resources, please use the local version.",
+          text = "Due to limited hardware resources, please use the local version. You can check PhosMap performance by watching the tutorial video on the home page.",
           type = "info",
           btn_labels = "OK"
         )
@@ -3415,7 +3416,7 @@ server<-shinyServer(function(input, output, session){
     }
   })
   
-  pca <- reactive({
+  pca <- eventReactive(input$drbt,{
     validate(
       need(fileset()[[1]], 'Please check that the experimental design file is uploaded !'),
       need(fileset()[[2]], 'Please check that the expression dataframe file is uploaded !')
@@ -3526,6 +3527,27 @@ server<-shinyServer(function(input, output, session){
     filename = function(){paste("pca_result", userID,".pdf",sep="")},
     content = function(file){
       file.copy(paste('tmp/',userID,'/analysis/pca/joinedpca.pdf',sep=''),file)
+    }
+  )
+  
+  observeEvent(
+    input$viewpcaresult, {
+      showModal(modalDialog(
+        title = "Score matrix",
+        size = "l",
+        dataTableOutput("pcascore"),
+        div(downloadButton("pcascoredl"), style = "display:flex; justify-content:center; align-item:center;"),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$pcascore <- renderDataTable(pca()[[2]])
+  output$pcascoredl <- downloadHandler(
+    filename = function(){paste("pca_matrix_score", userID,".csv",sep="")},
+    content = function(file){
+      write.csv(pca()[[2]],file,row.names = FALSE)
     }
   )
   
@@ -3750,7 +3772,8 @@ server<-shinyServer(function(input, output, session){
     input$limmaphbt, {
       if(click_counter$limma_count) {
         if(nrow(limma()[[1]] > 0)){
-          ph <- pheatmap(limma()[[1]],
+          limma_for_ph <- isolate(limma()[[1]])
+          ph <- pheatmap(limma_for_ph,
                          scale = input$limmaphscale,
                          cluster_rows = input$limmaphcluster,
                          cluster_cols = FALSE,
@@ -3762,20 +3785,34 @@ server<-shinyServer(function(input, output, session){
           )
           dev.off()
           output$limmaph <- renderPlot(ph)
-          output$limmainterph <- renderPlotly(
-            heatmaply(
-              limma()[[1]],
-              scale = input$limmaphscale,
-              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
-                low = "blue",
-                high = "red"
-              ),
-              Rowv = input$limmaphcluster,
-              Colv = FALSE,
-              hclust_method = input$limmaphclusmethod,
-              distance_method = input$limmaphdistance
+          if((nrow(limma_for_ph) > 150) & online) {
+            output$limmainterph <- renderPlotly({
+              p <- plot_ly() %>%
+                add_annotations(
+                  text = "Differential phosphorylation sites exceed 150. 
+                Please use the local version to view the interactive heatmap.",
+                  xref = "paper", yref = "paper",
+                  x = 0.5, y = 0.1,
+                  showarrow = FALSE,
+                  font = list(size = 20)
+                )
+            })
+          } else {
+            output$limmainterph <- renderPlotly(
+              heatmaply(
+                limma_for_ph,
+                scale = input$limmaphscale,
+                scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                  low = "blue",
+                  high = "red"
+                ),
+                Rowv = input$limmaphcluster,
+                Colv = FALSE,
+                hclust_method = input$limmaphclusmethod,
+                distance_method = input$limmaphdistance
+              )
             )
-          )
+          }
         }
       } else {
         sendSweetAlert(
@@ -3796,7 +3833,6 @@ server<-shinyServer(function(input, output, session){
       specifiedpoints <- input$limmalabelspec
       specifiedpoints <- strsplit(specifiedpoints, "\n")[[1]]
       if(identical(specifiedpoints, character(0))){specifiedpoints <- "abcdefghij"}
-      print(specifiedpoints)
       limma_results_df$sign <- ifelse((limma_results_df$pvalue < input$limmalabelpvalue & abs(limma_results_df$logFC) > log2(input$limmalabelfc)) | limma_results_df$ID %in% specifiedpoints,limma_results_df$ID,NA)
       p <- ggplot(data = limma_results_df, aes(x = logFC, y = -log10(pvalue), text = paste("ID:", ID))) +
         geom_point(aes(color = change), alpha=0.6, size=2) +
@@ -3998,34 +4034,51 @@ server<-shinyServer(function(input, output, session){
   observeEvent(
     input$samphbt, {
       if(click_counter$sam_count) {
-        if(nrow(sam()[[3]]> 0)){
-          ph <- pheatmap(sam()[[3]],
-                         scale = input$samphscale,
-                         cluster_rows = input$samphcluster,
-                         cluster_cols = FALSE,
-                         annotation_col = sam()[[4]],
-                         annotation_row = sam()[[5]],
-                         show_rownames = input$samphrowname,
-                         clustering_distance_rows = input$samphdistance,
-                         clustering_method = input$samphclusmethod
-          )
-          dev.off()
-          output$samph <- renderPlot(ph)
-          output$samphinter <- renderPlotly(
-            heatmaply(
-              sam()[[3]],
-              scale = input$samphscale,
-              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
-                low = "blue",
-                high = "red"
-              ),
-              Rowv = input$samphcluster,
-              Colv = FALSE,
-              hclust_method = input$samphclusmethod,
-              distance_method = input$samphdistance
+        isolate(
+          if(nrow(sam()[[3]]> 0)){
+            sam_for_ph <- isolate(sam()[[3]])
+            ph <- pheatmap(sam_for_ph,
+                           scale = input$samphscale,
+                           cluster_rows = input$samphcluster,
+                           cluster_cols = FALSE,
+                           annotation_col = sam()[[4]],
+                           annotation_row = sam()[[5]],
+                           show_rownames = input$samphrowname,
+                           clustering_distance_rows = input$samphdistance,
+                           clustering_method = input$samphclusmethod
             )
-          )
-        }
+            dev.off()
+            output$samph <- renderPlot(ph)
+            if((nrow(sam()[[3]]) > 150) & online ) {
+              output$samphinter <- renderPlotly({
+                p <- plot_ly() %>%
+                  add_annotations(
+                    text = "Differential phosphorylation sites exceed 150. 
+                Please use the local version to view the interactive heatmap.",
+                    xref = "paper", yref = "paper",
+                    x = 0.5, y = 0.1,
+                    showarrow = FALSE,
+                    font = list(size = 20)
+                  )
+              })
+            } else {
+              output$samphinter <- renderPlotly(
+                heatmaply(
+                  sam_for_ph,
+                  scale = input$samphscale,
+                  scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                    low = "blue",
+                    high = "red"
+                  ),
+                  Rowv = input$samphcluster,
+                  Colv = FALSE,
+                  hclust_method = input$samphclusmethod,
+                  distance_method = input$samphdistance
+                )
+              )
+            }
+          }
+        )
       } else {
         sendSweetAlert(
           session = session,
@@ -4077,7 +4130,8 @@ server<-shinyServer(function(input, output, session){
     input$anovaphbt, {
       if(click_counter$anova_count) {
         if(nrow(anova()[[1]] > 0)) {
-          ph <- pheatmap(anova()[[1]],
+          anova_for_ph <- isolate(anova()[[1]])
+          ph <- pheatmap(anova_for_ph,
                          scale = input$anovaphscale,
                          cluster_rows = input$anovaphcluster,
                          cluster_cols = FALSE,
@@ -4095,20 +4149,34 @@ server<-shinyServer(function(input, output, session){
               ggsave(filename = file,plot = p,width = 9,height = 5)
             }
           )
-          output$anovainterph <- renderPlotly(
-            heatmaply(
-              anova()[[1]],
-              scale = input$anovaphscale,
-              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
-                low = "blue",
-                high = "red"
-              ),
-              Rowv = input$anovaphcluster,
-              Colv = FALSE,
-              hclust_method = input$anovaphclusmethod,
-              distance_method = input$anovaphdistance,
+          if((nrow(anova_for_ph) > 150) & online) {
+            output$anovainterph <- renderPlotly({
+              p <- plot_ly() %>%
+                add_annotations(
+                  text = "Differential phosphorylation sites exceed 150. 
+                Please use the local version to view the interactive heatmap.",
+                  xref = "paper", yref = "paper",
+                  x = 0.5, y = 0.1,
+                  showarrow = FALSE,
+                  font = list(size = 20)
+                )
+            })
+          } else {
+            output$anovainterph <- renderPlotly(
+              heatmaply(
+                anova_for_ph,
+                scale = input$anovaphscale,
+                scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                  low = "blue",
+                  high = "red"
+                ),
+                Rowv = input$anovaphcluster,
+                Colv = FALSE,
+                hclust_method = input$anovaphclusmethod,
+                distance_method = input$anovaphdistance,
+              )
             )
-          )
+          }
         } 
       } else {
         sendSweetAlert(
@@ -4559,7 +4627,7 @@ server<-shinyServer(function(input, output, session){
       group = factor(group, levels = group_levels)
       
       if(input$kseapair == TRUE) {
-        if (!("Pair" %in% names(fileset()[[1]])) || all(is.na(fileset()[[1]]$Pair) | fileset()[[1]]$Pair == "")) {
+        if (!("Pair" %in% names(fileset()[[1]])) || all(is.na(fileset()[[1]]$Pair) | fileset()[[1]]$Pair == "") || all(fileset()[[1]]$Pair == 0)) {
           sendSweetAlert(
             session = session,
             title = "Error...",
@@ -5134,65 +5202,116 @@ server<-shinyServer(function(input, output, session){
         }
         rownames(motif_group_m_ratio_df) = motifs[index_of_motifs]
         motif_group_m_ratio_df_mat = as.matrix(motif_group_m_ratio_df)
-        if(nrow(motif_group_m_ratio_df_mat) > 0) {
-          if(nrow(motif_group_m_ratio_df_mat) < 15){
-          ph = pheatmap(motif_group_m_ratio_df_mat, 
-                        scale = input$motifscale, 
-                        clustering_distance_cols = input$motifdistance,
-                        clustering_method = input$motifclusmethod,
-                        fontsize = 10,
-                        fontsize_row = 10, 
-                        show_rownames = T, 
-                        cluster_rows = T,
-                        fontsize_col = 12, 
-                        show_colnames = T,
-                        cluster_cols = F,
-                        cellwidth = 15, cellheight = 15,
-                        main = input$motifmain)
-          } else if(nrow(motif_group_m_ratio_df_mat) < 25) {
-            ph = pheatmap(motif_group_m_ratio_df_mat, 
-                          scale = input$motifscale, 
-                          clustering_distance_cols = input$motifdistance,
-                          clustering_method = input$motifclusmethod,
-                          fontsize = 8,
-                          fontsize_row = 8, 
-                          show_rownames = T, 
-                          cluster_rows = T,
-                          fontsize_col = 10, 
-                          show_colnames = T,
-                          cluster_cols = F,
-                          cellwidth = 12, cellheight = 12,
-                          main = input$motifmain)
-          } else {
-            ph = pheatmap(motif_group_m_ratio_df_mat, 
-                          scale = input$motifscale, 
-                          clustering_distance_cols = input$motifdistance,
-                          clustering_method = input$motifclusmethod,
-                          fontsize = 6,
-                          fontsize_row = 6, 
-                          show_rownames = T, 
-                          cluster_rows = T,
-                          fontsize_col = 8, 
-                          show_colnames = T,
-                          cluster_cols = F,
-                          cellwidth = 8, cellheight = 8,
-                          main = input$motifmain)
-          }
-          dev.off()
-          showModal(modalDialog(
-            title = "Heatmap",
-            size = "l",
-            plotOutput("motifenrich2"),
-            div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
-            
-          ))
-          output$motifenrich2 <- renderPlot(ph)
-          output$motifphdl <- downloadHandler(
-            filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
-            content = function(file){
-              ggsave(ph, filename = file,width = 9,height = 9)
+        
+        # 更改
+        breaks_1 <- seq(0, 0.5, 0.1)
+        colors_1 <- colorRampPalette(c('green', 'blue'))(length(breaks_1)-1)
+        
+        breaks_3 <- seq(0.5, 1.5, 0.1)
+        colors_3 <- colorRampPalette(c('blue', 'white', '#FFBFBF'))(length(breaks_3))
+        
+        breaks_4 <- seq(1.5, 2, 0.1)
+        colors_4 <- colorRampPalette(c('#FFBFBF', 'red'))(length(breaks_4))
+        
+        breaks_5 <- seq(2, 4, 0.1)
+        colors_5 <- colorRampPalette(c('red','firebrick'))(length(breaks_5))
+        
+        breaks <- c(breaks_1, breaks_3, breaks_4, breaks_5)
+        breaks <- breaks[which(!duplicated(breaks))]
+        colors <- c(colors_1, colors_3, colors_4, colors_5)
+        colors <- colors[which(!duplicated(colors))]
+        
+        length(breaks)
+        length(which(!duplicated(colors)))
+        ph <- pheatmap(
+          motif_group_m_ratio_df_mat, 
+          scale = 'none', 
+          # annotation_col = annotation_col, 
+          clustering_distance_cols = 'euclidean',
+          clustering_method = input$motifclusmethod,
+          fontsize_row = 6, cutree_rows = 1, show_rownames = TRUE, cluster_rows = TRUE,
+          fontsize_col = 6, cutree_cols = 1, show_colnames = TRUE, cluster_cols = FALSE,
+          border_color = 'black', 
+          # color = colors, 
+          cellwidth = 12, cellheight = 12,
+          breaks = breaks,
+          color = colors,
+          legend_breaks = c(0, 0.5, 1, 1.5, 2, 4),
+          legend_labels = c(0, 0.5, 1, 1.5, 2, 4),
+          main = 'Motif enrichment analysis'
+        )
+        showModal(modalDialog(
+          title = "Heatmap",
+          size = "l",
+          plotOutput("motifenrich2"),
+          div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
+          
+        ))
+        output$motifenrich2 <- renderPlot(ph)
+        output$motifphdl <- downloadHandler(
+          filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
+          content = function(file){
+            ggsave(ph, filename = file,width = 9,height = 9)
           })
-        } 
+        # if(nrow(motif_group_m_ratio_df_mat) > 0) {
+        #   if(nrow(motif_group_m_ratio_df_mat) < 15){
+        #   ph = pheatmap(motif_group_m_ratio_df_mat, 
+        #                 scale = input$motifscale, 
+        #                 clustering_distance_cols = input$motifdistance,
+        #                 clustering_method = input$motifclusmethod,
+        #                 fontsize = 10,
+        #                 fontsize_row = 10, 
+        #                 show_rownames = T, 
+        #                 cluster_rows = T,
+        #                 fontsize_col = 12, 
+        #                 show_colnames = T,
+        #                 cluster_cols = F,
+        #                 cellwidth = 15, cellheight = 15,
+        #                 main = input$motifmain)
+        #   } else if(nrow(motif_group_m_ratio_df_mat) < 25) {
+        #     ph = pheatmap(motif_group_m_ratio_df_mat, 
+        #                   scale = input$motifscale, 
+        #                   clustering_distance_cols = input$motifdistance,
+        #                   clustering_method = input$motifclusmethod,
+        #                   fontsize = 8,
+        #                   fontsize_row = 8, 
+        #                   show_rownames = T, 
+        #                   cluster_rows = T,
+        #                   fontsize_col = 10, 
+        #                   show_colnames = T,
+        #                   cluster_cols = F,
+        #                   cellwidth = 12, cellheight = 12,
+        #                   main = input$motifmain)
+        #   } else {
+        #     ph = pheatmap(motif_group_m_ratio_df_mat, 
+        #                   scale = input$motifscale, 
+        #                   clustering_distance_cols = input$motifdistance,
+        #                   clustering_method = input$motifclusmethod,
+        #                   fontsize = 6,
+        #                   fontsize_row = 6, 
+        #                   show_rownames = T, 
+        #                   cluster_rows = T,
+        #                   fontsize_col = 8, 
+        #                   show_colnames = T,
+        #                   cluster_cols = F,
+        #                   cellwidth = 8, cellheight = 8,
+        #                   main = input$motifmain)
+        #   }
+        #   dev.off()
+        #   showModal(modalDialog(
+        #     title = "Heatmap",
+        #     size = "l",
+        #     plotOutput("motifenrich2"),
+        #     div(downloadButton("motifphdl"), style = "display:flex; justify-content:center; align-item:center;"),
+        #     
+        #   ))
+        #   output$motifenrich2 <- renderPlot(ph)
+        #   output$motifphdl <- downloadHandler(
+        #     filename=function(){paste("motif_heatmap_result", userID,".pdf",sep="")},
+        #     content = function(file){
+        #       ggsave(ph, filename = file,width = 9,height = 9)
+        #   })
+        # } 
       } else {
         sendSweetAlert(
           session = session,

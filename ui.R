@@ -138,9 +138,11 @@ ui <- renderUI(
             "",
             heading = "Notice",
             status = "info",
-            HTML("This server is single-thread and of low-level hardware, we do recommend\
-               users to analyze the data using the demo server with <b>small data sets</b>. \
-               An upgraded hardware is necessary, according to the possible computational\
+            HTML("This server is single-thread and of low-level hardware, we do recommend
+               users to analyze the data using the demo server with <b>small data sets</b>. 
+               To conserve computing resources, <b><u>your connection may be lost due to inactivity.
+               Please refresh the page to reconnect</u></b>. An upgraded hardware is necessary, 
+               according to the possible computational
                cost of the data, to reach the potential of PhosMap."),
             actionButton("viewinstall", "Tutorial video", icon("video")),
             HTML(
@@ -148,15 +150,15 @@ ui <- renderUI(
               <table id='help'>
   <tr>
     <th>Version</th>
+    <th>Preprocessing</th>
     <th>Analysis<br>[Except MEA]</th>
     <th>MEA</th>
-    <th>Preprocessing</th>
   </tr>
   <tr>
     <td>Online</td>
+    <td>MaxQuant:&#x2714; Firmiana:&#x2716; </td>
     <td>&#x2714;</td>
     <td>&#x2716;</td>
-    <td>MaxQuant:&#x2714; Firmiana:&#x2716; </td>
   </tr>
   <tr>
     <td>Local</td>
@@ -207,17 +209,15 @@ ui <- renderUI(
         ),
         column(
           9,
-          # h1(style = "text-align: center;", "PhosMap"),
-          h3(style = "text-align: center;", "PhosMap: an ensemble bioinformatic platform to empower one-stop interactive analysis of quantitative phosphoproteomics"),
+          h3(style = "text-align: center;", "PhosMap: An Ensemble Bioinformatic Platform to Empower One-stop Interactive Analysis of Quantitative Phosphoproteomics"),
           div(style = "text-align:center;", img(src = "main.svg", height = "700px", width = "900px", style = "")),
           
         ),
         column(
           12,
-        br(),
-        hr(),
-        h5(style = "text-align: center;","This website is free and open to all users and there is no login requirement.")
-          
+          br(),
+          hr(),
+          h5(style = "text-align: center;","This website is free and open to all users and there is no login requirement.")
         )
       ),
       
@@ -437,11 +437,11 @@ ui <- renderUI(
       tabPanel(
         "Preprocessing",
         fluidRow(
+          column(2, NULL),
+          column(8, h2(style = "text-align: center;", "Preprocessing")),
+          column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
           conditionalPanel(
             condition = "input.softwaretype == 2",
-            column(2, NULL),
-            column(8, h2(style = "text-align: center;", "Preprocessing")),
-            column(2, actionButton("pre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
             column(
               12,
               conditionalPanel(
@@ -857,9 +857,6 @@ ui <- renderUI(
           ),
           conditionalPanel(
             condition = "input.softwaretype == 1",
-            column(2, NULL),
-            column(8, h2(style = "text-align: center;", "Preprocessing")),
-            column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
             column(
               12,
               conditionalPanel(
@@ -1314,16 +1311,19 @@ ui <- renderUI(
                 column(12, h4("PCA:")),
                 column(6, textInput("pcamain", "main", "PCA")),
                 column(6, textInput("pcalegend", "legend title", "Hour")),
-                column(6, prettyToggle(
-                  inputId = "pcamean",
-                  label_on = "group mean", 
-                  icon_on = icon("check"),
-                  status_on = "info",
-                  status_off = "warning", 
-                  label_off = "group mean",
-                  icon_off = icon("xmark"),
-                  value = F
-                )),
+                column(
+                  6,
+                  prettyToggle(
+                    inputId = "pcamean",
+                    label_on = "group mean", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "group mean",
+                    icon_off = icon("xmark"),
+                    value = F
+                  )
+                ),
                 column(12, h4("t-SNE:")),
                 column(6, textInput("tsnemain", "main", "t-SNE")),
                 column(6, textInput("tsnelegend", "legend title", "Hour")),
@@ -1341,13 +1341,17 @@ ui <- renderUI(
               column(5, plotOutput("pca2")),
               column(1, NULL),
               column(5, plotOutput("pca1")),
-              column(1, downloadBttn(
-                outputId = "pcaplotdl",
-                label = "",
-                style = "material-flat",
-                color = "default",
-                size = "sm"
-              )),
+              column(
+                1,
+                downloadBttn(
+                  outputId = "pcaplotdl",
+                  label = "",
+                  style = "material-flat",
+                  color = "default",
+                  size = "sm"
+                ),
+                actionButton("viewpcaresult", "score matrix", icon("eye"), class = "viewbutton"),
+              ),
               column(5, plotOutput("tsne")),
               column(1, downloadBttn(
                 outputId = "tsneplotdl",
@@ -1722,7 +1726,7 @@ ui <- renderUI(
               conditionalPanel(
                 condition = "input.anovaphdisplaymode == false",
                 column(1, NULL),
-                column(12, plotlyOutput("anovainterph", height = "1700px"))
+                column(12, plotlyOutput("anovainterph"))
               )
             )
           )
@@ -1963,7 +1967,7 @@ ui <- renderUI(
           h2("Motif Enrichment Analysis", class = "tooltitle"),
           column(3, NULL),
           column(6, h4("This module is used to find and visualize enriched motifs.", class = "toolsubtitle")),
-          column(3, downloadButton("dlmotifkinase", "Motif-Kinase Relation")),
+          column(3, downloadButton("dlmotifkinase", HTML("Motif-<span style='color:red;'>Kinase</span> Relation"))),
           # column(3, actionLink("infoLink", "Motif-Kinase Relation", class = "btn-info")),
           
           fluidRow(
@@ -2104,28 +2108,27 @@ ui <- renderUI(
       tabPanel(
         "Tutorial",
         div(style = "text-align:center;", img(src = "tumain.svg", height = "200px", width = "1000px", style = "")),
+        radioGroupButtons(
+          inputId = "tutorialtab",
+          label = "",
+          choices = c("Web Server", 
+                      "Docker", "R Package"),
+          justified = TRUE,
+          checkIcon = list(
+            yes = icon("ok", 
+                       lib = "glyphicon"))
+        ),
         conditionalPanel(
-          condition = "input.tutorialtab == 'Web'",
-          column(10, HTML('<iframe style="height:1200px; width:90%" src= "manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')),
+          condition = "input.tutorialtab == 'Web Server'",
+          HTML('<iframe style="height:1200px; width:90%" src= "manual/manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Docker'",
-          column(10, uiOutput("dockermanual"))
+          uiOutput("dockermanual")
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'R Package'",
-          column(10, HTML('<iframe style="height:1200px; width:90%" src= "package_manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')),
-        ),
-        column(
-          2,
-          radioGroupButtons(
-            inputId = "tutorialtab",
-            label = "",
-            choices = c("Web", 
-                        "Docker", 
-                        "R Package"),
-            direction = "vertical"
-          )
+          HTML('<iframe style="height:1200px; width:90%" src= "package_manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
         )
         
       ),

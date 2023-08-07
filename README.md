@@ -18,21 +18,22 @@
 <a href="https://www.youtube.com/watch?v=KGccNSmjhsk" style="text-decoration:none;">
   <img src="https://user-images.githubusercontent.com/25839884/218346691-ceb2116a-465a-40af-8424-9f30d2348ca9.png" width="3%" alt="" /></a>
 <img src="https://user-images.githubusercontent.com/25839884/218346358-56cc8e2f-a2b8-487f-9088-32480cceabcf.png" width="3%" alt="" />
-<a href="https://www.bilibili.com/video/BV1zh411F7vJ/" style="text-decoration:none;">
+<a href="https://www.bilibili.com/video/BV1tj411z7Fe/" style="text-decoration:none;">
   <img src="https://user-images.githubusercontent.com/25839884/219026751-d7d14cce-a7c9-4e82-9942-8375fca65b99.png" width="3%" alt="" /></a>
 <img src="https://user-images.githubusercontent.com/25839884/218346358-56cc8e2f-a2b8-487f-9088-32480cceabcf.png" width="3%" alt="" />
 
 </div>
    
 ## Table of Contents
+- [Table of Contents](#table-of-contents)
 - [Brief Description](#brief-description)
 - [How to install](#how-to-install)
-  - [Docker-based installation](#installdocker)
-  - [R-based installation](#installr)
+  - [1. Docker-based installation](#1-docker-based-installation)
+  - [2. R-based installation](#2-r-based-installation)
 - [How to use](#how-to-use)
-- [Detail of R package "PhosMap"](#rpackage)
-- [Friendly suggestion](#suggestion)
-- [Reporting issues](#issues)
+- [Detail of R package "PhosMap"](#detail-of-r-package-phosmap)
+- [Friendly suggestion](#friendly-suggestion)
+- [Reporting issues](#reporting-issues)
 - [Contributing](#contributing)
 - [Citation](#citation)
 
