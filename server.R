@@ -1,4 +1,4 @@
-online = F
+online = T
 
 #
 # This is the server logic of a Shiny web application. You can run the
@@ -1373,7 +1373,9 @@ server<-shinyServer(function(input, output, session){
         input$masphosNAthre,
         normmethod = input$mascotnormmethod,
         imputemethod = input$mascotimputemethod,
-        topN = NA, mod_types = c('S', 'T', 'Y')
+        topN = NA, mod_types = c('S', 'T', 'Y'),
+        design_file = design_file,
+        bygroup = FALSE
         )
 
         phospho_data_filtering_STY_and_normalization <-
@@ -1429,14 +1431,15 @@ server<-shinyServer(function(input, output, session){
         }
       } else {
         
-        phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites4(
+        phospho_data_filtering_STY_and_normalization_list <- get_normalized_data_of_psites3(
           summary_df_of_unique_proteins_with_sites,
           phosphorylation_exp_design_info_file_path,
           input$masphosNAthre,
           normmethod = input$mascotnormmethod,
           imputemethod = input$mascotimputemethod,
           topN = NA, mod_types = c('S', 'T', 'Y'),
-          design_file = design_file
+          design_file = design_file,
+          bygroup = TRUE
         )
         
         if (identical(phospho_data_filtering_STY_and_normalization_list, list())) {
