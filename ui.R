@@ -64,6 +64,10 @@ ui <- renderUI(
                      background-color: #D6D9E4;
                      opacity:0.7;
                      z-index: 1050;
+                           }
+                     #manual_iframe {
+                     width: 100%;
+                     height: 100vh;
                      }
                      ",
                  HTML("
@@ -2120,7 +2124,8 @@ ui <- renderUI(
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Web Server'",
-          HTML('<iframe style="height:1200px; width:90%" src= "manual/manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
+          # HTML('<iframe style="height:1200px; width:90%" src= "manual/manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
+          tags$iframe(src="https://liuzan-info.github.io/", id="manual_iframe"),
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Docker'",
