@@ -2,7 +2,7 @@
 <div align="center">
   <img src="www/logo.svg" width="200"/>
   <div>&nbsp;</div>
-  <b>A docker image-based tool to accomplish one-stop interactive analysis of quantitative phosphoproteomics.</b>
+  <b>An Ensemble Bioinformatic Platform to Empower One-stop Interactive Analysis of Quantitative Phosphoproteomics.</b>
   <div>&nbsp;</div>
 
 [![Web Server CD](https://github.com/liuzan-info/PhosMap/actions/workflows/shinyapp.yml/badge.svg)](https://github.com/liuzan-info/PhosMap/actions/workflows/shinyapp.yml)
