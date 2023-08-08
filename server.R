@@ -1,4 +1,4 @@
-online = T
+online = F
 
 #
 # This is the server logic of a Shiny web application. You can run the
@@ -4672,171 +4672,193 @@ server<-shinyServer(function(input, output, session){
   )
   
   ksea2 <- eventReactive(input$kseaanalysisbt2,{
-    if(!is.null(ksea1()[[1]])) {
-      summary_df_list_from_ksea_cluster = get_summary_from_ksea2(ksea1()[[1]], species = input$kseaspecies, log2_label = FALSE, ratio_cutoff = 3) # species参数
-      ksea_regulons_activity_df_cluster = summary_df_list_from_ksea_cluster$ksea_regulons_activity_df
-      med <- apply(abs(ksea_regulons_activity_df_cluster[, 2:ncol(ksea_regulons_activity_df_cluster)]), 1, median) # 增加排序方式选项
-      ksea_regulons_activity_df_cluster$median <- med
+    if(online & (input$kseamode == 'Two groups') & (input$analysisdatatype == 3) & (input$analysisdemodata == 'case2')) {
+      sendSweetAlert(
+        session = session,
+        title = "Attention...",
+        text = "Due to limited hardware resources, please use the local version.",
+        type = "info",
+        btn_labels = "OK"
+      )
+    } else {
       
-      ksea_regulons_activity_df_cluster_sorted <- ksea_regulons_activity_df_cluster[order(-ksea_regulons_activity_df_cluster$median),]
-      ksea_regulons_activity_df_cluster_sorted <- head(ksea_regulons_activity_df_cluster_sorted, 50)
-      ksea_regulons_activity_df_cluster_sorted$median <- NULL
-      
-      ksea_id_cluster = as.vector(ksea_regulons_activity_df_cluster_sorted[,1])
-      ksea_value_cluster = ksea_regulons_activity_df_cluster_sorted[,-1]
-      
-      if(input$kseapair == FALSE) {
-        annotation_col = data.frame(
-          group =  ksea1()[[2]]
-        )
-        rownames(annotation_col) = colnames(ksea_value_cluster)
-      } else {
-        annotation_col = NULL
+      if(!is.null(ksea1()[[1]])) {
+        summary_df_list_from_ksea_cluster = get_summary_from_ksea2(ksea1()[[1]], species = input$kseaspecies, log2_label = FALSE, ratio_cutoff = 3) # species参数
+        ksea_regulons_activity_df_cluster = summary_df_list_from_ksea_cluster$ksea_regulons_activity_df
+        med <- apply(abs(ksea_regulons_activity_df_cluster[, 2:ncol(ksea_regulons_activity_df_cluster)]), 1, median) # 增加排序方式选项
+        ksea_regulons_activity_df_cluster$median <- med
+        
+        ksea_regulons_activity_df_cluster_sorted <- ksea_regulons_activity_df_cluster[order(-ksea_regulons_activity_df_cluster$median),]
+        ksea_regulons_activity_df_cluster_sorted <- head(ksea_regulons_activity_df_cluster_sorted, 50)
+        ksea_regulons_activity_df_cluster_sorted$median <- NULL
+        
+        ksea_id_cluster = as.vector(ksea_regulons_activity_df_cluster_sorted[,1])
+        ksea_value_cluster = ksea_regulons_activity_df_cluster_sorted[,-1]
+        
+        if(input$kseapair == FALSE) {
+          annotation_col = data.frame(
+            group =  ksea1()[[2]]
+          )
+          rownames(annotation_col) = colnames(ksea_value_cluster)
+        } else {
+          annotation_col = NULL
+        }
+        # breaks and colors setting
+        breaks_1 = seq(-4, -2, 0.2) 
+        colors_1 = colorRampPalette(c('#11264f', '#145b7d'))(length(breaks_1)-1) 
+        
+        breaks_2 = seq(-2, -1, 0.2)
+        colors_2 = colorRampPalette(c('#145b7d', '#009ad6'))(length(breaks_2))
+        
+        breaks_3 = seq(-1, 1, 0.2)
+        colors_3 = colorRampPalette(c('#009ad6', 'white', '#FF6600'))(length(breaks_3))
+        
+        breaks_4 = seq(1, 2, 0.2)
+        colors_4 = colorRampPalette(c('#FF6600', 'red'))(length(breaks_4))
+        
+        breaks_5 = seq(2, 4, 0.2)
+        colors_5 = colorRampPalette(c('red', 'firebrick'))(length(breaks_5))
+        
+        breaks = c(breaks_1, breaks_2, breaks_3, breaks_4, breaks_5)
+        breaks = breaks[which(!duplicated(breaks))]
+        color = c(colors_1, colors_2, colors_3, colors_4, colors_5)
+        color = color[which(!duplicated(color))]
+        
+        length(breaks)
+        length(which(!duplicated(color)))
+        list(ksea_value_cluster,annotation_col,breaks,color)
       }
-      # breaks and colors setting
-      breaks_1 = seq(-4, -2, 0.2) 
-      colors_1 = colorRampPalette(c('#11264f', '#145b7d'))(length(breaks_1)-1) 
       
-      breaks_2 = seq(-2, -1, 0.2)
-      colors_2 = colorRampPalette(c('#145b7d', '#009ad6'))(length(breaks_2))
-      
-      breaks_3 = seq(-1, 1, 0.2)
-      colors_3 = colorRampPalette(c('#009ad6', 'white', '#FF6600'))(length(breaks_3))
-      
-      breaks_4 = seq(1, 2, 0.2)
-      colors_4 = colorRampPalette(c('#FF6600', 'red'))(length(breaks_4))
-      
-      breaks_5 = seq(2, 4, 0.2)
-      colors_5 = colorRampPalette(c('red', 'firebrick'))(length(breaks_5))
-      
-      breaks = c(breaks_1, breaks_2, breaks_3, breaks_4, breaks_5)
-      breaks = breaks[which(!duplicated(breaks))]
-      color = c(colors_1, colors_2, colors_3, colors_4, colors_5)
-      color = color[which(!duplicated(color))]
-      
-      length(breaks)
-      length(which(!duplicated(color)))
-      list(ksea_value_cluster,annotation_col,breaks,color)
     }
   })
   
   observeEvent(
     input$kseaanalysisbt2, {
-      if(!is.null(ksea1()[[1]])) {
-        ksea_value_cluster <- ksea2()[[1]]
-        if(nrow(ksea_value_cluster) > 0) {
-          annotation_col <- ksea2()[[2]]
-          breaks <- ksea2()[[3]]
-          color <- ksea2()[[4]]
-          
-          output$kapstep2plottwogroupinter <- renderPlotly(
-            heatmaply(
-              ksea_value_cluster,
-              main = input$kseamain,
-              scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
-                low = "blue", 
-                high = "red", 
-                limits = c(-4, 4)
-              ),
-              scale = input$kseascale,
-              # row_dendrogram = TRUE,  
-              Colv = FALSE, 
-              hclust_method = input$kseaclusmethod, 
-              distance_method = input$kseadistance,
+      if(online & (input$kseamode == 'Two groups') & (input$analysisdatatype == 3) & (input$analysisdemodata == 'case2')) {
+        sendSweetAlert(
+          session = session,
+          title = "Attention...",
+          text = "Due to limited hardware resources, please use the local version.",
+          type = "info",
+          btn_labels = "OK"
+        )
+      } else {
+        if(!is.null(ksea1()[[1]])) {
+          ksea_value_cluster <- ksea2()[[1]]
+          if(nrow(ksea_value_cluster) > 0) {
+            annotation_col <- ksea2()[[2]]
+            breaks <- ksea2()[[3]]
+            color <- ksea2()[[4]]
+            
+            output$kapstep2plottwogroupinter <- renderPlotly(
+              heatmaply(
+                ksea_value_cluster,
+                main = input$kseamain,
+                scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+                  low = "blue", 
+                  high = "red", 
+                  limits = c(-4, 4)
+                ),
+                scale = input$kseascale,
+                # row_dendrogram = TRUE,  
+                Colv = FALSE, 
+                hclust_method = input$kseaclusmethod, 
+                distance_method = input$kseadistance,
+              )
             )
-          )
-          
-          if(nrow(ksea_value_cluster) < 37) {
-            output$kseastep2plotui <- renderUI({plotOutput("kseastep2plot")})
-            ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                          annotation_col = annotation_col,
-                          clustering_distance_rows = input$kseadistance,
-                          clustering_method = input$kseaclusmethod,
-                          show_rownames = T,
-                          cluster_cols = F,
-                          border_color = 'black',
-                          cellwidth = 15, cellheight = 15,
-                          breaks = breaks,
-                          color = color,
-                          fontsize_col = 10,
-                          fontsize_row = 10,
-                          legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                          legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                          main = input$kseamain)
-            dev.off()
-            output$kseastep2plot <- renderPlot(ph)
-          } else if(nrow(ksea_value_cluster) < 70) {
-            output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmid")})
-            ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                          annotation_col = annotation_col,
-                          clustering_distance_rows = input$kseadistance,
-                          clustering_method = input$kseaclusmethod,
-                          show_rownames = T,
-                          cluster_cols = F,
-                          border_color = 'black',
-                          # cellwidth = 12, cellheight = 12,
-                          cellwidth = 3, cellheight = 3,
-                          breaks = breaks,
-                          color = color,
-                          # fontsize_col = 10,
-                          # fontsize_row = 10,
-                          fontsize_col = 2,
-                          fontsize_row = 2,
-                          legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                          legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                          main = input$kseamain)
-            dev.off()
-            output$kseastep2plotmid <- renderPlot(ph)
-          } else if(nrow(ksea_value_cluster) < 100) {
-            output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmini")})
-            ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                          annotation_col = annotation_col,
-                          clustering_distance_rows = input$kseadistance,
-                          clustering_method = input$kseaclusmethod,
-                          show_rownames = T,
-                          cluster_cols = F,
-                          border_color = 'black',
-                          cellwidth = 12, cellheight = 12,
-                          breaks = breaks,
-                          color = color,
-                          fontsize_col = 10,
-                          fontsize_row = 10,
-                          
-                          legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                          legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                          main = input$kseamain)
-            dev.off()
-            output$kseastep2plotmini <- renderPlot(ph)
-          } else {
-            output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotxs")})
-            ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
-                          annotation_col = annotation_col,
-                          clustering_distance_rows = input$kseadistance,
-                          clustering_method = input$kseaclusmethod,
-                          show_rownames = T,
-                          cluster_cols = F,
-                          border_color = 'black',
-                          cellwidth = 12, cellheight = 12,
-                          breaks = breaks,
-                          color = color,
-                          fontsize_col = 10,
-                          fontsize_row = 10,
-                          
-                          legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
-                          legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
-                          main = input$kseamain)
-            dev.off()
-            output$kseastep2plotxs <- renderPlot(ph)
-          }
-          output$kaptwogroupplotdl <- downloadHandler(
-            filename = function(){paste("kinase_activity_pred", userID,".pdf",sep="")},
-            content = function(file){
-              p <- as.ggplot(ph)
-              ggsave(filename = file, p,width = 12,height = 12)
+            
+            if(nrow(ksea_value_cluster) < 37) {
+              output$kseastep2plotui <- renderUI({plotOutput("kseastep2plot")})
+              ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                            annotation_col = annotation_col,
+                            clustering_distance_rows = input$kseadistance,
+                            clustering_method = input$kseaclusmethod,
+                            show_rownames = T,
+                            cluster_cols = F,
+                            border_color = 'black',
+                            cellwidth = 15, cellheight = 15,
+                            breaks = breaks,
+                            color = color,
+                            fontsize_col = 10,
+                            fontsize_row = 10,
+                            legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                            legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                            main = input$kseamain)
+              dev.off()
+              output$kseastep2plot <- renderPlot(ph)
+            } else if(nrow(ksea_value_cluster) < 70) {
+              output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmid")})
+              ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                            annotation_col = annotation_col,
+                            clustering_distance_rows = input$kseadistance,
+                            clustering_method = input$kseaclusmethod,
+                            show_rownames = T,
+                            cluster_cols = F,
+                            border_color = 'black',
+                            # cellwidth = 12, cellheight = 12,
+                            cellwidth = 3, cellheight = 3,
+                            breaks = breaks,
+                            color = color,
+                            # fontsize_col = 10,
+                            # fontsize_row = 10,
+                            fontsize_col = 2,
+                            fontsize_row = 2,
+                            legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                            legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                            main = input$kseamain)
+              dev.off()
+              output$kseastep2plotmid <- renderPlot(ph)
+            } else if(nrow(ksea_value_cluster) < 100) {
+              output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotmini")})
+              ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                            annotation_col = annotation_col,
+                            clustering_distance_rows = input$kseadistance,
+                            clustering_method = input$kseaclusmethod,
+                            show_rownames = T,
+                            cluster_cols = F,
+                            border_color = 'black',
+                            cellwidth = 12, cellheight = 12,
+                            breaks = breaks,
+                            color = color,
+                            fontsize_col = 10,
+                            fontsize_row = 10,
+                            
+                            legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                            legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                            main = input$kseamain)
+              dev.off()
+              output$kseastep2plotmini <- renderPlot(ph)
+            } else {
+              output$kseastep2plotui <- renderUI({plotOutput("kseastep2plotxs")})
+              ph = pheatmap(ksea_value_cluster, scale = input$kseascale,
+                            annotation_col = annotation_col,
+                            clustering_distance_rows = input$kseadistance,
+                            clustering_method = input$kseaclusmethod,
+                            show_rownames = T,
+                            cluster_cols = F,
+                            border_color = 'black',
+                            cellwidth = 12, cellheight = 12,
+                            breaks = breaks,
+                            color = color,
+                            fontsize_col = 10,
+                            fontsize_row = 10,
+                            
+                            legend_breaks = c(-4, -2, -1, 0, 1, 2, 4),
+                            legend_labels = c(-4, -2, -1, 0, 1, 2, 4),
+                            main = input$kseamain)
+              dev.off()
+              output$kseastep2plotxs <- renderPlot(ph)
             }
-          )
-          output$kseastep2df <- renderDataTable(ksea_value_cluster)
-          updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
+            output$kaptwogroupplotdl <- downloadHandler(
+              filename = function(){paste("kinase_activity_pred", userID,".pdf",sep="")},
+              content = function(file){
+                p <- as.ggplot(ph)
+                ggsave(filename = file, p,width = 12,height = 12)
+              }
+            )
+            output$kseastep2df <- renderDataTable(ksea_value_cluster)
+            updateTabsetPanel(session, "kapresultnav", selected = "kapstep2val")
+          }
         }
       }
     }
