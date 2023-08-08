@@ -26,7 +26,6 @@
 </div>
    
 ## Table of Contents
-- [Table of Contents](#table-of-contents)
 - [Brief Description](#brief-description)
 - [How to install](#how-to-install)
   - [1. Docker-based installation](#1-docker-based-installation)
