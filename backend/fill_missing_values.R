@@ -10,7 +10,6 @@ fill_missing_values <- function(nadata, method) {
     df[is.na(df)] <- fill_value
   } else if (method == "bpca") {
     # take medium time
-    library(pcaMethods)
     data_zero1 <- pcaMethods::pca(as.matrix(df1), nPcs = ncol(df1)-1, method = "bpca", maxSteps =100)
     df <- completeObs(data_zero1)
   } else if (method == "lls" && anyNA(df1)) {
@@ -39,3 +38,4 @@ fill_missing_values <- function(nadata, method) {
   }
   return(df)
 }
+

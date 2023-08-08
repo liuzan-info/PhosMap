@@ -1,4 +1,5 @@
-get_normalized_data_of_psites3 <- function(data_frame, experiment_code_file_path, nathreshold, normmethod = "global", imputemethod = "minimum/10", topN = NA, mod_types = c('S', 'T', 'Y')){
+get_normalized_data_of_psites3 <- function(data_frame, experiment_code_file_path, nathreshold, normmethod = "global", imputemethod = "minimum/10", topN = NA,
+ mod_types = c('S', 'T', 'Y'), design_file = NULL, bygroup = FALSE){
   requireNamespace('utils')
   experiment_code <- utils::read.table(experiment_code_file_path, header = TRUE, sep = '\t', stringsAsFactors = NA)
   # experiment_code <- as.vector(unlist(experiment_code$Experiment_Code))
@@ -86,58 +87,49 @@ get_normalized_data_of_psites3 <- function(data_frame, experiment_code_file_path
   # }
   ptypes_value_FOT5 <- as.data.frame(ptypes_value_FOT5)
   ptypes_value_FOT5[ptypes_value_FOT5 == 0] <- NA
-  fill_missing_values01 <- function(nadata, method) {
-    df <- df1 <- nadata
-    if (method == "none") {
-      df[is.na(df)] <- 0
-    } else if (method == "minimum") {
-      fill_value <- min(df1, na.rm = TRUE)
-      df[is.na(df)] <- fill_value
-    } else if (method == "minimum/10") {
-      fill_value <- min(df1, na.rm = TRUE) / 10
-      df[is.na(df)] <- fill_value
-    } else if (method == "bpca") {
-      # take medium time
-      library(pcaMethods)
-      data_zero1<-pcaMethods::pca(as.matrix(df1), nPcs = ncol(df1)-1, method = "bpca", maxSteps =100)
-      df<-completeObs(data_zero1)
-    } else if (method == "lls") {
-      # take long time 
-      # library(pcaMethods)
-      data_zero1<-llsImpute(t(df1), k = 10, allVariables = TRUE)
-      df<-t(completeObs(data_zero1))
-    } else if (method == "impseq") {
-      # library(rrcovNA)
-      df <- impSeq(df1)
-    } else if(method=="impseqrob"){
-      # library(rrcovNA)
-      data_zero1 <- impSeqRob(df1, alpha=0.9)
-      df<-data_zero1$x
-    } else if(method=="knnmethod"){
-      # library(impute)
-      data_zero1<-impute.knn(as.matrix(df1),k = 10, rowmax = 1, colmax = 1)#rowmax = 0.9, colmax = 0.9
-      df<-data_zero1$data
-    } else if(method=="colmedian"){
-      # library(e1071)
-      df<-impute(df1,what ="median")
-    } else if(method=="rowmedian"){
-      # library(e1071)
-      dfx<-impute(t(df1),what ="median")
-      df<-t(dfx)
-      # } else if(method=="grr"){
-      #   library(DreamAI)
-      #   df<-impute.RegImpute(data=as.matrix(df1), fillmethod = "row_mean", maxiter_RegImpute = 10,conv_nrmse = 1e-03)
-      # } else if(method=="mle"){
-      #   library(norm)
-      #   xxm<-as.matrix(df1)
-      #   ss <- norm::prelim.norm(xxm)
-      #   thx <- norm::em.norm(ss)
-      #   norm::rngseed(123)
-      #   df <- norm::imp.norm(ss, thx, xxm)
+  if (bygroup) {
+  errorlabel = FALSE
+  errorlabel_values <- c()
+  
+  if (imputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+    for (group in unique(design_file$Group)) {
+      samples <- design_file[design_file$Group == group, 1]
+      group_data <- ptypes_value_FOT5[, samples]
+      # Check if any row in group_data has missing values
+      if (any(rowSums(is.na(group_data)) > 0)) {
+        errorlabel <- TRUE
+      } else {
+        errorlabel <- FALSE
+      }
+      errorlabel_values <- c(errorlabel_values, errorlabel)
     }
-    return(df)
   }
-  ptypes_value_FOT5 = fill_missing_values01(ptypes_value_FOT5, imputemethod)
+  
+  if (!any(errorlabel_values)) {
+    result_list <- list()
+    for (group in unique(design_file$Group)) {
+      samples <- design_file[design_file$Group == group, 1]
+      group_data <- ptypes_value_FOT5[, samples]
+      filled_group_data <- fill_missing_values(group_data, method = imputemethod)
+      
+      result_list <- c(result_list, list(filled_group_data))
+    }
+    
+    ptypes_value_FOT5 <- Reduce(cbind, result_list)
+    
+    ptypes_df_list <- list(
+      ptypes_area_df_with_id = data.frame(ptypes_id_df, ptypes_value),
+      ptypes_fot5_df_with_id = data.frame(ptypes_id_df, ptypes_value_FOT5)
+    )
+    
+    cat('\n The 7th step is over ^_^.')
+    return(ptypes_df_list)
+  } else {
+    empty_list <- list()
+    return(empty_list)
+  }
+} else {
+  ptypes_value_FOT5 = fill_missing_values(ptypes_value_FOT5, imputemethod)
   
   ptypes_df_list <- list(
     ptypes_area_df_with_id = data.frame(ptypes_id_df, ptypes_value),
@@ -146,4 +138,6 @@ get_normalized_data_of_psites3 <- function(data_frame, experiment_code_file_path
   
   cat('\n The 7th step is over ^_^.')
   return(ptypes_df_list)
+}
+
 }
