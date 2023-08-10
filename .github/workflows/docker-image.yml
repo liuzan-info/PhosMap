@@ -33,3 +33,4 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/phosmap:1.0.0
+          build-args: SECRETS_BYPY=${{ secrets.BYPY_JSON }}
