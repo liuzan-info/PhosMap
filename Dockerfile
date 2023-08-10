@@ -5,6 +5,7 @@ WORKDIR /srv/shiny-server
 
 # Config python and bypy for download PhosMap datasets
 ARG GITHUB_TOKEN
+RUN echo $GITHUB_TOKEN
 RUN echo '#!/bin/bash\npython3 "$@"' > /usr/bin/python && chmod +x /usr/bin/python
 RUN sudo apt-get update && sudo apt-get install -y python3-pip libgtk-3-dev cmake build-essential libcurl4-gnutls-dev libxml2 libxml2-dev libodbc1 libssl-dev libv8-dev libsodium-dev git && apt-get clean && pip install bypy
 RUN git clone https://$GITHUB_TOKEN@github.com/liuzan-info/bypy_json.git
