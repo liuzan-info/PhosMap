@@ -8,7 +8,7 @@ RUN echo '#!/bin/bash\npython3 "$@"' > /usr/bin/python && chmod +x /usr/bin/pyth
 RUN sudo apt-get update && sudo apt-get install -y python3-pip && pip install bypy && bypy --version
 ARG SECRETS_BYPY
 ENV SECRETS_BYPY=${SECRETS_BYPY}
-RUN echo "${SECRETS_BYPY}" > ~/.bypy/bypy.json  && bypy downfile PhosMap_datasets.zip . && unzip PhosMap_datasets.zip && rm PhosMap_datasets.zip
+RUN mkdir -p ~/.bypy && echo "${SECRETS_BYPY}" > ~/.bypy/bypy.json  && bypy downfile PhosMap_datasets.zip . && unzip PhosMap_datasets.zip && rm PhosMap_datasets.zip
 
 # Install dependencies
 RUN R -e "devtools::install_github(c('evocellnet/ksea', 'omarwagih/rmotifx', 'ecnuzdd/PhosMap'))"
