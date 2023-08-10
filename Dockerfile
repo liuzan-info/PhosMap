@@ -5,11 +5,12 @@ WORKDIR /srv/shiny-server
 
 # Config python and bypy for download PhosMap datasets
 RUN echo '#!/bin/bash\npython3 "$@"' > /usr/bin/python && chmod +x /usr/bin/python
-RUN sudo apt-get update && sudo apt-get install -y python3-pip && pip install bypy && bypy --version
-ARG SECRETS_BYPY
-ENV SECRETS_BYPY=${SECRETS_BYPY}
-RUN echo "${SECRETS_BYPY}"
-RUN mkdir -p ~/.bypy && echo "${SECRETS_BYPY}" > ~/.bypy/bypy.json  && bypy downfile PhosMap_datasets.zip . && unzip PhosMap_datasets.zip && rm PhosMap_datasets.zip
+RUN sudo apt-get update && sudo apt-get install -y python3-pip && pip install bypy
+RUN git clone https://$GITHUB_TOKEN@github.com/liuzan-info/bypy_json.git
+RUN mkdir -p ~/.bypy && mv bypy_json/bypy.json ~/.bypy/ && bypy downfile PhosMap_datasets.zip . && unzip PhosMap_datasets.zip && rm PhosMap_datasets.zip
+
+# !!!Delete bypy.json and $GITHUB_TOKEN
+RUN rm ~/.bypy/bypy.json && unset GITHUB_TOKEN
 
 # Install dependencies
 RUN R -e "devtools::install_github(c('evocellnet/ksea', 'omarwagih/rmotifx', 'ecnuzdd/PhosMap'))"
