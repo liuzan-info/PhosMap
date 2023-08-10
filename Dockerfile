@@ -5,7 +5,7 @@ WORKDIR /srv/shiny-server
 
 # Config python and bypy for download PhosMap datasets
 RUN echo '#!/bin/bash\npython3 "$@"' > /usr/bin/python && chmod +x /usr/bin/python
-RUN sudo apt-get update && sudo apt-get install -y python3-pip && pip install bypy
+RUN sudo apt-get update && sudo apt-get install -y python3-pip && pip install bypy && bypy --version
 ARG SECRETS_BYPY
 ENV SECRETS_BYPY=${SECRETS_BYPY}
 RUN echo "${SECRETS_BYPY}" > /root/.bypy/bypy.json  && bypy downfile PhosMap_datasets.zip . && unzip PhosMap_datasets.zip && rm PhosMap_datasets.zip
