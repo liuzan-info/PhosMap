@@ -12,7 +12,7 @@ RUN echo "${SECRETS_BYPY}" > /root/.bypy/bypy.json  && bypy downfile PhosMap_dat
 
 # Install dependencies
 RUN R -e "devtools::install_github(c('evocellnet/ksea', 'omarwagih/rmotifx', 'ecnuzdd/PhosMap'))"
-RUN sudo apt-get update && sudo apt-get install -y libgtk-3-dev cmake build-essential libcurl4-gnutls-dev libxml2 libxml2-dev libodbc1 libssl-dev libv8-dev libsodium-dev&& apt-get clean
+RUN sudo apt-get install -y libgtk-3-dev cmake build-essential libcurl4-gnutls-dev libxml2 libxml2-dev libodbc1 libssl-dev libv8-dev libsodium-dev&& apt-get clean
 RUN Rscript /srv/shiny-server/r_packages_install.R
 
 EXPOSE 3838 
