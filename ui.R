@@ -65,7 +65,7 @@ ui <- renderUI(
                      opacity:0.7;
                      z-index: 1050;
                            }
-                     #manual_iframe {
+                     .manual_iframe {
                      width: 100%;
                      height: 100vh;
                      }
@@ -2132,28 +2132,55 @@ ui <- renderUI(
       tabPanel(
         "Tutorial",
         icon = icon("book"),
-        div(style = "text-align:center;", img(src = "tumain.svg", height = "200px", width = "1000px", style = "")),
+        div(style = "text-align:center;", img(src = "tumain.svg", height = "80px", width = "500px", style = "")),
         radioGroupButtons(
           inputId = "tutorialtab",
           label = "",
-          choices = c("Web Server", 
+          choices = c("Web Server / Local UI", 
                       "Docker", "R Package"),
           justified = TRUE,
           checkIcon = list(
             yes = icon("book"))
         ),
         conditionalPanel(
-          condition = "input.tutorialtab == 'Web Server'",
+          condition = "input.tutorialtab == 'Web Server / Local UI'",
           # HTML('<iframe style="height:1200px; width:90%" src= "manual/manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
-          tags$iframe(src="https://liuzan-info.github.io/", id="manual_iframe"),
+          tags$iframe(src="https://liuzan-info.github.io/phosmap_manual", class="manual_iframe"),
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Docker'",
-          uiOutput("dockermanual")
+          tags$p(
+            "We provide a docker image with PhosMap: ",
+            tags$a("https://hub.docker.com/r/liuzandh/phosmap", href = "https://hub.docker.com/r/liuzandh/phosmap"),
+            tags$br(),
+            tags$br(),
+            "Pull the docker image of PhosMap:",
+            tags$code("docker pull liuzandh/phosmap:1.0.0", language = "linux"),
+            tags$br(),
+            tags$br(),
+            "Create a docker container containing PhosMap:",
+            tags$code("docker run -p HostPort:3838 liuzandh/phosmap:1.0.0", language = "linux"),
+            tags$br(),
+            tags$br(),
+            "Then, you can enter PhosMap by visiting HostIP:HostPort.",
+            tags$br(),
+            tags$br(),
+            "For example, HostPort could be set to 8083. This parameter can be changed according to user needs.",
+            tags$br(),
+            tags$code("docker run -p 8083:3838 liuzandh/phosmap:1.0.0", language = "linux"),
+            tags$br(),
+            tags$br(),
+            "Next, open 127.0.0.1:8083 in the local browser or remotely access ip:8083 (you should ensure that the machine can be accessed remotely)."
+          )
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'R Package'",
-          HTML('<iframe style="height:1200px; width:90%" src= "package_manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
+          tags$p(
+            "In case your browser fails to display this tutorial correctly, please visit ",
+            tags$a("https://liuzan-info.github.io/phosmap_r", href = "https://liuzan-info.github.io/phosmap_r", target = "_blank"),
+            " for access."
+          ),
+          tags$iframe(src="https://liuzan-info.github.io/phosmap_r", class="manual_iframe"),
         )
         
       ),

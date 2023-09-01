@@ -5445,13 +5445,13 @@ server<-shinyServer(function(input, output, session){
   #######################################
   #######        Tutorial         #######
   #######################################
-  output$dockermanual <- renderUI({
-    readme <- readLines("README.md")
-    md_start <- grep("^### 1\\. Docker-based installation", readme)
-    md_end <- grep("^### 2\\. R-based installation", readme)
-    md_section <- paste(readme[(md_start + 1) : (md_end - 1)], collapse = "\n")
-    markdown(md_section)
-  })
+  # output$dockermanual <- renderUI({
+  #   readme <- readLines("README.md")
+  #   md_start <- grep("^### 1\\. Docker-based installation", readme)
+  #   md_end <- grep("^### 2\\. R-based installation", readme)
+  #   md_section <- paste(readme[(md_start + 1) : (md_end - 1)], collapse = "\n")
+  #   markdown(md_section)
+  # })
   
   #######################################
   #######    FAQ and Download     #######
