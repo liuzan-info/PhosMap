@@ -259,12 +259,12 @@ ui <- renderUI(
               ))
             ),
             wellPanel(
-              materialSwitch(
+              prettySwitch(
                 inputId = "loaddatatype",
                 label = "Load example data", 
-                value = TRUE,
+                fill = TRUE,
                 status = "success",
-                right = TRUE
+                value = TRUE
               ),
               radioGroupButtons(
                 inputId = "softwaretype",
