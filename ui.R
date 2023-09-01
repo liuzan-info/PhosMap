@@ -36,6 +36,7 @@ library(rrcovNA)
 library(impute)
 library(e1071)
 library(heatmaply)
+library(ggdendro)
 
 
 ui <- renderUI(
