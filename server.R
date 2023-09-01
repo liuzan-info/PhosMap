@@ -1093,6 +1093,94 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
+  observeEvent(
+    input$qualityinspector,{
+      output$qualityinspectorplot <- renderPlot({
+        if(input$loaddatatype == T) {  # demo
+          if(input$softwaretype == 1) {
+            design_file_path = "examplefile/maxquant/phosphorylation_exp_design_info.txt"  # max demo
+            if(input$maxuseprocheck1 == T) {
+              expr_df_path = paste0(maxdemopreloc, "DemoPreNormBasedProSummary_v.csv")  # max demo with proteomics
+            } else {
+              expr_df_path = paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv")  # max demo without proteomics
+            }
+          }
+          if(input$softwaretype == 2) {
+            design_file_path = "examplefile/mascot/phosphorylation_exp_design_info.txt"  # mascot demo
+            if(input$useprocheck1 == T) {
+              expr_df_path = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary_v.csv")  # mascot demo with proteomics
+            } else {
+              expr_df_path = paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv")  # mascot demo without proteomics
+            }
+          }
+        } else {  # user
+          if(input$softwaretype == 1) {
+            design_file_path = input$updesign$datapath  # max user
+            if(is.null(input$maxuseruseprocheck)) {
+              expr_df_path = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
+            } else if(input$maxuseruseprocheck==0) {
+              expr_df_path = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
+            } else {
+              expr_df_path = paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv")
+            }
+          }
+          if(input$softwaretype == 2) {
+            design_file_path = input$updesign$datapath  # mascot user
+            if(is.null(input$useruseprocheck1)) {
+              expr_df_path = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
+            } else if(input$useruseprocheck1==0) {
+              expr_df_path = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
+            } else {
+              expr_df_path = paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv")
+            }
+          }
+        }
+        
+        if(!file.exists(expr_df_path) | !file.exists(design_file_path)){
+          plot.new()
+          text(x = 0.5, y = 0.5, labels = "Please click this button after completing all the steps!", cex = 2)
+        } else {
+          df_design = read.csv(design_file_path, sep = '\t')
+          df = read.csv(expr_df_path)[,-c(1,2)]
+          
+          dist_matrix <- stats::hclust(stats::dist(t(df)))
+          label_grps <- df_design$Group[stats::order.dendrogram(as.dendrogram(dist_matrix))]
+          
+          nGrps = length(table(label_grps))
+          label_colors = grDevices::rainbow(nGrps)[factor(label_grps)]
+          p <- ggdendro::ggdendrogram(dist_matrix) +
+            ggplot2::ggtitle("Sample hierarchical clustering") +
+            ggplot2::theme(
+              axis.text.x = ggtext::element_markdown(color = label_colors),
+              axis.text = ggplot2::element_text(size = 12)
+            )
+          ggsave(paste('tmp/',userID,'/quality_inspector.pdf',sep=''), p, height = 6, width = 5) 
+          p
+        }
+      })
+      
+      showModal(modalDialog(
+        title = "Quality Inspector",
+        size = "l",
+        tags$p(
+          HTML("When performing unsupervised hierarchical clustering on appropriately
+               preprocessed data, samples from the same group should cluster together.
+               If not, please adjust the parameters accordingly.")
+        ),
+        plotOutput("qualityinspectorplot"),
+        div(downloadButton("qualinspecplotdl"), style = "display:flex; justify-content:center; align-item:center;"),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$qualinspecplotdl <- downloadHandler(
+    filename = function(){paste("quality_inspector", userID,".pdf",sep="")},
+    content = function(file){
+      file.copy(paste('tmp/',userID,'/quality_inspector.pdf',sep=''),file)
+    }
+  )
 
   #mascot
   phosphorylation_exp_design_info_file_path <- 'examplefile/mascot/phosphorylation_exp_design_info.txt'

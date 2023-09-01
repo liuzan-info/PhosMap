@@ -129,28 +129,44 @@ ui <- renderUI(
       position = "fixed-top",
       tabPanel(
         "Home",
-        # icon = icon("house"),
+        icon = icon("house"),
         column(
-          3,
-          panel(
-            "",
-            heading = "Update Log",
-            status = "warning",
-            h5("PhosMap 1.0.0 was released in July 2023.")
+          2,
+          radioGroupButtons(
+            inputId = "homenotice",
+            label = "",
+            choices = c("Log", 
+                        "Notice", "Intro"),
+            justified = TRUE,
+            selected = "Intro",
+            checkIcon = list(
+              yes = icon("face-smile"))
           ),
-          panel(
-            "",
-            heading = "Notice",
-            status = "info",
-            HTML("This server is single-thread and of low-level hardware, we do recommend
-               users to analyze the data using the demo server with <b>small data sets</b>. 
-               To conserve computing resources, <b><u>your connection may be lost due to inactivity.
-               Please refresh the page to reconnect</u></b>. An upgraded hardware is necessary, 
+          conditionalPanel(
+            condition = "input.homenotice == 'Log'",
+            panel(
+              "",
+              heading = "Update Log",
+              status = "warning",
+              h4("PhosMap 1.1.0 was released in August 2023."),
+              h5("Key features: Introduce a quality inspector to facilitate iterative preprocessing for obtaining high-quality data."),
+              h4("PhosMap 1.0.0 was released in July 2023.")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.homenotice == 'Notice'",
+            panel(
+              "",
+              heading = "Notice",
+              status = "info",
+              HTML("This server is single-thread and of low-level hardware, we do recommend
+               users to analyze the data using the demo server with <b>small data sets</b>.
+               An upgraded hardware is necessary, 
                according to the possible computational
                cost of the data, to reach the potential of PhosMap."),
-            actionButton("viewinstall", "Tutorial video", icon("video")),
-            HTML(
-              "
+              actionButton("viewinstall", "Tutorial video", icon("video")),
+              HTML(
+                "
               <table id='help'>
   <tr>
     <th>Version</th>
@@ -160,7 +176,7 @@ ui <- renderUI(
   </tr>
   <tr>
     <td>Online</td>
-    <td>MaxQuant:&#x2714; Firmiana:&#x2716; </td>
+    <td>MaxQuant:&#x2714; Firmiana:&#x2714; </td>
     <td>&#x2714;</td>
     <td>&#x2716;</td>
   </tr>
@@ -187,13 +203,16 @@ ui <- renderUI(
   }
 </style>
               "
+              )
             )
           ),
-          panel(
-            "",
-            heading = "Introduction",
-            status = "success",
-            HTML("<p>PhosMap supports multiple function modules for full landscape of 
+          conditionalPanel(
+            condition = "input.homenotice == 'Intro'",
+            panel(
+              "",
+              heading = "Introduction",
+              status = "success",
+              HTML("<p>PhosMap supports multiple function modules for full landscape of 
                phosphoproteomics data analyses including quality control, phosphosite 
                mapping, dimension reduction analysis, time course analysis, kinase 
                activity analysis and survival analysis. Various of publication ready 
@@ -205,14 +224,15 @@ ui <- renderUI(
                is provided for more flexible analysis. 
                <p>Furthermore, our data flow is standardized, ensuring its strong scalability.
                Therefore, if users have other analysis requirements, they are welcome to submit PR or issue on <a href='https://github.com/liuzan-info/PhosMap' target='_blank'>GitHub</a>.</p>"),
-            # HTML("<b>Related links:</b><br><p>R package:<a href='https://github.com/ecnuzdd/PhosMap'>https://github.com/ecnuzdd/PhosMap</a></p>
-            # <p>docker image:<a href='https://hub.docker.com/r/liuzandh/phosmap'>https://hub.docker.com/r/liuzandh/phosmap</a></p>
-            # <p>source code:<a href='https://github.com/liuzan-info/PhosMap'>https://github.com/liuzan-info/PhosMap</a></p>
-            #      ")
+              # HTML("<b>Related links:</b><br><p>R package:<a href='https://github.com/ecnuzdd/PhosMap'>https://github.com/ecnuzdd/PhosMap</a></p>
+              # <p>docker image:<a href='https://hub.docker.com/r/liuzandh/phosmap'>https://hub.docker.com/r/liuzandh/phosmap</a></p>
+              # <p>source code:<a href='https://github.com/liuzan-info/PhosMap'>https://github.com/liuzan-info/PhosMap</a></p>
+              #      ")
+            )
           )
         ),
         column(
-          9,
+          10,
           h3(style = "text-align: center;", "PhosMap: An Ensemble Bioinformatic Platform to Empower One-stop Interactive Analysis of Quantitative Phosphoproteomics"),
           div(style = "text-align:center;", img(src = "main.svg", height = "700px", width = "900px", style = "")),
           
@@ -241,7 +261,7 @@ ui <- renderUI(
               materialSwitch(
                 inputId = "loaddatatype",
                 label = "Load example data", 
-                value = FALSE,
+                value = TRUE,
                 status = "success",
                 right = TRUE
               ),
@@ -440,9 +460,11 @@ ui <- renderUI(
       ),
       tabPanel(
         "Preprocessing",
+        icon = icon("arrows-spin"),
         fluidRow(
-          column(2, NULL),
-          column(8, h2(style = "text-align: center;", "Preprocessing")),
+          column(4, NULL),
+          column(4, h2(style = "text-align: center;", "Preprocessing")),
+          column(2, actionButton("qualityinspector", "Quality Inspector", icon = icon("magnifying-glass"))),
           column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
           conditionalPanel(
             condition = "input.softwaretype == 2",
@@ -1386,8 +1408,7 @@ ui <- renderUI(
                         "SAM", "ANOVA"),
             justified = TRUE,
             checkIcon = list(
-              yes = icon("ok", 
-                         lib = "glyphicon"))
+              yes = icon("key"))
           ),
           conditionalPanel(
             condition = "input.detools == 'limma'",
@@ -1790,8 +1811,7 @@ ui <- renderUI(
                             "Two groups"),
                 justified = TRUE,
                 checkIcon = list(
-                  yes = icon("ok", 
-                             lib = "glyphicon"))
+                  yes = icon("flask"))
               ),
               conditionalPanel(
                 condition = "input.kseamode == 'Multiple groups'",
@@ -2111,6 +2131,7 @@ ui <- renderUI(
       ),
       tabPanel(
         "Tutorial",
+        icon = icon("book"),
         div(style = "text-align:center;", img(src = "tumain.svg", height = "200px", width = "1000px", style = "")),
         radioGroupButtons(
           inputId = "tutorialtab",
@@ -2119,8 +2140,7 @@ ui <- renderUI(
                       "Docker", "R Package"),
           justified = TRUE,
           checkIcon = list(
-            yes = icon("ok", 
-                       lib = "glyphicon"))
+            yes = icon("book"))
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Web Server'",
@@ -2139,6 +2159,7 @@ ui <- renderUI(
       ),
       tabPanel(
         "FAQ",
+        icon = icon("question"),
         h2("FAQ", style="align: center;"),
         hr(style = "border-color: grey;"),
         h4("Q1: What is the format of the experimental design file?"),
@@ -2167,6 +2188,7 @@ ui <- renderUI(
       ),
       tabPanel(
         "Download",
+        icon = icon("download"),
         h2("Download", style="align: center;"),
         hr(style = "border-color: grey;"),
         h4("1. 'Preprocessing' example data:"),
