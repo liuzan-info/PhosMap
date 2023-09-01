@@ -51,13 +51,36 @@ server<-shinyServer(function(input, output, session){
         h5("If the following video fails to play, you can choose to open these links instead."),
         tags$ol(
           tags$li(
-            tags$a(href = "https://youtu.be/2ZlMqMJjNU8", target = "_blank", "https://youtu.be/2ZlMqMJjNU8")
+            style = "display: flex; align-items: center;",
+            tags$a(
+              href = "https://youtu.be/2ZlMqMJjNU8",
+              target = "_blank",
+              "https://youtu.be/2ZlMqMJjNU8"
+            ),
+            tags$span(
+              style = "color: red; margin-left: 5px;",
+              "recommended"
+            )
           ),
           tags$li(
-            tags$a(href = "https://www.bilibili.com/video/BV1tj411z7Fe/", target = "_blank", "https://www.bilibili.com/video/BV1tj411z7Fe/")
+            style = "display: flex; align-items: center;",
+            tags$a(
+              href = "https://www.bilibili.com/video/BV1tj411z7Fe/",
+              target = "_blank",
+              "https://www.bilibili.com/video/BV1tj411z7Fe/"
+            ),
+            tags$span(
+              style = "color: red; margin-left: 5px;",
+              "recommended"
+            )
           ),
           tags$li(
-            tags$a(href = "https://bio-inf.shinyapps.io/phosmap_video/", target = "_blank", "https://bio-inf.shinyapps.io/phosmap_video/")
+            style = "display: flex; align-items: center;",
+            tags$a(
+              href = "https://bio-inf.shinyapps.io/phosmap_video/",
+              target = "_blank",
+              "https://bio-inf.shinyapps.io/phosmap_video/"
+            )
           )
         ),
         tags$iframe(width="850", height="700", src="https://bio-inf.shinyapps.io/phosmap_video/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),

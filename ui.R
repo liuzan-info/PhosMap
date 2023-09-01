@@ -159,11 +159,11 @@ ui <- renderUI(
               "",
               heading = "Notice",
               status = "info",
-              HTML("This server is single-thread and of low-level hardware, we do recommend
-               users to analyze the data using the demo server with <b>small data sets</b>.
-               An upgraded hardware is necessary, 
-               according to the possible computational
-               cost of the data, to reach the potential of PhosMap."),
+              HTML("The server currently operates on a single-thread and utilizes low-level hardware. 
+                   To enhance performance and unlock the full potential of PhosMap, 
+                   we recommend users consider analyzing their data using the server that is specifically designed for <b>small data sets</b>. 
+                   It is advisable to evaluate the possibility of upgrading to higher-level hardware, 
+                   considering the potential computational cost associated with the data, to fully maximize the capabilities of PhosMap."),
               actionButton("viewinstall", "Tutorial video", icon("video")),
               HTML(
                 "
