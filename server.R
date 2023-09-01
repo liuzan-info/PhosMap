@@ -51,13 +51,36 @@ server<-shinyServer(function(input, output, session){
         h5("If the following video fails to play, you can choose to open these links instead."),
         tags$ol(
           tags$li(
-            tags$a(href = "https://youtu.be/2ZlMqMJjNU8", target = "_blank", "https://youtu.be/2ZlMqMJjNU8")
+            style = "display: flex; align-items: center;",
+            tags$a(
+              href = "https://youtu.be/2ZlMqMJjNU8",
+              target = "_blank",
+              "https://youtu.be/2ZlMqMJjNU8"
+            ),
+            tags$span(
+              style = "color: red; margin-left: 5px;",
+              "recommended"
+            )
           ),
           tags$li(
-            tags$a(href = "https://www.bilibili.com/video/BV1tj411z7Fe/", target = "_blank", "https://www.bilibili.com/video/BV1tj411z7Fe/")
+            style = "display: flex; align-items: center;",
+            tags$a(
+              href = "https://www.bilibili.com/video/BV1tj411z7Fe/",
+              target = "_blank",
+              "https://www.bilibili.com/video/BV1tj411z7Fe/"
+            ),
+            tags$span(
+              style = "color: red; margin-left: 5px;",
+              "recommended"
+            )
           ),
           tags$li(
-            tags$a(href = "https://bio-inf.shinyapps.io/phosmap_video/", target = "_blank", "https://bio-inf.shinyapps.io/phosmap_video/")
+            style = "display: flex; align-items: center;",
+            tags$a(
+              href = "https://bio-inf.shinyapps.io/phosmap_video/",
+              target = "_blank",
+              "https://bio-inf.shinyapps.io/phosmap_video/"
+            )
           )
         ),
         tags$iframe(width="850", height="700", src="https://bio-inf.shinyapps.io/phosmap_video/", frameborder="0", allow="accelerometer; encrypted-media; gyroscope; picture-in-picture", allowfullscreen=NA),
@@ -189,18 +212,6 @@ server<-shinyServer(function(input, output, session){
       output$viewedfile2 <- renderDataTable({
         datatable(designfile(), options = list(pageLength = 10))
       })
-      if(online) {
-        data <- designfile()
-        if(nrow(data)>9){
-          sendSweetAlert(
-            session = session,
-            title = "Attention...",
-            text = "The sample size is too large. It is recommended to use the local version.",
-            type = "info",
-            btn_labels = "OK"
-          )
-        }
-      }
     }
   )
 
@@ -1093,6 +1104,94 @@ server<-shinyServer(function(input, output, session){
     }
   )
   
+  observeEvent(
+    input$qualityinspector,{
+      output$qualityinspectorplot <- renderPlot({
+        if(input$loaddatatype == T) {  # demo
+          if(input$softwaretype == 1) {
+            design_file_path = "examplefile/maxquant/phosphorylation_exp_design_info.txt"  # max demo
+            if(input$maxuseprocheck1 == T) {
+              expr_df_path = paste0(maxdemopreloc, "DemoPreNormBasedProSummary_v.csv")  # max demo with proteomics
+            } else {
+              expr_df_path = paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv")  # max demo without proteomics
+            }
+          }
+          if(input$softwaretype == 2) {
+            design_file_path = "examplefile/mascot/phosphorylation_exp_design_info.txt"  # mascot demo
+            if(input$useprocheck1 == T) {
+              expr_df_path = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary_v.csv")  # mascot demo with proteomics
+            } else {
+              expr_df_path = paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv")  # mascot demo without proteomics
+            }
+          }
+        } else {  # user
+          if(input$softwaretype == 1) {
+            design_file_path = input$updesign$datapath  # max user
+            if(is.null(input$maxuseruseprocheck)) {
+              expr_df_path = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
+            } else if(input$maxuseruseprocheck==0) {
+              expr_df_path = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
+            } else {
+              expr_df_path = paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv")
+            }
+          }
+          if(input$softwaretype == 2) {
+            design_file_path = input$updesign$datapath  # mascot user
+            if(is.null(input$useruseprocheck1)) {
+              expr_df_path = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
+            } else if(input$useruseprocheck1==0) {
+              expr_df_path = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
+            } else {
+              expr_df_path = paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv")
+            }
+          }
+        }
+        
+        if(!file.exists(expr_df_path) | !file.exists(design_file_path)){
+          plot.new()
+          text(x = 0.5, y = 0.5, labels = "Please click this button after completing all the steps!", cex = 2)
+        } else {
+          df_design = read.csv(design_file_path, sep = '\t')
+          df = read.csv(expr_df_path)[,-c(1,2)]
+          
+          dist_matrix <- stats::hclust(stats::dist(t(df)))
+          label_grps <- df_design$Group[stats::order.dendrogram(as.dendrogram(dist_matrix))]
+          
+          nGrps = length(table(label_grps))
+          label_colors = grDevices::rainbow(nGrps)[factor(label_grps)]
+          p <- ggdendro::ggdendrogram(dist_matrix) +
+            ggplot2::ggtitle("Sample hierarchical clustering") +
+            ggplot2::theme(
+              axis.text.x = ggtext::element_markdown(color = label_colors),
+              axis.text = ggplot2::element_text(size = 12)
+            )
+          ggsave(paste('tmp/',userID,'/quality_inspector.pdf',sep=''), p, height = 6, width = 5) 
+          p
+        }
+      })
+      
+      showModal(modalDialog(
+        title = "Quality Inspector",
+        size = "l",
+        tags$p(
+          HTML("When performing unsupervised hierarchical clustering on appropriately
+               preprocessed data, samples from the same group should cluster together.
+               If not, please adjust the parameters accordingly.")
+        ),
+        plotOutput("qualityinspectorplot"),
+        div(downloadButton("qualinspecplotdl"), style = "display:flex; justify-content:center; align-item:center;"),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  
+  output$qualinspecplotdl <- downloadHandler(
+    filename = function(){paste("quality_inspector", userID,".pdf",sep="")},
+    content = function(file){
+      file.copy(paste('tmp/',userID,'/quality_inspector.pdf',sep=''),file)
+    }
+  )
 
   #mascot
   phosphorylation_exp_design_info_file_path <- 'examplefile/mascot/phosphorylation_exp_design_info.txt'
@@ -1102,154 +1201,144 @@ server<-shinyServer(function(input, output, session){
 
   observeEvent(
     input$parserbt01,{
-      if(online) {
-        sendSweetAlert(
-          session = session,
-          title = "Attention...",
-          text = "Due to limited hardware resources, please use the local version. You can check PhosMap performance by watching the tutorial video on the home page.",
-          type = "info",
-          btn_labels = "OK"
-        )
-      } else {
-        mascot_txt_dir <- paste0(mascotdemopreloc, "demomascottxt_data")
-        # Convert the suffix, convert again after extraction for reading
-        file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
-        file2 = list.files(file1, full.names = T)
-        for (f in file2){
-          tmpname <- substring(f, 0, nchar(f)-4)
-          newname <- sub("$", ".xml", tmpname)
-          file.rename(f, newname)
-        }
-        if(dir.exists(mascot_txt_dir)){
-          unlink(mascot_txt_dir, recursive = T)
-        }
-        dir.create(mascot_txt_dir)
-        
-        withProgress(message = 'Step1:Paser', style = "notification", detail = "processing...",
-                     value = 0,max = 2,{
-                       for(i in 1:2){
-                         if(i == 1){
-                           extract_psites_score(phosphorylation_exp_design_info_file_path, mascot_xml_dir, mascot_txt_dir)
-                           
-                           file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
-                           file2 = list.files(file1, full.names = T)
-                           for (f in file2){
-                             tmpname <- substring(f, 0, nchar(f)-4)
-                             newname <- sub("$", ".txt", tmpname)
-                             file.rename(f, newname)
-                           }
+      mascot_txt_dir <- paste0(mascotdemopreloc, "demomascottxt_data")
+      # Convert the suffix, convert again after extraction for reading
+      file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
+      file2 = list.files(file1, full.names = T)
+      for (f in file2){
+        tmpname <- substring(f, 0, nchar(f)-4)
+        newname <- sub("$", ".xml", tmpname)
+        file.rename(f, newname)
+      }
+      if(dir.exists(mascot_txt_dir)){
+        unlink(mascot_txt_dir, recursive = T)
+      }
+      dir.create(mascot_txt_dir)
+      
+      withProgress(message = 'Step1:Paser', style = "notification", detail = "processing...",
+                   value = 0,max = 2,{
+                     for(i in 1:2){
+                       if(i == 1){
+                         extract_psites_score(phosphorylation_exp_design_info_file_path, mascot_xml_dir, mascot_txt_dir)
+                         
+                         file1 = normalizePath(list.files(mascot_xml_dir, full.names = T))
+                         file2 = list.files(file1, full.names = T)
+                         for (f in file2){
+                           tmpname <- substring(f, 0, nchar(f)-4)
+                           newname <- sub("$", ".txt", tmpname)
+                           file.rename(f, newname)
                          }
-                         if(i == 2){
-                           withProgress(message = "Generating CSV files of phosphorylation sites with confidence score", style = "notification", detail = "This may take a while...", value = 0, {
-                             BASE_DIR <- getwd()
-                             psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
-                             if(dir.exists(psites_score_dir)){
-                               unlink(psites_score_dir, recursive = T)
-                             }
-                             dir.create(psites_score_dir)
-                             firmiana_peptide_dir <- phosphorylation_peptide_dir
-                             mascot_txt_dir_paths <- list.dirs(mascot_txt_dir)
-                             mascot_txt_dir_paths <- mascot_txt_dir_paths[-1]
-                             mascot_txt_dir_paths_expNames <- list.files(mascot_txt_dir)
-                             
-                             firmiana_txt_file_names <- list.files(firmiana_peptide_dir)
-                             firmiana_txt_file_names_expNames <- apply(data.frame(firmiana_txt_file_names), 1, function(x){
-                               x <- strsplit(x, split = '_')[[1]]
-                               x[1]
-                             })
-                             
-                             mascot_txt_dir_paths_len <- length(mascot_txt_dir_paths)
-                             cat('\n Total file: ', mascot_txt_dir_paths_len)
-                             cat('\n It will take a little while.')
-                             for(i in seq_len(mascot_txt_dir_paths_len)){
-                               mascot_txt_dir_path <- mascot_txt_dir_paths[i]
-                               mascot_txt_dir_path_expName <- mascot_txt_dir_paths_expNames[i]
-                               mascot_txt_dir_path_expName_path <- list.files(mascot_txt_dir_path)
-                               mascot_txt_dir_path_expName_path <- normalizePath(
-                                 file.path(mascot_txt_dir_path, mascot_txt_dir_path_expName_path)
-                               )
-                               
-                               match_index <- match(mascot_txt_dir_path_expName, firmiana_txt_file_names_expNames)
-                               firmiana_txt_file_name <- firmiana_txt_file_names[match_index]
-                               firmiana_peptide_dir_path_expName_path <- normalizePath(
-                                 file.path(firmiana_peptide_dir, firmiana_txt_file_name)
-                               )
-                               
-                               outputName <- normalizePath(
-                                 file.path(psites_score_dir, paste(mascot_txt_dir_path_expName, '_psites_score.csv', sep = '')),
-                                 mustWork = FALSE
-                               )
-                               expName <- mascot_txt_dir_path_expName
-                               write_csv_pep_seq_conf(expName, outputName, mascot_txt_dir_path_expName_path, firmiana_peptide_dir_path_expName_path)
-                               
-                               cat('\n Completed file: ', i, '/', mascot_txt_dir_paths_len)
-                               incProgress(1/seq_len(mascot_txt_dir_paths_len), detail = paste0('\n Completed file: ', i, '/', mascot_txt_dir_paths_len))
-                             }
-                           })
-                           
-                           
-                           
-                           output$demomascotparserui <- renderUI({
-                             tagList(
-                               selectInput(
-                                 "demomascotparserresultid",
-                                 NULL,
-                                 choices = get_target_name(psites_score_dir, 1)
-                               ),
-                               dataTableOutput("demomascotparserresultdt")
-                             )
-                           })
-                           output$demomascotdropproparserui <- renderUI({
-                             tagList(
-                               selectInput(
-                                 "demomascotdropproparserresultid",
-                                 NULL,
-                                 choices = get_target_name(psites_score_dir, 1)
-                               ),
-                               dataTableOutput("demomascotdropproparserresultdt")
-                             )
-                           })
-                         }
-                         incProgress(1, detail = "")
                        }
-                     })
-        updateTabsetPanel(session, "resultnav", selected = "demomascotstep1val")
-        updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep1val")
-        
-        observeEvent(
-          input$demomascotparserresultid,{
-            output$demomascotparserresultdt <- renderDataTable({
-              id <- input$demomascotparserresultid
-              psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
-              # Determine the file path based on the relative index position
-              index = which(get_target_name(psites_score_dir, 1) == id)
-              path <- list.files(psites_score_dir, full.names = T)[index]
-              dataread <- read.csv(path, header = T)
-            })
-          }
-        )
-        observeEvent(
-          input$demomascotdropproparserresultid,{
-            output$demomascotdropproparserresultdt <- renderDataTable({
-              id <- input$demomascotdropproparserresultid
-              psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
-              # Determine the file path based on the relative index position
-              index = which(get_target_name(psites_score_dir, 1) == id)
-              path <- list.files(psites_score_dir, full.names = T)[index]
-              dataread <- read.csv(path, header = T)
-            })
-          }
-        )
-        updateActionButton(session, "parserbt01", icon = icon("rotate-right"))
-        updateActionButton(session, "mergingbt0", icon = icon("play"))
-        updateActionButton(session, "mappingbt01", icon = icon("play"))
-        updateActionButton(session, "normalizationbt01", icon = icon("play"))
-        updateActionButton(session, "normalizationbt02", icon = icon("play"))
-        if(input$useprocheck1 == 1) {
-          updateProgressBar(session = session, id = "preprobar", value = 20)
-        } else {
-          updateProgressBar(session = session, id = "preprobar", value = 25)
+                       if(i == 2){
+                         withProgress(message = "Generating CSV files of phosphorylation sites with confidence score", style = "notification", detail = "This may take a while...", value = 0, {
+                           BASE_DIR <- getwd()
+                           psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
+                           if(dir.exists(psites_score_dir)){
+                             unlink(psites_score_dir, recursive = T)
+                           }
+                           dir.create(psites_score_dir)
+                           firmiana_peptide_dir <- phosphorylation_peptide_dir
+                           mascot_txt_dir_paths <- list.dirs(mascot_txt_dir)
+                           mascot_txt_dir_paths <- mascot_txt_dir_paths[-1]
+                           mascot_txt_dir_paths_expNames <- list.files(mascot_txt_dir)
+                           
+                           firmiana_txt_file_names <- list.files(firmiana_peptide_dir)
+                           firmiana_txt_file_names_expNames <- apply(data.frame(firmiana_txt_file_names), 1, function(x){
+                             x <- strsplit(x, split = '_')[[1]]
+                             x[1]
+                           })
+                           
+                           mascot_txt_dir_paths_len <- length(mascot_txt_dir_paths)
+                           cat('\n Total file: ', mascot_txt_dir_paths_len)
+                           cat('\n It will take a little while.')
+                           for(i in seq_len(mascot_txt_dir_paths_len)){
+                             mascot_txt_dir_path <- mascot_txt_dir_paths[i]
+                             mascot_txt_dir_path_expName <- mascot_txt_dir_paths_expNames[i]
+                             mascot_txt_dir_path_expName_path <- list.files(mascot_txt_dir_path)
+                             mascot_txt_dir_path_expName_path <- normalizePath(
+                               file.path(mascot_txt_dir_path, mascot_txt_dir_path_expName_path)
+                             )
+                             
+                             match_index <- match(mascot_txt_dir_path_expName, firmiana_txt_file_names_expNames)
+                             firmiana_txt_file_name <- firmiana_txt_file_names[match_index]
+                             firmiana_peptide_dir_path_expName_path <- normalizePath(
+                               file.path(firmiana_peptide_dir, firmiana_txt_file_name)
+                             )
+                             
+                             outputName <- normalizePath(
+                               file.path(psites_score_dir, paste(mascot_txt_dir_path_expName, '_psites_score.csv', sep = '')),
+                               mustWork = FALSE
+                             )
+                             expName <- mascot_txt_dir_path_expName
+                             write_csv_pep_seq_conf(expName, outputName, mascot_txt_dir_path_expName_path, firmiana_peptide_dir_path_expName_path)
+                             
+                             cat('\n Completed file: ', i, '/', mascot_txt_dir_paths_len)
+                             incProgress(1/seq_len(mascot_txt_dir_paths_len), detail = paste0('\n Completed file: ', i, '/', mascot_txt_dir_paths_len))
+                           }
+                         })
+                         
+                         
+                         
+                         output$demomascotparserui <- renderUI({
+                           tagList(
+                             selectInput(
+                               "demomascotparserresultid",
+                               NULL,
+                               choices = get_target_name(psites_score_dir, 1)
+                             ),
+                             dataTableOutput("demomascotparserresultdt")
+                           )
+                         })
+                         output$demomascotdropproparserui <- renderUI({
+                           tagList(
+                             selectInput(
+                               "demomascotdropproparserresultid",
+                               NULL,
+                               choices = get_target_name(psites_score_dir, 1)
+                             ),
+                             dataTableOutput("demomascotdropproparserresultdt")
+                           )
+                         })
+                       }
+                       incProgress(1, detail = "")
+                     }
+                   })
+      updateTabsetPanel(session, "resultnav", selected = "demomascotstep1val")
+      updateTabsetPanel(session, "resultnavdroppro", selected = "demomascotdropprostep1val")
+      
+      observeEvent(
+        input$demomascotparserresultid,{
+          output$demomascotparserresultdt <- renderDataTable({
+            id <- input$demomascotparserresultid
+            psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
+            # Determine the file path based on the relative index position
+            index = which(get_target_name(psites_score_dir, 1) == id)
+            path <- list.files(psites_score_dir, full.names = T)[index]
+            dataread <- read.csv(path, header = T)
+          })
         }
+      )
+      observeEvent(
+        input$demomascotdropproparserresultid,{
+          output$demomascotdropproparserresultdt <- renderDataTable({
+            id <- input$demomascotdropproparserresultid
+            psites_score_dir <- paste0(mascotdemopreloc, "psites_score_csv")
+            # Determine the file path based on the relative index position
+            index = which(get_target_name(psites_score_dir, 1) == id)
+            path <- list.files(psites_score_dir, full.names = T)[index]
+            dataread <- read.csv(path, header = T)
+          })
+        }
+      )
+      updateActionButton(session, "parserbt01", icon = icon("rotate-right"))
+      updateActionButton(session, "mergingbt0", icon = icon("play"))
+      updateActionButton(session, "mappingbt01", icon = icon("play"))
+      updateActionButton(session, "normalizationbt01", icon = icon("play"))
+      updateActionButton(session, "normalizationbt02", icon = icon("play"))
+      if(input$useprocheck1 == 1) {
+        updateProgressBar(session = session, id = "preprobar", value = 20)
+      } else {
+        updateProgressBar(session = session, id = "preprobar", value = 25)
       }
     }
   )
@@ -3788,11 +3877,11 @@ server<-shinyServer(function(input, output, session){
           )
           dev.off()
           output$limmaph <- renderPlot(ph)
-          if((nrow(limma_for_ph) > 150) & online) {
+          if((nrow(limma_for_ph) > 500) & online) {
             output$limmainterph <- renderPlotly({
               p <- plot_ly() %>%
                 add_annotations(
-                  text = "Differential phosphorylation sites exceed 150. 
+                  text = "Differential phosphorylation sites exceed 500. 
                 Please use the local version to view the interactive heatmap.",
                   xref = "paper", yref = "paper",
                   x = 0.5, y = 0.1,
@@ -4052,11 +4141,11 @@ server<-shinyServer(function(input, output, session){
             )
             dev.off()
             output$samph <- renderPlot(ph)
-            if((nrow(sam()[[3]]) > 150) & online ) {
+            if((nrow(sam()[[3]]) > 500) & online ) {
               output$samphinter <- renderPlotly({
                 p <- plot_ly() %>%
                   add_annotations(
-                    text = "Differential phosphorylation sites exceed 150. 
+                    text = "Differential phosphorylation sites exceed 500. 
                 Please use the local version to view the interactive heatmap.",
                     xref = "paper", yref = "paper",
                     x = 0.5, y = 0.1,
@@ -4152,11 +4241,11 @@ server<-shinyServer(function(input, output, session){
               ggsave(filename = file,plot = p,width = 9,height = 5)
             }
           )
-          if((nrow(anova_for_ph) > 150) & online) {
+          if((nrow(anova_for_ph) > 500) & online) {
             output$anovainterph <- renderPlotly({
               p <- plot_ly() %>%
                 add_annotations(
-                  text = "Differential phosphorylation sites exceed 150. 
+                  text = "Differential phosphorylation sites exceed 500. 
                 Please use the local version to view the interactive heatmap.",
                   xref = "paper", yref = "paper",
                   x = 0.5, y = 0.1,
@@ -5357,13 +5446,13 @@ server<-shinyServer(function(input, output, session){
   #######################################
   #######        Tutorial         #######
   #######################################
-  output$dockermanual <- renderUI({
-    readme <- readLines("README.md")
-    md_start <- grep("^### 1\\. Docker-based installation", readme)
-    md_end <- grep("^### 2\\. R-based installation", readme)
-    md_section <- paste(readme[(md_start + 1) : (md_end - 1)], collapse = "\n")
-    markdown(md_section)
-  })
+  # output$dockermanual <- renderUI({
+  #   readme <- readLines("README.md")
+  #   md_start <- grep("^### 1\\. Docker-based installation", readme)
+  #   md_end <- grep("^### 2\\. R-based installation", readme)
+  #   md_section <- paste(readme[(md_start + 1) : (md_end - 1)], collapse = "\n")
+  #   markdown(md_section)
+  # })
   
   #######################################
   #######    FAQ and Download     #######

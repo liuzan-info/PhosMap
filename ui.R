@@ -36,6 +36,7 @@ library(rrcovNA)
 library(impute)
 library(e1071)
 library(heatmaply)
+library(ggdendro)
 
 
 ui <- renderUI(
@@ -65,7 +66,7 @@ ui <- renderUI(
                      opacity:0.7;
                      z-index: 1050;
                            }
-                     #manual_iframe {
+                     .manual_iframe {
                      width: 100%;
                      height: 100vh;
                      }
@@ -129,28 +130,44 @@ ui <- renderUI(
       position = "fixed-top",
       tabPanel(
         "Home",
-        # icon = icon("house"),
+        icon = icon("house"),
         column(
-          3,
-          panel(
-            "",
-            heading = "Update Log",
-            status = "warning",
-            h5("PhosMap 1.0.0 was released in July 2023.")
+          2,
+          radioGroupButtons(
+            inputId = "homenotice",
+            label = "",
+            choices = c("Log", 
+                        "Notice", "Intro"),
+            justified = TRUE,
+            selected = "Intro",
+            checkIcon = list(
+              yes = icon("face-smile"))
           ),
-          panel(
-            "",
-            heading = "Notice",
-            status = "info",
-            HTML("This server is single-thread and of low-level hardware, we do recommend
-               users to analyze the data using the demo server with <b>small data sets</b>. 
-               To conserve computing resources, <b><u>your connection may be lost due to inactivity.
-               Please refresh the page to reconnect</u></b>. An upgraded hardware is necessary, 
-               according to the possible computational
-               cost of the data, to reach the potential of PhosMap."),
-            actionButton("viewinstall", "Tutorial video", icon("video")),
-            HTML(
-              "
+          conditionalPanel(
+            condition = "input.homenotice == 'Log'",
+            panel(
+              "",
+              heading = "Update Log",
+              status = "warning",
+              h4("PhosMap 1.1.0 was released in August 2023."),
+              h5("Key features: Introduce a quality inspector to facilitate iterative preprocessing for obtaining high-quality data."),
+              h4("PhosMap 1.0.0 was released in July 2023.")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.homenotice == 'Notice'",
+            panel(
+              "",
+              heading = "Notice",
+              status = "info",
+              HTML("The server currently operates on a single-thread and utilizes low-level hardware. 
+                   To enhance performance and unlock the full potential of PhosMap, 
+                   we recommend users consider analyzing their data using the server that is specifically designed for <b>small data sets</b>. 
+                   It is advisable to evaluate the possibility of upgrading to higher-level hardware, 
+                   considering the potential computational cost associated with the data, to fully maximize the capabilities of PhosMap."),
+              actionButton("viewinstall", "Tutorial video", icon("video")),
+              HTML(
+                "
               <table id='help'>
   <tr>
     <th>Version</th>
@@ -160,7 +177,7 @@ ui <- renderUI(
   </tr>
   <tr>
     <td>Online</td>
-    <td>MaxQuant:&#x2714; Firmiana:&#x2716; </td>
+    <td>MaxQuant:&#x2714; Firmiana:&#x2714; </td>
     <td>&#x2714;</td>
     <td>&#x2716;</td>
   </tr>
@@ -187,13 +204,16 @@ ui <- renderUI(
   }
 </style>
               "
+              )
             )
           ),
-          panel(
-            "",
-            heading = "Introduction",
-            status = "success",
-            HTML("<p>PhosMap supports multiple function modules for full landscape of 
+          conditionalPanel(
+            condition = "input.homenotice == 'Intro'",
+            panel(
+              "",
+              heading = "Introduction",
+              status = "success",
+              HTML("<p>PhosMap supports multiple function modules for full landscape of 
                phosphoproteomics data analyses including quality control, phosphosite 
                mapping, dimension reduction analysis, time course analysis, kinase 
                activity analysis and survival analysis. Various of publication ready 
@@ -205,14 +225,15 @@ ui <- renderUI(
                is provided for more flexible analysis. 
                <p>Furthermore, our data flow is standardized, ensuring its strong scalability.
                Therefore, if users have other analysis requirements, they are welcome to submit PR or issue on <a href='https://github.com/liuzan-info/PhosMap' target='_blank'>GitHub</a>.</p>"),
-            # HTML("<b>Related links:</b><br><p>R package:<a href='https://github.com/ecnuzdd/PhosMap'>https://github.com/ecnuzdd/PhosMap</a></p>
-            # <p>docker image:<a href='https://hub.docker.com/r/liuzandh/phosmap'>https://hub.docker.com/r/liuzandh/phosmap</a></p>
-            # <p>source code:<a href='https://github.com/liuzan-info/PhosMap'>https://github.com/liuzan-info/PhosMap</a></p>
-            #      ")
+              # HTML("<b>Related links:</b><br><p>R package:<a href='https://github.com/ecnuzdd/PhosMap'>https://github.com/ecnuzdd/PhosMap</a></p>
+              # <p>docker image:<a href='https://hub.docker.com/r/liuzandh/phosmap'>https://hub.docker.com/r/liuzandh/phosmap</a></p>
+              # <p>source code:<a href='https://github.com/liuzan-info/PhosMap'>https://github.com/liuzan-info/PhosMap</a></p>
+              #      ")
+            )
           )
         ),
         column(
-          9,
+          10,
           h3(style = "text-align: center;", "PhosMap: An Ensemble Bioinformatic Platform to Empower One-stop Interactive Analysis of Quantitative Phosphoproteomics"),
           div(style = "text-align:center;", img(src = "main.svg", height = "700px", width = "900px", style = "")),
           
@@ -241,7 +262,7 @@ ui <- renderUI(
               materialSwitch(
                 inputId = "loaddatatype",
                 label = "Load example data", 
-                value = FALSE,
+                value = TRUE,
                 status = "success",
                 right = TRUE
               ),
@@ -440,9 +461,11 @@ ui <- renderUI(
       ),
       tabPanel(
         "Preprocessing",
+        icon = icon("arrows-spin"),
         fluidRow(
-          column(2, NULL),
-          column(8, h2(style = "text-align: center;", "Preprocessing")),
+          column(4, NULL),
+          column(4, h2(style = "text-align: center;", "Preprocessing")),
+          column(2, actionButton("qualityinspector", "Quality Inspector", icon = icon("magnifying-glass"))),
           column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
           conditionalPanel(
             condition = "input.softwaretype == 2",
@@ -1386,8 +1409,7 @@ ui <- renderUI(
                         "SAM", "ANOVA"),
             justified = TRUE,
             checkIcon = list(
-              yes = icon("ok", 
-                         lib = "glyphicon"))
+              yes = icon("key"))
           ),
           conditionalPanel(
             condition = "input.detools == 'limma'",
@@ -1790,8 +1812,7 @@ ui <- renderUI(
                             "Two groups"),
                 justified = TRUE,
                 checkIcon = list(
-                  yes = icon("ok", 
-                             lib = "glyphicon"))
+                  yes = icon("flask"))
               ),
               conditionalPanel(
                 condition = "input.kseamode == 'Multiple groups'",
@@ -2111,34 +2132,62 @@ ui <- renderUI(
       ),
       tabPanel(
         "Tutorial",
-        div(style = "text-align:center;", img(src = "tumain.svg", height = "200px", width = "1000px", style = "")),
+        icon = icon("book"),
+        div(style = "text-align:center;", img(src = "tumain.svg", height = "80px", width = "500px", style = "")),
         radioGroupButtons(
           inputId = "tutorialtab",
           label = "",
-          choices = c("Web Server", 
+          choices = c("Web Server / Local UI", 
                       "Docker", "R Package"),
           justified = TRUE,
           checkIcon = list(
-            yes = icon("ok", 
-                       lib = "glyphicon"))
+            yes = icon("book"))
         ),
         conditionalPanel(
-          condition = "input.tutorialtab == 'Web Server'",
+          condition = "input.tutorialtab == 'Web Server / Local UI'",
           # HTML('<iframe style="height:1200px; width:90%" src= "manual/manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
-          tags$iframe(src="https://liuzan-info.github.io/", id="manual_iframe"),
+          tags$iframe(src="https://liuzan-info.github.io/phosmap_manual", class="manual_iframe"),
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'Docker'",
-          uiOutput("dockermanual")
+          tags$p(
+            "We provide a docker image with PhosMap: ",
+            tags$a("https://hub.docker.com/r/liuzandh/phosmap", href = "https://hub.docker.com/r/liuzandh/phosmap"),
+            tags$br(),
+            tags$br(),
+            "Pull the docker image of PhosMap:",
+            tags$code("docker pull liuzandh/phosmap:1.0.0", language = "linux"),
+            tags$br(),
+            tags$br(),
+            "Create a docker container containing PhosMap:",
+            tags$code("docker run -p HostPort:3838 liuzandh/phosmap:1.0.0", language = "linux"),
+            tags$br(),
+            tags$br(),
+            "Then, you can enter PhosMap by visiting HostIP:HostPort.",
+            tags$br(),
+            tags$br(),
+            "For example, HostPort could be set to 8083. This parameter can be changed according to user needs.",
+            tags$br(),
+            tags$code("docker run -p 8083:3838 liuzandh/phosmap:1.0.0", language = "linux"),
+            tags$br(),
+            tags$br(),
+            "Next, open 127.0.0.1:8083 in the local browser or remotely access ip:8083 (you should ensure that the machine can be accessed remotely)."
+          )
         ),
         conditionalPanel(
           condition = "input.tutorialtab == 'R Package'",
-          HTML('<iframe style="height:1200px; width:90%" src= "package_manual.pdf">This browser does not support PDFs.Please download the PDF at our github.</iframe>')
+          tags$p(
+            "In case your browser fails to display this tutorial correctly, please visit ",
+            tags$a("https://liuzan-info.github.io/phosmap_r", href = "https://liuzan-info.github.io/phosmap_r", target = "_blank"),
+            " for access."
+          ),
+          tags$iframe(src="https://liuzan-info.github.io/phosmap_r", class="manual_iframe"),
         )
         
       ),
       tabPanel(
         "FAQ",
+        icon = icon("question"),
         h2("FAQ", style="align: center;"),
         hr(style = "border-color: grey;"),
         h4("Q1: What is the format of the experimental design file?"),
@@ -2167,6 +2216,7 @@ ui <- renderUI(
       ),
       tabPanel(
         "Download",
+        icon = icon("download"),
         h2("Download", style="align: center;"),
         hr(style = "border-color: grey;"),
         h4("1. 'Preprocessing' example data:"),

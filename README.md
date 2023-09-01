@@ -5,16 +5,15 @@
   <b>An Ensemble Bioinformatic Platform to Empower One-stop Interactive Analysis of Quantitative Phosphoproteomics.</b>
   <div>&nbsp;</div>
 
-[![Web Server CD](https://github.com/liuzan-info/PhosMap/actions/workflows/shinyapp.yml/badge.svg)](https://github.com/liuzan-info/PhosMap/actions/workflows/shinyapp.yml)
 [![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
 <img src="https://img.shields.io/github/license/liuzan-info/PhosMap">
 
 [![R](https://img.shields.io/badge/-R%20package-276DC3?style=flat-square&logo=R&logoColor=white)](https://github.com/ecnuzdd/PhosMap) | 
-[![Web](https://img.shields.io/badge/-Web%20server-FF7139?style=flat-square&logo=Google-Chrome&logoColor=white)](https://bio-inf.shinyapps.io/phosmap/) | 
+[![Web](https://img.shields.io/badge/-Web%20server-FF7139?style=flat-square&logo=Google-Chrome&logoColor=white)](https://huggingface.co/spaces/Bio-Add/PhosMap) | 
 [![Docker](https://img.shields.io/badge/-Docker%20image-2496ED?style=flat-square&logo=Docker&logoColor=white)](https://hub.docker.com/r/liuzandh/phosmap/tags)
 
-[📘Doc for R package](https://github.com/liuzan-info/PhosMap/blob/main/www/package_manual.pdf)
-[📙Doc for Web server and Docker image](https://liuzan-info.github.io/)
+[📘Doc for R package](https://liuzan-info.github.io/phosmap_r)
+[📙Doc for Web server and Local UI](https://liuzan-info.github.io/phosmap_manual)
 
 <a href="https://youtu.be/2ZlMqMJjNU8" style="text-decoration:none;">
   <img src="https://user-images.githubusercontent.com/25839884/218346691-ceb2116a-465a-40af-8424-9f30d2348ca9.png" width="3%" alt="" /></a>
@@ -25,36 +24,27 @@
 
 </div>
    
-## Table of Contents
+<b>Table of Contents</b>
 - [Brief Description](#brief-description)
 - [How to install](#how-to-install)
   - [1. Docker-based installation](#1-docker-based-installation)
   - [2. R-based installation](#2-r-based-installation)
 - [How to use](#how-to-use)
-- [Detail of R package "PhosMap"](#rpackage)
-- [Friendly suggestion](#suggestion)
-- [Reporting issues](#issues)
-- [Contributing](#contributing)🥰
+- [Detail of R package "PhosMap"](#detail-of-r-package-phosmap)
+- [Friendly suggestion](#friendly-suggestion)
+- [Reporting issues](#reporting-issues)
+- [Contributing](#contributing)
 - [Citation](#citation)
 
 <p id="brief-description"></p>
 
 ## Brief Description
 
-PhosMap supports multiple function modules for full landscape of 
-phosphoproteomics data analyses including quality control, phosphosite 
-mapping, dimension reduction analysis, time course analysis, kinase 
-activity analysis and survival analysis. Various of publication ready 
-figures and tables could be generated via PhosMap. We provided a downloadable
-R package for local customized analysis of massive data in the R shiny environment
-deploying on the Docker upon the Windows, Linux, and Mac system.
+PhosMap emerges as an all-encompassing bioinformatic framework meticulously architected to bestow researchers with a harmonious and interactive data analysis experience within the domain of MS-based phosphoproteomics. Its core essence revolves around catering to label-free phosphoproteomics data procured through data-dependent acquisition (DDA) mass spectrometry. Notably, PhosMap seamlessly accommodates preprocessed data originating from either Mascot integrated in Firmiana or Andromeda derived from MaxQuant. Serving as a versatile and user-friendly platform, PhosMap extends its prowess through a trifecta of deployment options: a web server, a local graphical interface, and an R package. For users without bioinformatics skills, the web server is suitable for analyzing small data volumes. When dealing with larger data volumes, it is recommended to utilize the local graphical interface of PhosMap. Meanwhile, for users with programming skills, the locally installed graphical interface allows for convenient customization and expansion. Moreover, the PhosMap R package offers a highly flexible platform for advanced analysis.
 
 
-We provide a demo server at https://bio-inf.shinyapps.io/phosmap/. 
-This server is single-thread and of low-level hardware, we do recommend
-users to analyze the data using the demo server with small data sets. 
-An upgraded hardware is necessary, according to the possible computational
-cost of the data, to reach the potential of PhosMap.
+The PhosMap web server can be accessed at the following URL: https://huggingface.co/spaces/Bio-Add/PhosMap.
+
 
 <div align="center">
   <img src="www/main.svg" width = 70%>
@@ -63,6 +53,7 @@ cost of the data, to reach the potential of PhosMap.
 <p id="how-to-install"></p>
 
 ## How to install
+To fully unleash the potential of PhosMap, we recommend users to utilize the local version.
 There are two different ways to launch PhosMap:
 
 <p id="installdocker"></p>
@@ -108,13 +99,12 @@ This tool is developed with R, so if you want to run it locally, you may do some
 
   BiocManager::install(c("pcaMethods", "impute"))
 
-  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply"))
+  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply", "ggdendro))
 
   install.packages('devtools')
   require(devtools)
 
   install_github('evocellnet/ksea')
-  install_github('omarwagih/rmotifx')
   install_github('ecnuzdd/PhosMap')
   ```
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
@@ -122,7 +112,7 @@ This tool is developed with R, so if you want to run it locally, you may do some
 <p id="how-to-use"></p>
 
 ## How to use
-You can find comprehensive documentation and an in-depth video tutorial on this website.https://bio-inf.shinyapps.io/phosmap/
+You can find comprehensive documentation and an in-depth video tutorial on this website. https://github.com/liuzan-info/PhosMap
 
 <p id="rpackage"></p>
 
@@ -132,7 +122,7 @@ https://github.com/ecnuzdd/PhosMap
 <p id="suggestion"></p>
 
 ## Friendly suggestion
-1. Open PhosMap with Chrome.
+1. Open PhosMap with Chrome or Firefox.
 2. The minimum operating system specifications are: RAM 8GB, Hard drive 100 GB.
 
 <p id="issues"></p>
