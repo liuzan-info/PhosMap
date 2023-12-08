@@ -1,4 +1,4 @@
-FROM rocker/shiny-verse:4.2.3
+FROM rocker/shiny-verse:4.3
 COPY . /srv/shiny-server
 RUN chown -R shiny:shiny /srv/shiny-server
 WORKDIR /srv/shiny-server
