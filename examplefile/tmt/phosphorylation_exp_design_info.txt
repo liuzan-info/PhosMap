@@ -1,0 +1,5 @@
+Experiment_Code	Group	Pair	Description
+CoV2_1hr_A	1	0	ID:1/CoV2.1hr.A
+CoV2_1hr_B	1	0	ID:2/CoV2.1hr.B
+CoV2_3hr_A	3	0	ID:3/CoV2.3hr.A
+CoV2_3hr_B	3	0	ID:4/CoV2.3hr.B

@@ -38,6 +38,11 @@ library(e1071)
 library(heatmaply)
 library(ggdendro)
 
+# new
+library(data.table)
+library(dplyr)
+library(tidyr)
+
 
 ui <- renderUI(
   fluidPage(
@@ -110,6 +115,12 @@ ui <- renderUI(
           #usermascotdropproresultnav {float: left;}
           #demomaxresultnav {float: left;}
           #demomaxdropproresultnav {float: left;}
+          #demomaxtmtresultnav {float: left;}
+          #usermaxtmtresultnav {float: left;}
+          #demodiannresultnav {float: left;}
+          #userdiannresultnav {float: left;}
+          #demosnresultnav {float: left;}
+          #usersnresultnav {float: left;}
           #usermaxnoproresultnav {float: left;}
           #usermaxresultnav {float: left;}
           #usermaxdropproresultnav {float: left;}
@@ -253,41 +264,89 @@ ui <- renderUI(
           sidebarPanel(
             width = 3,
             fluidRow(
-              column(10, h3("Import Data")),
+              column(4, h3("Import Data")),
+              column(6, actionButton("samplequalityinspector", "Sample Quality Control", icon = icon("magnifying-glass"))),
               column(2, tags$div(title = "If pre-processed data is available, click this button to proceed directly to the analysis module and upload the data for analysis.", 
                                  actionButton("pre2analysis", NULL, icon = icon("paper-plane"))
               ))
             ),
             wellPanel(
-              materialSwitch(
+              prettySwitch(
                 inputId = "loaddatatype",
                 label = "Load example data", 
-                value = TRUE,
+                fill = TRUE,
                 status = "success",
-                right = TRUE
+                value = TRUE
               ),
-              radioGroupButtons(
-                inputId = "softwaretype",
-                label = NULL,
-                choices = list("MaxQuant" = 1, "Firmiana" = 2),
-                # direction = "vertical",
-                individual = TRUE,
-                selected = 1,
-                checkIcon = list(
-                  yes = tags$i(class = "fa fa-circle", 
-                               style = "color: steelblue"),
-                  no = tags$i(class = "fa fa-circle-o", 
-                              style = "color: steelblue")),
+              radioButtons("mstech", "MS-based Technique:",
+                           choiceNames = list(
+                             "label-free DDA",
+                             "labeled DDA[TMT]",
+                             "DIA"
+                           ),
+                           choiceValues = list(
+                             1,
+                             2,
+                             3
+                           ),
+                           inline = TRUE
+              ),
+              conditionalPanel(
+                condition = "input.mstech == 1",
+                radioGroupButtons(
+                  inputId = "softwaretype",
+                  label = "Searching Software:",
+                  choices = list("MaxQuant" = 1, "Firmiana" = 2),
+                  # direction = "vertical",
+                  individual = TRUE,
+                  selected = 1,
+                  checkIcon = list(
+                    yes = tags$i(class = "fa fa-circle", 
+                                 style = "color: steelblue"),
+                    no = tags$i(class = "fa fa-circle-o", 
+                                style = "color: steelblue")),
+                )
+              ),
+              conditionalPanel(
+                condition = "input.mstech == 2",
+                radioGroupButtons(
+                  inputId = "lddasoftwaretype",
+                  label = "Searching Software:",
+                  choices =  list("MaxQuant" = 1),
+                  selected = 1,
+                  checkIcon = list(
+                    yes = tags$i(class = "fa fa-circle", 
+                                 style = "color: steelblue"),
+                    no = tags$i(class = "fa fa-circle-o", 
+                                style = "color: steelblue")),
+                )
+              ),
+              conditionalPanel(
+                condition = "input.mstech == 3",
+                radioGroupButtons(
+                  inputId = "diasoftwaretype",
+                  label = "Searching Software:",
+                  choices =  list("Spectronaut" = 1, "DIANN" = 2),
+                  individual = TRUE,
+                  selected = 1,
+                  checkIcon = list(
+                    yes = tags$i(class = "fa fa-circle", 
+                                 style = "color: steelblue"),
+                    no = tags$i(class = "fa fa-circle-o", 
+                                style = "color: steelblue")),
+                )
               )
             ),
+            # label-free dda
             conditionalPanel(
-              condition = "input.loaddatatype == true",
+              condition = "input.loaddatatype == true & input.mstech == 1",
               h4("1. Experimental design file: "),
               actionButton("viewbt1", "view", icon("eye"), class = "viewbutton"),
               hr(style = "border-style: dashed;border-color: grey;")
             ),
+            # mascot
             conditionalPanel(
-              condition = "input.loaddatatype == true  & input.softwaretype == 2",
+              condition = "input.loaddatatype == true  & input.softwaretype == 2 & input.mstech == 1",
               h4("2. Mascot xml file: "),
               selectInput("mascotdemoxmlid", NULL, choices = c("Exp027015_F1_R1", "Exp027016_F1_R1", "Exp027017_F1_R1", "Exp027031_F1_R1", "Exp027032_F1_R1", "Exp027033_F1_R1", "Exp027046_F1_R1", "Exp027047_F1_R1", "Exp027048_F1_R1")),
               hr(style = "border-style: dashed;border-color: grey;"),
@@ -303,9 +362,9 @@ ui <- renderUI(
               selectInput("mascotdemoproid", NULL, choices = c("Exp026982_gene", "Exp026983_gene", "Exp026995_gene", "Exp026996_gene", "Exp027008_gene", "Exp027009_gene"))
             ),
 
-            #Maxquant
+            # Maxquant label-free
             conditionalPanel(
-              condition = "input.loaddatatype == true  & input.softwaretype == 1",
+              condition = "input.loaddatatype == true  & input.softwaretype == 1 & input.mstech == 1",
               h4("2. Phospho (STY)Sites.txt: "),
               actionButton("viewdemomaxphosbt", "view", icon("eye"), class = "viewbutton"),
               hr(style = "border-style: dashed;border-color: grey;"),
@@ -316,6 +375,36 @@ ui <- renderUI(
               actionButton("viewdemomaxprodesignbt", "view", icon("eye"), class = "viewbutton"),
               h4("3.2 proteinGroups.txt: "),
               actionButton("viewdemomaxprobt", "view", icon("eye"), class = "viewbutton"),
+            ),
+            
+            # Maxquant tmt
+            conditionalPanel(
+              condition = "input.loaddatatype == true  & input.lddasoftwaretype == 1 & input.mstech == 2",
+              h4("1. Experimental design file: "),
+              actionButton("viedemomaxtmtphosbt1", "view", icon("eye"), class = "viewbutton"),
+              hr(style = "border-style: dashed;border-color: grey;"),
+              h4("2. Phospho (STY)Sites.txt: "),
+              actionButton("viewdemomaxtmtphosbt2", "view", icon("eye"), class = "viewbutton"),
+            ),
+            
+            # dia
+            conditionalPanel(
+              condition = "input.loaddatatype == true  & input.mstech == 3",
+              h4("1. Experimental design file: "),
+              actionButton("dianndemoviewbt1", "view", icon("eye"), class = "viewbutton"),
+              hr(style = "border-style: dashed;border-color: grey;")
+            ),
+            # SN
+            conditionalPanel(
+              condition = "input.loaddatatype == true  & input.diasoftwaretype == 1 & input.mstech == 3",
+              h4("2. Report.xls: "),
+              actionButton("sndemoviewbt2", "view", icon("eye"), class = "viewbutton"),
+            ),
+            # diann
+            conditionalPanel(
+              condition = "input.loaddatatype == true  & input.diasoftwaretype == 2 & input.mstech == 3",
+              h4("2. report.tsv: "),
+              actionButton("dianndemoviewbt2", "view", icon("eye"), class = "viewbutton"),
             ),
             
             ## user data
@@ -339,7 +428,7 @@ ui <- renderUI(
             
             # mascot
             conditionalPanel(
-              condition = "input.loaddatatype == false & input.softwaretype == 2",
+              condition = "input.loaddatatype == false & input.softwaretype == 2 & input.mstech == 1",
               h4("2. Mascot xml file: "),
               downloadButton("usermascotxmldl", "Download Demo", icon = NULL,
                              style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
@@ -384,7 +473,7 @@ ui <- renderUI(
             
             # Maxquant
             conditionalPanel(
-              condition = "input.loaddatatype == false & input.softwaretype == 1",
+              condition = "input.loaddatatype == false & input.softwaretype == 1 & input.mstech == 1",
               h4("2. Phospho (STY)Sites.txt: "),
               downloadButton("userphosmaxdl", "Download Demo", icon = NULL,
                              style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
@@ -434,9 +523,67 @@ ui <- renderUI(
               )
             ),
             
+            # Maxquant tmt
             conditionalPanel(
-              condition = "input.loaddatatype == false & input.softwaretype == 3",
-              h4("another user data")
+              condition = "input.loaddatatype == false  & input.lddasoftwaretype == 1 & input.mstech == 2",
+              h4("2. Phospho (STY)Sites.txt: "),
+              downloadButton("userphosmaxtmtdl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              actionButton("userphosmaxtmtinstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              fileInput("upusermaxtmtphos", NULL, accept = ".txt"),
+              hidden(
+                div(
+                  id = "hidviewusermaxtmtphosbt",
+                  actionButton("viewusermaxtmtphosbt", "view", icon("eye"), class = "viewbutton")
+                ),
+                div(
+                  id = "hidviewusermaxtmtphosbtwarning",
+                  actionButton("viewusermaxtmtphosbtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
+                )
+              )
+            ),
+            
+            # SN
+            conditionalPanel(
+              condition = "input.loaddatatype == false  & input.diasoftwaretype == 1 & input.mstech == 3",
+              h4("2. Report.xls: "),
+              downloadButton("userphossndl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              actionButton("userphossninstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              fileInput("upusersnphos", NULL, accept = ".xls"),
+              hidden(
+                div(
+                  id = "hidviewusersnphosbt",
+                  actionButton("viewusersnphosbt", "view", icon("eye"), class = "viewbutton")
+                ),
+                div(
+                  id = "hidviewusersnphosbtwarning",
+                  actionButton("viewusersnphosbtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
+                )
+              )
+            ),
+            
+            # diann
+            conditionalPanel(
+              condition = "input.loaddatatype == false  & input.diasoftwaretype == 2 & input.mstech == 3",
+              h4("2. report.tsv: "),
+              downloadButton("userphosdianndl", "Download Demo", icon = NULL,
+                             style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              actionButton("userphosdianninstruction", "View Upload Instructions", 
+                           style = "padding: 2px 5px; font-size: 12px; line-height: 1;"),
+              fileInput("upuserdiannphos", NULL, accept = ".tsv"),
+              hidden(
+                div(
+                  id = "hidviewuserdiannphosbt",
+                  actionButton("viewuserdiannphosbt", "view", icon("eye"), class = "viewbutton")
+                ),
+                div(
+                  id = "hidviewuserdiannphosbtwarning",
+                  actionButton("viewuserdiannphosbtwarning", "error...", icon("triangle-exclamation"), class = "warningbutton")
+                )
+              )
             )
           ),
           mainPanel(
@@ -467,8 +614,8 @@ ui <- renderUI(
           column(4, h2(style = "text-align: center;", "Preprocessing")),
           column(2, actionButton("qualityinspector", "Quality Inspector", icon = icon("magnifying-glass"))),
           column(2, actionButton("maxpre2analysis", "Go to analysis tools", icon = icon("paper-plane"))),
-          conditionalPanel(
-            condition = "input.softwaretype == 2",
+          conditionalPanel( # label-free dda + mascot
+            condition = "input.softwaretype == 2 & input.mstech == 1",
             column(
               12,
               conditionalPanel(
@@ -513,7 +660,7 @@ ui <- renderUI(
                 )
               ),
               panel(
-                heading = "Step2: Quality Control & Merging",
+                heading = "Step2: p-site Quality Control & Merging",
                 status = "warning",
                 numericInput(
                   "qcscore",
@@ -882,8 +1029,8 @@ ui <- renderUI(
               )
             )
           ),
-          conditionalPanel(
-            condition = "input.softwaretype == 1",
+          conditionalPanel(  # label-free dda + maxquant
+            condition = "input.softwaretype == 1 & input.mstech == 1",
             column(
               12,
               conditionalPanel(
@@ -898,7 +1045,7 @@ ui <- renderUI(
             column(
               3,
               panel(
-                heading = "Step1: Quality Control",
+                heading = "Step1: p-site Quality Control",
                 status = "primary",
                 numericInput(
                   "minqcscore",
@@ -1194,6 +1341,638 @@ ui <- renderUI(
                 uiOutput("maxuserresultpanelui")
               )
             )
+          ),
+          conditionalPanel(  # tmt + maxquant
+            condition = "input.mstech == 2 & input.lddasoftwaretype == 1",
+            column(
+              12,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                progressBar(id = "demomaxtmtpreprobar", value = 0, status = "success")
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                progressBar(id = "usermaxtmtpreprobar", value = 0, status = "success")
+              )
+            ),
+            column(
+              3,
+              panel(
+                heading = "Step1: p-site Quality Control",
+                status = "primary",
+                numericInput(
+                  "maxtmtminqcscore",
+                  "minimum score:",
+                  40,
+                  max = 200,
+                  min = 40,
+                  step = 1
+                ),
+                numericInput(
+                  "maxtmtminqclocalizationprob",
+                  "minimum localization probability:",
+                  0.75,
+                  max = 1,
+                  min = 0,
+                  step = 0.01
+                ),
+                numericInput(
+                  "maxtmtphosNAthre",
+                  "minimum detection frequency:",
+                  1,
+                  min = 0,
+                  step = 1
+                ),
+                bsTooltip(
+                  "maxtmtphosNAthre",
+                  # "xxxx",
+                  "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demomaxtmtqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "usermaxtmtqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              panel(
+                heading = "Step2: Normalizaiton & Imputation & Filtering",
+                status = "warning",
+                selectInput("maxtmtphosnormmethod", "normalization method:", choices = c("global", "median")),
+                column(12,
+                       prettyToggle(
+                         inputId = "maxtmtdemocountbygroup",
+                         label_on = "impute by group",
+                         icon_on = icon("check"),
+                         status_on = "info",
+                         status_off = "warning",
+                         label_off = "impute globally ",
+                         icon_off = icon("xmark"),
+                         value = FALSE
+                       )
+                ),
+                selectInput(
+                  "maxtmtphosimputemethod",
+                  label = "imputation method: ",
+                  choices = list(
+                    "globally"= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    "globally_or_bygroup" = c("bpca", "lls", "knnmethod", "rowmedian")
+                  ),
+                  selected = "minimum/10"
+                ),
+                # selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
+                
+                
+                numericInputIcon(
+                  inputId = "maxtmttop",
+                  label = "top:",
+                  value = 100,
+                  step = 1,
+                  max = 100,
+                  min = 1,
+                  icon = list(NULL, icon("percent"))
+                ),
+                bsTooltip(
+                  "maxtmttop", 
+                  "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demomaxtmtnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "usermaxtmtnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              )
+            ),
+            column(
+              9,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                navbarPage(
+                  title = "Result",
+                  id = "demomaxtmtresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "demomaxtmtstep1val",
+                    h4("QC result: "),
+                    column(11,dataTableOutput("demomaxtmtresult1")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxtmtresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demomaxtmtstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("demomaxtmtresult2")),
+                    column(1,downloadBttn(
+                      outputId = "demomaxtmtresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                navbarPage(
+                  title = "Result",
+                  id = "usermaxtmtresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "usermaxtmtstep1val",
+                    h4("QC result: "),
+                    column(11,dataTableOutput("usermaxtmtresult1")),
+                    column(1,downloadBttn(
+                      outputId = "usermaxtmtresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "usermaxtmtstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("usermaxtmtresult2")),
+                    column(1,downloadBttn(
+                      outputId = "usermaxtmtresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              )
+            )
+          ),
+          conditionalPanel(  # dia + diann
+            condition = "input.mstech == 3 & input.diasoftwaretype == 2",
+            column(
+              12,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                progressBar(id = "demodiannpreprobar", value = 0, status = "success")
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                progressBar(id = "userdiannpreprobar", value = 0, status = "success")
+              )
+            ),
+            column(
+              3,
+              panel(
+                heading = "Step1: Parser & p-site Quality Control",
+                status = "primary",
+                numericInput(
+                  "diannptmqvalue",
+                  "PTM.Q.Value threshold:",
+                  0.01,
+                  max = 0.05,
+                  min = 0.01,
+                  step = 0.001
+                ),
+                numericInput(
+                  "diannphosNAthre",
+                  "minimum detection frequency:",
+                  1,
+                  min = 0,
+                  step = 1
+                ),
+                bsTooltip(
+                  "diannphosNAthre",
+                  # "xxxx",
+                  "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                numericInput(
+                  "dianncorenum",
+                  "thread num:",
+                  2,
+                  min = 1,
+                  step = 1
+                ),
+                bsTooltip(
+                  "dianncorenum",
+                  # "xxxx",
+                  "To speed up the data processing, you can increase the number of threads based on the available resources.",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demodiannqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "userdiannqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              panel(
+                heading = "Step2: Normalizaiton & Imputation & Filtering",
+                status = "warning",
+                selectInput("diannphosnormmethod", "normalization method:", choices = c("global", "median")),
+                column(12,
+                       prettyToggle(
+                         inputId = "dianndemocountbygroup",
+                         label_on = "impute by group",
+                         icon_on = icon("check"),
+                         status_on = "info",
+                         status_off = "warning",
+                         label_off = "impute globally ",
+                         icon_off = icon("xmark"),
+                         value = FALSE
+                       )
+                ),
+                selectInput(
+                  "diannphosimputemethod",
+                  label = "imputation method: ",
+                  choices = list(
+                    "globally"= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    "globally_or_bygroup" = c("bpca", "lls", "knnmethod", "rowmedian")
+                  ),
+                  selected = "minimum/10"
+                ),
+                # selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
+                
+                
+                numericInputIcon(
+                  inputId = "dianntop",
+                  label = "top:",
+                  value = 100,
+                  step = 1,
+                  max = 100,
+                  min = 1,
+                  icon = list(NULL, icon("percent"))
+                ),
+                bsTooltip(
+                  "dianntop", 
+                  "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demodiannnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "userdiannnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              )
+            ),
+            column(
+              9,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                navbarPage(
+                  title = "Result",
+                  id = "demodiannresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "demodiannstep1val",
+                    h4("Parser&QC result: "),
+                    column(11,dataTableOutput("demodiannresult1")),
+                    column(1,downloadBttn(
+                      outputId = "demodiannresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demodiannstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("demodiannresult2")),
+                    column(1,downloadBttn(
+                      outputId = "demodiannresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                navbarPage(
+                  title = "Result",
+                  id = "userdiannresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "userdiannstep1val",
+                    h4("Parser&QC result: "),
+                    column(11,dataTableOutput("userdiannresult1")),
+                    column(1,downloadBttn(
+                      outputId = "userdiannresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "userdiannstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("userdiannresult2")),
+                    column(1,downloadBttn(
+                      outputId = "userdiannresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              )
+            )
+          ),
+          conditionalPanel(  # dia + sn
+            condition = "input.mstech == 3 & input.diasoftwaretype == 1",
+            column(
+              12,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                progressBar(id = "demosnpreprobar", value = 0, status = "success")
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                progressBar(id = "usersnpreprobar", value = 0, status = "success")
+              )
+            ),
+            column(
+              3,
+              panel(
+                heading = "Step1: Parser & p-site Quality Control",
+                status = "primary",
+                numericInput(
+                  "snphosNAthre",
+                  "minimum detection frequency:",
+                  1,
+                  min = 0,
+                  step = 1
+                ),
+                bsTooltip(
+                  "snphosNAthre",
+                  # "xxxx",
+                  "minimum detection frequency for per locus, equivalents to the number of samples minus the number of ‘0’ value",
+                  placement = "right",
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demosnqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "usersnqcbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              ),
+              panel(
+                heading = "Step2: Normalizaiton & Imputation & Filtering",
+                status = "warning",
+                selectInput("snphosnormmethod", "normalization method:", choices = c("global", "median")),
+                column(12,
+                       prettyToggle(
+                         inputId = "sndemocountbygroup",
+                         label_on = "impute by group",
+                         icon_on = icon("check"),
+                         status_on = "info",
+                         status_off = "warning",
+                         label_off = "impute globally ",
+                         icon_off = icon("xmark"),
+                         value = FALSE
+                       )
+                ),
+                selectInput(
+                  "snphosimputemethod",
+                  label = "imputation method: ",
+                  choices = list(
+                    "globally"= c("0", "minimum", "minimum/10", "impseq", "impseqrob", "colmedian"),
+                    "globally_or_bygroup" = c("bpca", "lls", "knnmethod", "rowmedian")
+                  ),
+                  selected = "minimum/10"
+                ),
+                # selectInput("maxphosimputemethod", "imputation method:", choices = c("0", "minimum", "minimum/10", "bpca", "lls", "impseq", "impseqrob", "knnmethod", "colmedian", "rowmedian"), selected = "minimum/10"),
+                
+                
+                numericInputIcon(
+                  inputId = "sntop",
+                  label = "top:",
+                  value = 100,
+                  step = 1,
+                  max = 100,
+                  min = 1,
+                  icon = list(NULL, icon("percent"))
+                ),
+                bsTooltip(
+                  "sntop", 
+                  "compute row maximum each psites, sort row maximum in decreasing order and keep top N (percentage).",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == true",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "demosnnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.loaddatatype == false",
+                  div(
+                    class = "runbuttondiv",
+                    actionButton(
+                      "usersnnormbt",
+                      "",
+                      icon("play"),
+                      class = "runbutton"
+                    )
+                  )
+                )
+              )
+            ),
+            column(
+              9,
+              conditionalPanel(
+                condition = "input.loaddatatype == true",
+                navbarPage(
+                  title = "Result",
+                  id = "demosnresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "demosnstep1val",
+                    h4("Parser&QC result: "),
+                    column(11,dataTableOutput("demosnresult1")),
+                    column(1,downloadBttn(
+                      outputId = "demosnresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "demosnstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("demosnresult2")),
+                    column(1,downloadBttn(
+                      outputId = "demosnresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = "input.loaddatatype == false",
+                navbarPage(
+                  title = "Result",
+                  id = "usersnresultnav",
+                  tabPanel(
+                    "Step 1",
+                    value = "usersnstep1val",
+                    h4("Parser&QC result: "),
+                    column(11,dataTableOutput("usersnresult1")),
+                    column(1,downloadBttn(
+                      outputId = "usersnresult1_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                    
+                  ),
+                  tabPanel(
+                    "Step 2",
+                    value = "usersnstep2val",
+                    h4("Phosphorylation data frame: "),
+                    column(11,dataTableOutput("usersnresult2")),
+                    column(1,downloadBttn(
+                      outputId = "usersnresult2_dl",
+                      label = "",
+                      style = "material-flat",
+                      color = "default",
+                      size = "sm"
+                    ))
+                  )
+                )
+              )
+            )
           )
         )
       ),
@@ -1261,11 +2040,11 @@ ui <- renderUI(
                 hr(style = "border-style: dashed;border-color: grey;"),
                 h4("3. Clinical data file[optional]: "),
                 conditionalPanel(
-                  condition = "input.loaddatatype == true",
+                  condition = "input.loaddatatype == true & input.mstech == 1",
                   actionButton("viewanalysispipeclin", "view", icon("eye"))
                 ),
                 conditionalPanel(
-                  condition = "input.loaddatatype == false",
+                  condition = "input.loaddatatype != true | input.mstech != 1",
                   fileInput(
                     inputId = "annalysisupload24",
                     label = NULL,
