@@ -18,6 +18,13 @@ server<-shinyServer(function(input, output, session){
   maxuserpreloc <- paste0("tmp/", userID, "/maxquant/user/")
   mascotdemopreloc <- paste0("tmp/", userID, "/mascot/demo/")
   mascotuserpreloc <- paste0("tmp/", userID, "/mascot/user/")
+  maxtmtdemopreloc <- paste0("tmp/", userID, "/tmt/demo/")
+  maxtmtuserpreloc <- paste0("tmp/", userID, "/tmt/user/")
+  dianndemopreloc <- paste0("tmp/", userID, "/diann/demo/")
+  diannuserpreloc <- paste0("tmp/", userID, "/diann/user/")
+  sndemopreloc <- paste0("tmp/", userID, "/sn/demo/")
+  snuserpreloc <- paste0("tmp/", userID, "/sn/user/")
+  
   pcaloc <- paste0("tmp/", userID, "/analysis/pca")
   tsneloc <- paste0("tmp/", userID, "/analysis/tsne")
   limmaloc <- paste0("tmp/", userID, "/analysis/limma")
@@ -34,6 +41,13 @@ server<-shinyServer(function(input, output, session){
   dir.create(maxuserpreloc, recursive = TRUE)
   dir.create(mascotdemopreloc, recursive = TRUE)
   dir.create(mascotuserpreloc, recursive = TRUE)
+  dir.create(maxtmtdemopreloc, recursive = TRUE)
+  dir.create(maxtmtuserpreloc, recursive = TRUE)
+  dir.create(dianndemopreloc, recursive = TRUE)
+  dir.create(diannuserpreloc, recursive = TRUE)
+  dir.create(sndemopreloc, recursive = TRUE)
+  dir.create(snuserpreloc, recursive = TRUE)
+  
   dir.create(pcaloc, recursive = TRUE)
   dir.create(tsneloc, recursive = TRUE)
   dir.create(limmaloc, recursive = TRUE)
@@ -188,6 +202,63 @@ server<-shinyServer(function(input, output, session){
       output$viewedfile <- renderDataTable({
         dataread <- read.csv("examplefile/maxquant/proteinGroups.txt",header=T,sep='\t')
         datatable(dataread,options = list(ordering=F))
+      })
+    }
+  )
+  
+  # maxquant tmt demo
+  observeEvent(
+    input$viedemomaxtmtphosbt1,{
+      output$html <- renderUI(div(class = "loadfiledescription", HTML("1. Experimental design file:")))
+      output$viewedfile <- renderDataTable({
+        dataread <- read.csv("examplefile/tmt/phosphorylation_exp_design_info.txt",header=T,sep='\t')
+        # dataread
+        datatable(dataread,options = list(ordering=F))
+      })
+    }
+  )
+  
+  observeEvent(
+    input$viewdemomaxtmtphosbt2,{
+      output$html <- renderUI(div(class = "loadfiledescription", HTML("2. Phospho (STY)Sites.txt:")))
+      output$viewedfile <- renderDataTable({
+        dataread <- read.csv("examplefile/tmt/Phospho (STY)Sites.txt",header=T,sep='\t')
+        datatable(dataread,options = list(ordering=F))
+      })
+    }
+  )
+  
+  # diann demo
+  observeEvent(
+    input$dianndemoviewbt1,{
+      output$html <- renderUI(div(class = "loadfiledescription", HTML("1. Experimental design file:")))
+      output$viewedfile <- renderDataTable({
+        dataread <- read.csv("examplefile/diann/phosphorylation_exp_design_info.txt",header=T,sep='\t')
+        # dataread
+        datatable(dataread,options = list(ordering=F))
+      })
+    }
+  )
+  
+  observeEvent(
+    input$dianndemoviewbt2,{
+      output$html <- renderUI(div(class = "loadfiledescription", HTML("2. report.tsv:")))
+      output$viewedfile <- renderDataTable({
+        dataread <- as.data.frame(fread("examplefile/diann/report_mini.tsv", stringsAsFactors = FALSE))
+        datatable(dataread,options = list(ordering=F))
+      })
+    }
+  )
+  
+  # sn demo
+  observeEvent(
+    input$sndemoviewbt2,{
+      output$html <- renderUI(div(class = "loadfiledescription", HTML("2. Report.xls:")))
+      output$viewedfile <- renderDataTable({
+        file.rename("examplefile/SN/20231122_1_Report.xls", "examplefile/SN/20231122_1_Report.csv")
+        sn_df <- read.csv("examplefile/SN/20231122_1_Report.csv", sep = '\t', check.names=F)
+        file.rename("examplefile/SN/20231122_1_Report.csv", "examplefile/SN/20231122_1_Report.xls")
+        datatable(sn_df,options = list(ordering=F))
       })
     }
   )
@@ -748,6 +819,444 @@ server<-shinyServer(function(input, output, session){
     content = function(file) {file.copy("examplefile/download/profiling_gene_txt.zip", file)}
   )
   
+  
+  # max tmt
+  output$userphosmaxtmtdl <- downloadHandler(
+    filename = "Phospho (STY)Sites.txt",
+    content = function(file) {file.copy("examplefile/tmt/Phospho (STY)Sites.txt", file)}
+  )
+  observeEvent(
+    input$userphosmaxtmtinstruction,{
+      showModal(modalDialog(
+        title = "Phospho (STY)Sites.txt",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of MaxQuant.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  usermaxtmtphos <- reactive({
+    files = input$upusermaxtmtphos
+    if(is.null(files)){
+      dataread <- NULL
+    }else{
+      dataread <- read.csv(files$datapath, header = T, sep = "\t")
+    }
+  })
+  observeEvent(
+    input$upusermaxtmtphos,{
+      shinyjs::show(id = "hidviewusermaxtmtphosbt", anim = FALSE)
+      data <- usermaxtmtphos()
+      output$html2 <- renderUI(div(class = "loadfiledescription", HTML("2. Phospho (STY)Sites.txt:")))
+      output$viewedfile2 <- renderDataTable({datatable(data,options = list(ordering=F))})
+      if(!('Gene.names' %in% colnames(data))){
+        sendSweetAlert(
+          session = session,
+          title = "Error...",
+          text = "The data format is wrong because you did not select the correct 'identifier rule' for the fasta file on maxquant software",
+          type = "error",
+          btn_labels = "I will rerun MaxQuant"
+        )
+        shinyjs::show(id = "hidviewusermaxtmtphosbtwarning", anim = FALSE)
+      } else {
+        shinyjs::hide(id = "hidviewusermaxtmtphosbtwarning", anim = FALSE)
+      }
+    }
+  )
+  observeEvent(
+    input$viewusermaxtmtphosbtwarning, {
+      sendSweetAlert(
+        session = session,
+        title = "Error...",
+        text = "The data format is wrong because you did not select the correct 'identifier rule' for the fasta file on maxquant software",
+        type = "error",
+        btn_labels = "I will rerun MaxQuant"
+      )
+    }
+  )
+  
+  observeEvent(
+    input$viewusermaxtmtphosbt,{
+      output$html2 <- renderUI(div(class = "loadfiledescription", HTML("2. Phospho (STY)Sites.txt:")))
+      output$viewedfile2 <- renderDataTable({datatable(usermaxtmtphos(),options = list(ordering=F))})
+    }
+  )
+  
+  # sn
+  output$userphossndl <- downloadHandler(
+    filename = "20231122_1_Report.xls",
+    content = function(file) {file.copy("examplefile/SN/20231122_1_Report.xls", file)}
+  )
+  observeEvent(
+    input$userphossninstruction,{
+      showModal(modalDialog(
+        title = "Report.xls",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of Spectronaut. Please make sure to export 'PEP.MS2Quantity' information in Spectronaut.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  usersnphos <- reactive({
+    files = input$upusersnphos
+    if(is.null(files)){
+      dataread <- NULL
+    }else{
+      old_filename <- files$datapath
+      new_filename <- sub(".xls$", ".csv", old_filename)
+      file.rename(old_filename, new_filename)
+      sn_df <- read.csv(new_filename, sep = '\t', check.names=F)
+      file.rename(new_filename, old_filename)
+      sn_df
+    }
+  })
+  observeEvent(
+    input$upusersnphos,{
+      shinyjs::show(id = "hidviewusersnphosbt", anim = FALSE)
+      data <- usersnphos()
+      output$html2 <- renderUI(div(class = "loadfiledescription", HTML("2. Report.xls:")))
+      output$viewedfile2 <- renderDataTable({datatable(data,options = list(ordering=F))})
+      if(!(any(grepl("PEP.MS2Quantity$", colnames(data))))){
+        sendSweetAlert(
+          session = session,
+          title = "Error...",
+          text = "The data format is wrong because you did not export 'PEP.MS2Quantity' information in Spectronaut",
+          type = "error",
+          btn_labels = "I will rerun Spectronaut"
+        )
+        shinyjs::show(id = "hidviewusersnphosbtwarning", anim = FALSE)
+      } else {
+        shinyjs::hide(id = "hidviewusersnphosbtwarning", anim = FALSE)
+      }
+    }
+  )
+  observeEvent(
+    input$viewusersnphosbtwarning, {
+      sendSweetAlert(
+        session = session,
+        title = "Error...",
+        text = "The data format is wrong because you did not export 'PEP.MS2Quantity' information in Spectronaut",
+        type = "error",
+        btn_labels = "I will rerun Spectronaut"
+      )
+    }
+  )
+  
+  observeEvent(
+    input$viewusersnphosbt,{
+      output$html2 <- renderUI(div(class = "loadfiledescription", HTML("2. Report.xls:")))
+      output$viewedfile2 <- renderDataTable({datatable(usersnphos(),options = list(ordering=F))})
+    }
+  )
+  
+  # diann
+  output$userphosdianndl <- downloadHandler(
+    filename = "report.tsv",
+    content = function(file) {file.copy("examplefile/diann/report_mini.tsv", file)}
+  )
+  observeEvent(
+    input$userphosdianninstruction,{
+      showModal(modalDialog(
+        title = "report.tsv",
+        size = "l",
+        tags$p(
+          HTML("This file comes directly from the identically-named result file of DiaNN.")
+        ),
+        easyClose = T,
+        footer = modalButton("OK")
+      ))
+    }
+  )
+  userdiannphos <- reactive({
+    files = input$upuserdiannphos
+    if(is.null(files)){
+      dataread <- NULL
+    }else{
+      dataread <- as.data.frame(fread(files$datapath, stringsAsFactors = FALSE))
+    }
+  })
+  observeEvent(
+    input$upuserdiannphos,{
+      shinyjs::show(id = "hidviewuserdiannphosbt", anim = FALSE)
+      data <- userdiannphos()
+      output$html2 <- renderUI(div(class = "loadfiledescription", HTML("2. report.tsv:")))
+      output$viewedfile2 <- renderDataTable({datatable(data,options = list(ordering=F))})
+      # if(!('Gene.names' %in% colnames(data))){
+      #   sendSweetAlert(
+      #     session = session,
+      #     title = "Error...",
+      #     text = "The data format is wrong because you did not select the correct 'identifier rule' for the fasta file on maxquant software",
+      #     type = "error",
+      #     btn_labels = "I will rerun MaxQuant"
+      #   )
+      #   shinyjs::show(id = "hidviewuserdiannphosbtwarning", anim = FALSE)
+      # } else {
+      #   shinyjs::hide(id = "hidviewuserdiannphosbtwarning", anim = FALSE)
+      # }
+    }
+  )
+  # observeEvent(
+  #   input$viewuserdiannphosbtwarning, {
+  #     sendSweetAlert(
+  #       session = session,
+  #       title = "Error...",
+  #       text = "The data format is wrong because you did not select the correct 'identifier rule' for the fasta file on maxquant software",
+  #       type = "error",
+  #       btn_labels = "I will rerun MaxQuant"
+  #     )
+  #   }
+  # )
+  observeEvent(
+    input$viewuserdiannphosbt,{
+      output$html2 <- renderUI(div(class = "loadfiledescription", HTML("2. report.tsv:")))
+      output$viewedfile2 <- renderDataTable({datatable(userdiannphos(),options = list(ordering=F))})
+    }
+  )
+  
+  # sample quality control
+  observeEvent(
+    input$samplequalityinspector, {
+      output$samplequalityinspectorplot <- renderPlot({
+        # if(input$loaddatatype == T) {}
+        if(input$mstech == 1 & input$softwaretype == 1) {  # max label-free
+          if(input$loaddatatype == T) {
+            filenames <- read.csv('examplefile/maxquant/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+            rawdata <- read.csv('examplefile/maxquant/Phospho (STY)Sites.txt', sep = "\t")
+          } else {
+            if(is.null(input$upusermaxphos)|is.null(input$updesign)) {
+              filenames <- NULL
+            } else {
+              rawdata <- read.csv(input$upusermaxphos$datapath,header=T,sep='\t')
+              filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+            }
+          }
+          
+          if(!is.null(filenames)) {
+            rawdata <- rawdata[-which(rawdata$Reverse=="+"),]
+            rawdata <- rawdata[-which(rawdata$Potential.contaminant=="+"),]
+            rawdata <- rawdata[-which(rawdata$Protein.names == "" | rawdata$Gene.names == ""),]
+            varnames <- c()
+            for(i in 1:nrow(filenames)){
+              varnames[i] <- paste('Intensity',filenames$Experiment_Code[i],sep = '.')
+            }
+          }
+        }
+        if(input$mstech == 1 & input$softwaretype == 2) {  # mascot
+          filenames <- NULL
+        }
+        if(input$mstech == 2 & input$lddasoftwaretype == 1) {  # max tmt
+          if(input$loaddatatype == T) {
+            filenames <- read.csv('examplefile/tmt/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+            rawdata <- read.csv('examplefile/tmt/Phospho (STY)Sites.txt', sep = "\t")
+          } else {
+            if(is.null(input$upusermaxtmtphos)|is.null(input$updesign)) {
+              filenames <- NULL
+            } else {
+              rawdata <- read.csv(input$upusermaxtmtphos$datapath,header=T,sep='\t')
+              filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+            }
+          }
+          
+          if(!is.null(filenames)) {
+            rawdata <- rawdata[-which(rawdata$Reverse=="+"),]
+            rawdata <- rawdata[-which(rawdata$Potential.contaminant=="+"),]
+            rawdata <- rawdata[-which(rawdata$Protein.names == "" | rawdata$Gene.names == ""),]
+            varnames <- c()
+            for(i in 1:nrow(filenames)){
+              varnames[i] <- paste0('Reporter.intensity.corrected.',filenames$Experiment_Code[i],'___1')
+            }
+          }
+        }
+        if(input$mstech == 3 & input$diasoftwaretype == 2) {  # diann
+          if(input$loaddatatype == T) {
+            filenames <- read.csv('examplefile/diann/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+            diann_df <- as.data.frame(fread('examplefile/diann/report_mini.tsv', stringsAsFactors = FALSE))
+          } else {
+            if(is.null(input$upuserdiannphos)|is.null(input$updesign)) {
+              filenames <- NULL
+            } else {
+              diann_df <- as.data.frame(fread(input$upuserdiannphos$datapath, stringsAsFactors = FALSE))
+              filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+            }
+          }
+          
+          if(!is.null(filenames)) {
+            diann_df <- diann_df %>% filter(Run %in% filenames$Experiment_Code)
+            
+            fasta_file = 'PhosMap_datasets/fasta_library/uniprot/human/human_uniprot_fasta.txt'
+            PHOSPHATE_LIB_FASTA_DATA = utils::read.table(file=fasta_file, header=TRUE, sep="\t")
+            
+            diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value")
+            diann_df <- diann_df[diann_df_var]
+            
+            # Dont filter in module 'sample check'
+            # diann_df <- diann_df[which(diann_df$PTM.Q.Value <= input$diannptmqvalue),]
+            
+            for (i in 1:nrow(diann_df)) {
+              if(!(i %% 5000)) {
+                showNotification(
+                  paste0("Processing, please wait. Currently completed processing ", i, " out of ", nrow(diann_df), " rows of data."),
+                  duration = 3  # second
+                )
+              }
+              diann_df_modified_seq <- diann_df[i, "Modified.Sequence"]
+              # Check Phospho
+              match_result <- regexpr("\\(UniMod:21\\)", diann_df_modified_seq)
+              if(match_result != -1) {
+                substring <- substr(diann_df_modified_seq, 1, match_result - 1)
+                updated_string <- gsub("\\([^()]+\\)", "", substring)
+                index_pep <- nchar(updated_string)
+                site_type <- substr(updated_string, index_pep, index_pep)
+              } else {
+                index_pep <- -1
+                site_type <- 'non-phos'
+              }
+              if(index_pep != -1) {
+                # Find peptide in whole protein
+                diann_df_seq <- diann_df[i, "Stripped.Sequence"]
+                source_seq <- PHOSPHATE_LIB_FASTA_DATA[PHOSPHATE_LIB_FASTA_DATA$ID == diann_df[i, "Protein.Group"],]$Sequence
+                matches <- gregexpr(diann_df_seq, source_seq)
+                if (length(matches) > 0 && any(matches[[1]] != -1)) {  # some protein not in fasta file
+                  start_positions <- matches[[1]]
+                  notfound <- 0  # found
+                } else {
+                  start_positions <- -1
+                  notfound <- 1  # dont find pep in protein, maybe need update fasta file.
+                }
+                if(length(start_positions) == 1) {
+                  if(start_positions != -1) {
+                    # Get index in protein
+                    index <- start_positions[1] + index_pep - 1
+                    phospho_site <- paste0(site_type, index)
+                    upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+                  } else {
+                    index <- -1
+                    phospho_site <- paste0(site_type, index)
+                    upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+                  }
+                } else {
+                  index <- -2
+                  phospho_site <- paste0(site_type, index)
+                  upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+                }
+              } else {
+                index <- -3
+                notfound <- -1
+                phospho_site <- paste0(site_type, index)
+                upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+              }
+              # Modify p-site to lower case
+              if(notfound == 0 & index != -2) {
+                part1 <- substr(diann_df_seq, 1, index_pep - 1)
+                part2 <- tolower(substr(diann_df_seq, index_pep, index_pep))
+                part3 <- substr(diann_df_seq, index_pep + 1, nchar(diann_df_seq))
+                diann_df_seq <- paste0(part1, part2, part3)
+              } else {
+                diann_df_seq <- -1
+              }
+              diann_df[i, "upsID"] <- upsID
+              diann_df[i, "Sequence"] <- diann_df_seq
+              diann_df[i, "index"] <- index  # the index of phospho-site in corresponding protein. -1: not found,equal 'not found=1'; -2: multi phospho-site; -3: no phospho-site,equal 'not found=-1'
+              diann_df[i, "notfound"] <- notfound  # 0: found; 1: not found; -1: no phospho-site
+            }
+            
+            # Following information maybe useful in future.
+            diann_df_notfound = diann_df[which(diann_df$notfound == 1),]
+            diann_df_other_modify = diann_df[which(diann_df$notfound == -1),]
+            diann_df_phos = diann_df[which(diann_df$notfound == 0),]
+            diann_df_phos_multi = diann_df_phos[which(diann_df_phos$index == -2),]
+            diann_df_phos_single = diann_df_phos[which(diann_df_phos$index != -2),]
+            
+            final_diann_df_phos_single = diann_df_phos_single[c("upsID", "Sequence", "PG.MaxLFQ", "Run")]
+            
+            grouped_df <- final_diann_df_phos_single %>%
+              group_by(upsID, Run) %>%
+              summarise(Sequence = first(Sequence), PG.MaxLFQ = sum(PG.MaxLFQ))
+            
+            grouped_df <- grouped_df %>%
+              group_by(upsID) %>%
+              mutate(Sequence = first(Sequence))
+            
+            rawdata <- grouped_df %>%
+              pivot_wider(names_from = Run, values_from = PG.MaxLFQ, values_fill = 0)
+            
+            varnames <- filenames$Experiment_Code
+          }
+        }
+        if(input$mstech == 3 & input$diasoftwaretype == 1) {  # sn
+          if(input$loaddatatype == T) {
+            filenames <- read.csv('examplefile/diann/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+            data_summary_path <- 'examplefile/SN/20231122_1_Report.xls'
+            new_filename <- sub(".xls$", ".csv", data_summary_path)
+            file.rename(data_summary_path, new_filename)
+            rawdata <- read.csv(new_filename, sep = '\t', check.names=F)
+            file.rename(new_filename, data_summary_path)
+          } else {
+            if(is.null(input$upusersnphos)|is.null(input$updesign)) {
+              filenames <- NULL
+            } else {
+              filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+              old_filename <- input$upusersnphos$datapath
+              new_filename <- sub(".xls$", ".csv", old_filename)
+              file.rename(old_filename, new_filename)
+              rawdata <- read.csv(new_filename, sep = '\t', check.names=F)
+              file.rename(new_filename, old_filename)
+            }
+          }
+          
+          if(!is.null(filenames)) {
+            colnames(rawdata) <- sub("\\[\\d+\\] (.*)\\.raw\\.PEP\\.MS2Quantity", "\\1", colnames(rawdata))
+            rawdata <- rawdata[-which(rawdata$PG.ProteinAccessions == "" | rawdata$PG.Genes == "" | rawdata$EG.ProteinPTMLocations == "" | rawdata$EG.ModifiedSequence == ""),]
+            varnames <- filenames$Experiment_Code
+          }
+        }
+        
+        if(is.null(filenames)) {
+          plot.new()
+          text(x = 0.5, y = 0.5, labels = "Please check after uploading the file. \nThis feature is not supported by Firmiana Data at the moment.", cex = 2)
+        } else {
+          newdata <- rawdata[varnames]
+          colnames(newdata) <- filenames$Experiment_Code
+          zero_counts <- apply(newdata, 2, function(x) sum(x == 0 | is.na(x)))
+          nonzero_counts <- apply(newdata, 2, function(x) sum(x != 0 & !is.na(x)))
+          
+          data <- data.frame(column = colnames(newdata), Missing = zero_counts, Detection = nonzero_counts)
+          
+          data_long <- gather(data, key = "class", value = "value", Detection, Missing)
+          
+          p <- ggplot(data_long) +
+            geom_bar(aes(x = column, y = value, fill = class), stat = "identity", position = position_stack(reverse = TRUE)) +
+            scale_fill_manual(values = c("#fec44f", "grey")) +
+            theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10),
+                  axis.text.y = element_text(size = 10),
+                  axis.title.x = element_text(size = 12),
+                  axis.title.y = element_text(size = 12)) +
+            labs(x = "Sample", y = "The Number of p-site")
+        }
+        
+        p
+      })
+      
+      showModal(modalDialog(
+        title = "Sample Quality Control",
+        size = "l",
+        tags$p(
+          HTML("The detection status of each sample, with a low detection count indicating poor data quality. 
+               You can remove low-quality samples in the design file without the need to manipulate other files. PhosMap will automatically handle the remaining tasks for you.")
+        ),
+        plotOutput("samplequalityinspectorplot"),
+        div(downloadButton("samplequalinspecplotdl"), style = "display:flex; justify-content:center; align-item:center;"),
+        easyClose = F,
+        footer = modalButton("OK")
+      ))
+    }
+  )
   #######################################
   #######     preprocessing       #######
   #######################################
@@ -1108,7 +1617,7 @@ server<-shinyServer(function(input, output, session){
     input$qualityinspector,{
       output$qualityinspectorplot <- renderPlot({
         if(input$loaddatatype == T) {  # demo
-          if(input$softwaretype == 1) {
+          if(input$mstech == 1 & input$softwaretype == 1) {
             design_file_path = "examplefile/maxquant/phosphorylation_exp_design_info.txt"  # max demo
             if(input$maxuseprocheck1 == T) {
               expr_df_path = paste0(maxdemopreloc, "DemoPreNormBasedProSummary_v.csv")  # max demo with proteomics
@@ -1116,7 +1625,7 @@ server<-shinyServer(function(input, output, session){
               expr_df_path = paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv")  # max demo without proteomics
             }
           }
-          if(input$softwaretype == 2) {
+          if(input$mstech == 1 & input$softwaretype == 2) {
             design_file_path = "examplefile/mascot/phosphorylation_exp_design_info.txt"  # mascot demo
             if(input$useprocheck1 == T) {
               expr_df_path = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary_v.csv")  # mascot demo with proteomics
@@ -1124,8 +1633,20 @@ server<-shinyServer(function(input, output, session){
               expr_df_path = paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv")  # mascot demo without proteomics
             }
           }
+          if(input$mstech == 2 & input$lddasoftwaretype == 1) {
+            design_file_path = "examplefile/tmt/phosphorylation_exp_design_info.txt"  # maxtmt demo
+            expr_df_path = paste0(maxtmtdemopreloc, "DemoPreNormImputeSummary.csv")
+          }
+          if(input$mstech == 3 & input$diasoftwaretype == 2) {
+            design_file_path = "examplefile/diann/phosphorylation_exp_design_info.txt"  # diann demo
+            expr_df_path = paste0(dianndemopreloc, "DemoPreNormImputeSummary.csv")
+          }
+          if(input$mstech == 3 & input$diasoftwaretype == 1) {
+            design_file_path = "examplefile/diann/phosphorylation_exp_design_info.txt"  # sn demo
+            expr_df_path = paste0(sndemopreloc, "DemoPreNormImputeSummary.csv")
+          }
         } else {  # user
-          if(input$softwaretype == 1) {
+          if(input$mstech == 1 & input$softwaretype == 1) {
             design_file_path = input$updesign$datapath  # max user
             if(is.null(input$maxuseruseprocheck)) {
               expr_df_path = paste0(maxuserpreloc, "PreNormImputeSummary_v.csv")
@@ -1135,7 +1656,7 @@ server<-shinyServer(function(input, output, session){
               expr_df_path = paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv")
             }
           }
-          if(input$softwaretype == 2) {
+          if(input$mstech == 1 & input$softwaretype == 2) {
             design_file_path = input$updesign$datapath  # mascot user
             if(is.null(input$useruseprocheck1)) {
               expr_df_path = paste0(mascotuserpreloc, "NormImputeSummary_v.csv")
@@ -1145,6 +1666,18 @@ server<-shinyServer(function(input, output, session){
               expr_df_path = paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv")
             }
           }
+          if(input$mstech == 2 & input$lddasoftwaretype == 1) {
+            design_file_path = input$updesign$datapath  # maxtmt user
+            expr_df_path = paste0(maxtmtuserpreloc, "PreNormImputeSummary.csv")
+          }
+          if(input$mstech == 3 & input$diasoftwaretype == 2) {
+            design_file_path = input$updesign$datapath  # diann user
+            expr_df_path = paste0(diannuserpreloc, "PreNormImputeSummary.csv")
+          }
+          if(input$mstech == 3 & input$diasoftwaretype == 1) {
+            design_file_path = input$updesign$datapath  # sn user
+            expr_df_path = paste0(snuserpreloc, "PreNormImputeSummary.csv")
+          }
         }
         
         if(!file.exists(expr_df_path) | !file.exists(design_file_path)){
@@ -1152,8 +1685,7 @@ server<-shinyServer(function(input, output, session){
           text(x = 0.5, y = 0.5, labels = "Please click this button after completing all the steps!", cex = 2)
         } else {
           df_design = read.csv(design_file_path, sep = '\t')
-          df = read.csv(expr_df_path)[,-c(1,2)]
-          
+          df = read.csv(expr_df_path, check.names=F)[,-c(1,2)]
           dist_matrix <- stats::hclust(stats::dist(t(df)))
           label_grps <- df_design$Group[stats::order.dendrogram(as.dendrogram(dist_matrix))]
           
@@ -1684,8 +2216,640 @@ server<-shinyServer(function(input, output, session){
       )
     }
   )
+  # maxtmt demo
+  observeEvent(
+    input$demomaxtmtqcbt, {
+      tmt_df <- read.csv("examplefile/tmt/Phospho (STY)Sites.txt",header=T,sep='\t')
+      filenames <- read.csv('examplefile/tmt/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+      
+      # Filter reverse and contaminant
+      tmt_df <- tmt_df[-which(tmt_df$Reverse=="+"),]
+      tmt_df <- tmt_df[-which(tmt_df$Potential.contaminant=="+"),]
+      tmt_df <- tmt_df[-which(tmt_df$Protein == "" | tmt_df$Gene.names == ""),]
+      
+      varnames <- c()
+      for(i in 1:nrow(filenames)){
+        varnames[i] <- paste0('Reporter.intensity.corrected.',filenames$Experiment_Code[i],'___1')
+      }
+      
+      myvar <- c('Proteins', 'Positions.within.proteins', 'Protein','Gene.names','Amino.acid', 
+                 'Localization.prob','Score', 'Phospho..STY..Probabilities', 
+                 'Position.in.peptide', varnames)
+      tmt_df <- tmt_df[myvar]
+      
+      # Filter by qc config
+      tmt_df <- tmt_df[which(tmt_df$Localization.prob >= input$maxtmtminqclocalizationprob & tmt_df$Score >= input$maxtmtminqcscore),]
+      
+      Protein <- apply(data.frame(tmt_df$Protein), 1, function(x){
+        x <- strsplit(x, split = ';')[[1]]
+        x[1]
+      })
+      Gene.names <- apply(data.frame(tmt_df$Gene.names), 1, function(x){
+        x <- strsplit(x, split = ';')[[1]]
+        x[1]
+      })
+      tmt_df$Protein <- Protein
+      tmt_df$Gene.names <- Gene.names
+      
+      get_combined <- function(protein, proteins, positions, Gene.names, psite) {
+        protein_index <- which(strsplit(proteins, ";")[[1]] == protein)
+        if (length(protein_index) > 0) {
+          positions <- strsplit(positions, ";")[[1]]
+          combined <- paste(protein, Gene.names, paste0(psite, positions[protein_index]), sep = "_")
+        } else {
+          combined <- NA
+        }
+        return(combined)
+      }
+      
+      # Retrive upsID
+      tmt_df$upsID <- mapply(get_combined, tmt_df$Protein, tmt_df$Proteins, 
+                             tmt_df$Positions.within.proteins, tmt_df$Gene.names, tmt_df$Amino.acid)
+      
+      # Retrive sequence
+      sequence <- gsub("\\(.*?\\)","",tmt_df$Phospho..STY..Probabilities)
+      Sequence <- c()
+      for (i in seq(length(sequence))) {
+        tmp <- unlist(str_split(sequence[i], pattern = ""))
+        index <- tmt_df$Position.in.peptide[i]
+        tmp[index] <- tolower(tmp[index])
+        
+        Sequence[i] <- paste(tmp, collapse = "")
+      }
+      
+      tmt_df$Sequence <- Sequence
+      
+      tmt_df <- tmt_df[c('upsID', 'Sequence', varnames)]
+      
+      # Filter by the number of NA
+      NAnumthre <- length(filenames$Experiment_Code) - input$maxtmtphosNAthre  # NA threshold
+      if(NAnumthre < 0) {NAnumthre = 0}
+      NAnumthresig <- c()
+      for (row in 1:nrow(tmt_df)) {
+        NAnumthresig[row] <- (sum(tmt_df[row,][-c(1, 2)] == 0) <= NAnumthre)
+      }
+      tmt_df_filter <- tmt_df[NAnumthresig,]
+      
+      # Change column names to match the design file
+      colnames(tmt_df_filter) <- sub("^Reporter\\.intensity\\.corrected\\.(.*)___1$", "\\1", colnames(tmt_df_filter), perl = TRUE)
+      
+      write.csv(tmt_df_filter, paste0(maxtmtdemopreloc, "DemoPreQc.csv"), row.names = F)
+      output$demomaxtmtresult1 <- renderDataTable(({datatable(tmt_df_filter)}))
+      updateTabsetPanel(session, "demomaxtmtresultnav", selected = "demomaxtmtstep1val")
+      updateActionButton(session, "demomaxtmtqcbt", icon = icon("rotate-right"))
+      updateActionButton(session, "demomaxtmtnormbt", icon = icon("play"))
+      updateProgressBar(session = session, id = "demomaxtmtpreprobar", value = 50)
+    }
+  )
   
+  observeEvent(
+    input$demomaxtmtnormbt, {
+      if(!file.exists(
+        paste0(maxtmtdemopreloc, "DemoPreQc.csv")
+      )) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the buttons in order",
+          type = "info"
+        )
+      }
+      else{
+        design_file <- read.csv("examplefile/tmt/phosphorylation_exp_design_info.txt",header=T,sep = '\t')
+        newdata3out <- read.csv(paste0(maxtmtdemopreloc, "DemoPreQc.csv"), check.names=F)
+        normmethod <- "global" # median
+        if(input$maxtmtphosnormmethod == "global") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,sum,na.rm=T),FUN="/")
+        }
+        if(input$maxtmtphosnormmethod == "median") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,median,na.rm=T),FUN="/")
+        }
+        newdata4 <- newdata4 *1e5
+        newdata4[newdata4==0]<-NA
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        
+        if (input$maxtmtdemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$maxtmtphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$maxtmtphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$maxtmtphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          }
+          
+        }
+        
+        if (!any(errorlabel_values)) {
+          df <- data.frame(newdata3out$upsID, newdata3out$Sequence, df)
+          colnames(df) <- colnames(newdata3out)
+          phospho_data_topX <- keep_psites_with_max_in_topX3(df, percent_of_kept_sites = input$maxtmttop/100)
+          output$demomaxtmtresult2 <- renderDataTable(phospho_data_topX)
+          write.csv(phospho_data_topX, paste0(maxtmtdemopreloc, "DemoPreNormImputeSummary.csv"), row.names = FALSE)
+          
+          updateTabsetPanel(session, "demomaxtmtresultnav", selected = "demomaxtmtstep2val")
+          updateActionButton(session, "demomaxtmtnormbt", icon = icon("rotate-right"))
+          updateProgressBar(session = session, id = "demomaxtmtpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+      }
+    }
+  )
+  
+  # diann demo
+  observeEvent(
+    input$demodiannqcbt, {
+      diann_df <- as.data.frame(fread("examplefile/diann/report_mini.tsv", stringsAsFactors = FALSE))
+      # diann_df <- read.csv("PhosMap_datasets/diann/mini_diann_report_modified.csv")
+      filenames <- read.csv('examplefile/diann/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+      
+      # Filter by filenames
+      diann_df <- diann_df %>% filter(Run %in% filenames$Experiment_Code)
+      
+      fasta_file = 'PhosMap_datasets/fasta_library/uniprot/human/human_uniprot_fasta.txt'
+      PHOSPHATE_LIB_FASTA_DATA = utils::read.table(file=fasta_file, header=TRUE, sep="\t")
+      
+      diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value")
+      diann_df <- diann_df[diann_df_var]
+      
+      diann_df <- diann_df[which(diann_df$PTM.Q.Value <= input$diannptmqvalue),]
+      
+      for (i in 1:nrow(diann_df)) {
+        if(!(i %% 5000)) {
+          showNotification(
+            paste0("Processing, please wait. Currently completed processing ", i, " out of ", nrow(diann_df), " rows of data."),
+            duration = 3  # second
+          )
+        }
+        diann_df_modified_seq <- diann_df[i, "Modified.Sequence"]
+        # Check Phospho
+        match_result <- regexpr("\\(UniMod:21\\)", diann_df_modified_seq)
+        if(match_result != -1) {
+          substring <- substr(diann_df_modified_seq, 1, match_result - 1)
+          updated_string <- gsub("\\([^()]+\\)", "", substring)
+          index_pep <- nchar(updated_string)
+          site_type <- substr(updated_string, index_pep, index_pep)
+        } else {
+          index_pep <- -1
+          site_type <- 'non-phos'
+        }
+        if(index_pep != -1) {
+          # Find peptide in whole protein
+          diann_df_seq <- diann_df[i, "Stripped.Sequence"]
+          source_seq <- PHOSPHATE_LIB_FASTA_DATA[PHOSPHATE_LIB_FASTA_DATA$ID == diann_df[i, "Protein.Group"],]$Sequence
+          matches <- gregexpr(diann_df_seq, source_seq)
+          if (length(matches) > 0 && any(matches[[1]] != -1)) {  # some protein not in fasta file
+            start_positions <- matches[[1]]
+            notfound <- 0  # found
+          } else {
+            start_positions <- -1
+            notfound <- 1  # dont find pep in protein, maybe need update fasta file.
+          }
+          if(length(start_positions) == 1) {
+            if(start_positions != -1) {
+              # Get index in protein
+              index <- start_positions[1] + index_pep - 1
+              phospho_site <- paste0(site_type, index)
+              upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+            } else {
+              index <- -1
+              phospho_site <- paste0(site_type, index)
+              upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+            }
+          } else {
+            index <- -2
+            phospho_site <- paste0(site_type, index)
+            upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+          }
+        } else {
+          index <- -3
+          notfound <- -1
+          phospho_site <- paste0(site_type, index)
+          upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+        }
+        # Modify p-site to lower case
+        if(notfound == 0 & index != -2) {
+          part1 <- substr(diann_df_seq, 1, index_pep - 1)
+          part2 <- tolower(substr(diann_df_seq, index_pep, index_pep))
+          part3 <- substr(diann_df_seq, index_pep + 1, nchar(diann_df_seq))
+          diann_df_seq <- paste0(part1, part2, part3)
+        } else {
+          diann_df_seq <- -1
+        }
+        diann_df[i, "upsID"] <- upsID
+        diann_df[i, "Sequence"] <- diann_df_seq
+        diann_df[i, "index"] <- index  # the index of phospho-site in corresponding protein. -1: not found,equal 'not found=1'; -2: multi phospho-site; -3: no phospho-site,equal 'not found=-1'
+        diann_df[i, "notfound"] <- notfound  # 0: found; 1: not found; -1: no phospho-site
+      }
+      
+      # Following information maybe useful in future.
+      diann_df_notfound = diann_df[which(diann_df$notfound == 1),]
+      diann_df_other_modify = diann_df[which(diann_df$notfound == -1),]
+      diann_df_phos = diann_df[which(diann_df$notfound == 0),]
+      diann_df_phos_multi = diann_df_phos[which(diann_df_phos$index == -2),]
+      diann_df_phos_single = diann_df_phos[which(diann_df_phos$index != -2),]
+      
+      final_diann_df_phos_single = diann_df_phos_single[c("upsID", "Sequence", "PG.MaxLFQ", "Run")]
+      
+      grouped_df <- final_diann_df_phos_single %>%
+        group_by(upsID, Run) %>%
+        summarise(Sequence = first(Sequence), PG.MaxLFQ = sum(PG.MaxLFQ))
+      
+      grouped_df <- grouped_df %>%
+        group_by(upsID) %>%
+        mutate(Sequence = first(Sequence))
+      
+      final_df <- grouped_df %>%
+        pivot_wider(names_from = Run, values_from = PG.MaxLFQ, values_fill = 0)
+      final_df$upsID <- as.character(final_df$upsID)
+      
+      # Filter by the number of NA
+      NAnumthre <- length(filenames$Experiment_Code) - input$diannphosNAthre
+      if(NAnumthre < 0) {NAnumthre = 0}
+      NAnumthresig <- c()
+      for (row in 1:nrow(final_df)) {
+        NAnumthresig[row] <- (sum(final_df[row,][-c(1:2)] == 0) <= NAnumthre)
+      }
+      final_df <- final_df[NAnumthresig,]
+      final_df <- final_df[c("upsID", "Sequence", filenames$Experiment_Code)]
+      
+      write.csv(final_df, paste0(dianndemopreloc, "DemoPreQc.csv"), row.names = F)
+      output$demodiannresult1 <- renderDataTable(({datatable(final_df)}))
+      updateTabsetPanel(session, "demodiannresultnav", selected = "demodiannstep1val")
+      updateActionButton(session, "demodiannqcbt", icon = icon("rotate-right"))
+      updateActionButton(session, "demodiannnormbt", icon = icon("play"))
+      updateProgressBar(session = session, id = "demodiannpreprobar", value = 50)
+    }
+  )
+  
+  observeEvent(
+    input$demodiannnormbt, {
+      if(!file.exists(
+        paste0(dianndemopreloc, "DemoPreQc.csv")
+      )) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the buttons in order",
+          type = "info"
+        )
+      }
+      else{
+        design_file <- read.csv("examplefile/diann/phosphorylation_exp_design_info.txt",header=T,sep = '\t')
+        newdata3out <- read.csv(paste0(dianndemopreloc, "DemoPreQc.csv"), check.names=F)
+        normmethod <- "global" # median
+        if(input$diannphosnormmethod == "global") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,sum,na.rm=T),FUN="/")
+        }
+        if(input$diannphosnormmethod == "median") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,median,na.rm=T),FUN="/")
+        }
+        newdata4 <- newdata4 *1e5
+        newdata4[newdata4==0]<-NA
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
 
+        if (input$dianndemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$diannphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$diannphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$diannphosimputemethod)
+
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          }
+
+        }
+
+        if (!any(errorlabel_values)) {
+          df <- data.frame(newdata3out$upsID, newdata3out$Sequence, df)
+          colnames(df) <- colnames(newdata3out)
+          phospho_data_topX <- keep_psites_with_max_in_topX3(df, percent_of_kept_sites = input$dianntop/100)
+          output$demodiannresult2 <- renderDataTable(phospho_data_topX)
+          write.csv(phospho_data_topX, paste0(dianndemopreloc, "DemoPreNormImputeSummary.csv"), row.names = FALSE)
+          
+          updateTabsetPanel(session, "demodiannresultnav", selected = "demodiannstep2val")
+          updateActionButton(session, "demodiannnormbt", icon = icon("rotate-right"))
+          updateProgressBar(session = session, id = "demodiannpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+      }
+    }
+  )
+  
+  # SN demo
+  observeEvent(
+    input$demosnqcbt, {
+      file.rename("examplefile/SN/20231122_1_Report.xls", "examplefile/SN/20231122_1_Report.csv")
+      sn_df <- read.csv("examplefile/SN/20231122_1_Report.csv", sep = '\t', check.names=F)
+      file.rename("examplefile/SN/20231122_1_Report.csv", "examplefile/SN/20231122_1_Report.xls")
+      filenames <- read.csv('examplefile/diann/phosphorylation_exp_design_info.txt',header = T,sep='\t')
+      
+      varnames <- c()
+      for(i in 1:nrow(filenames)){
+        varnames[i] <- paste0('[',i,']',' ', filenames$Experiment_Code[i],'.raw.PEP.MS2Quantity')
+      }
+      
+      myvar <- c('PG.ProteinAccessions', 'PG.Genes', 'EG.ProteinPTMLocations', 'EG.ModifiedSequence', varnames)
+      sn_df <- sn_df[myvar]
+      
+      sn_df <- sn_df[-which(sn_df$PG.ProteinAccessions == "" | sn_df$PG.Genes == "" | sn_df$EG.ProteinPTMLocations == "" | sn_df$EG.ModifiedSequence == ""),]
+      
+      PG.ProteinAccessions <- apply(data.frame(sn_df$PG.ProteinAccessions), 1, function(x){
+        x <- strsplit(x, split = ';')[[1]]
+        x[1]
+      })
+      
+      PG.Genes <- apply(data.frame(sn_df$PG.Genes), 1, function(x){
+        x <- strsplit(x, split = ';')[[1]]
+        x[1]
+      })
+      
+      EG.ProteinPTMLocations <- apply(data.frame(sn_df$EG.ProteinPTMLocations), 1, function(x){
+        x <- strsplit(x, split = ';')[[1]]
+        x[1]
+      })
+      
+      sn_df$PG.ProteinAccessions <- PG.ProteinAccessions
+      sn_df$PG.Genes <- PG.Genes
+      sn_df$EG.ProteinPTMLocations <- EG.ProteinPTMLocations
+      
+      process_locations <- function(locations) {
+        
+        # Remove multiple bracket
+        if (grepl("\\(.*\\).*\\(.*\\)", locations)) {
+          return(NA)
+        }
+        # Remove bracket
+        locations <- gsub("[()]", "", locations)
+        
+        elements <- strsplit(locations, ",")[[1]]
+        
+        # S\T\Y
+        s_elements <- grep("S", elements, value = TRUE)
+        t_elements <- grep("T", elements, value = TRUE)
+        y_elements <- grep("Y", elements, value = TRUE)
+        
+        # Count
+        countS <- length(s_elements)
+        countT <- length(t_elements)
+        countY <- length(y_elements)
+        
+        if (countS + countT + countY == 1) {
+          if (countS == 1) {
+            locations <- gsub(".*?(S\\d+).*", "\\1", s_elements)
+          } else if (countT == 1) {
+            locations <- gsub(".*?(T\\d+).*", "\\1", t_elements)
+          } else {
+            locations <- gsub(".*?(Y\\d+).*", "\\1", y_elements)
+          }
+        } else {
+          # Remove multiple sites
+          locations <- NA
+        }
+        
+        return(locations)
+      }
+      
+      sn_df$test_EG.ProteinPTMLocations <- sapply(sn_df$EG.ProteinPTMLocations, process_locations)
+      sn_df <- sn_df[-which(is.na(sn_df$test_EG.ProteinPTMLocations)),]
+      
+      process_sequence <- function(sequence) {
+        # Remove _
+        sequence <- str_remove_all(sequence, "^_|_$")
+        
+        match <- str_locate(sequence, "\\[Phospho \\(STY\\)\\]")
+        
+        if (!is.na(match[1])) {
+          start <- match[1]
+          end <- match[2]
+          left <- tolower(str_sub(sequence, start - 1, start - 1))
+          sequence <- paste0(str_sub(sequence, 1, start - 2), left, str_sub(sequence, start, end), str_sub(sequence, end + 1))
+        }
+        sequence <- str_remove_all(sequence, "\\[.*?\\]")
+        return(sequence)
+      }
+      
+      sn_df$Sequence <- sapply(sn_df$EG.ModifiedSequence, process_sequence)
+      sn_df$upsID <- paste(sn_df$PG.ProteinAccessions, sn_df$PG.Genes, sn_df$test_EG.ProteinPTMLocations, sep = "_")
+      sn_df <- sn_df[c("upsID", "Sequence", varnames)]
+      
+      colnames(sn_df) <- sub("\\[\\d+\\] (.*)\\.raw\\.PEP\\.MS2Quantity", "\\1", colnames(sn_df))
+      
+      # Filter by the number of NA
+      NAnumthre <- length(filenames$Experiment_Code) - input$snphosNAthre  # NA threshold
+      if(NAnumthre < 0) {NAnumthre = 0}
+      NAnumthresig <- c()
+      for (row in 1:nrow(sn_df)) {
+        NAnumthresig[row] <- (sum(is.na(sn_df[row,][-c(1, 2)])) <= NAnumthre)
+      }
+      sn_df_filter <- sn_df[NAnumthresig,]
+      
+      write.csv(sn_df_filter, paste0(sndemopreloc, "DemoPreQc.csv"), row.names = F)
+      output$demosnresult1 <- renderDataTable(({datatable(sn_df_filter)}))
+      updateTabsetPanel(session, "demosnresultnav", selected = "demosnstep1val")
+      updateActionButton(session, "demosnqcbt", icon = icon("rotate-right"))
+      updateActionButton(session, "demosnnormbt", icon = icon("play"))
+      updateProgressBar(session = session, id = "demosnpreprobar", value = 50)
+    }
+  )
+  
+  observeEvent(
+    input$demosnnormbt, {
+      if(!file.exists(
+        paste0(sndemopreloc, "DemoPreQc.csv")
+      )) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the buttons in order",
+          type = "info"
+        )
+      }
+      else{
+        design_file <- read.csv("examplefile/diann/phosphorylation_exp_design_info.txt",header=T,sep = '\t')
+        newdata3out <- read.csv(paste0(sndemopreloc, "DemoPreQc.csv"))
+        
+        newdata4 = newdata3out[-c(1,2)]
+        
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        
+        if (input$sndemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$snphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$snphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$snphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          }
+          
+        }
+        
+        if (!any(errorlabel_values)) {
+          df <- data.frame(newdata3out$upsID, newdata3out$Sequence, df)
+          colnames(df) <- colnames(newdata3out)
+          
+          value_cols <- names(df)[3:ncol(df)]
+          
+          df <- df %>%
+            group_by(upsID) %>%
+            summarize(Sequence = first(Sequence), across(all_of(value_cols), sum))
+          
+          phospho_data_topX <- keep_psites_with_max_in_topX3(df, percent_of_kept_sites = input$sntop/100)
+          output$demosnresult2 <- renderDataTable(phospho_data_topX)
+          write.csv(phospho_data_topX, paste0(sndemopreloc, "DemoPreNormImputeSummary.csv"), row.names = FALSE)
+          
+          updateTabsetPanel(session, "demosnresultnav", selected = "demosnstep2val")
+          updateActionButton(session, "demosnnormbt", icon = icon("rotate-right"))
+          updateProgressBar(session = session, id = "demosnpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+      }
+    }
+  )
+  
+  
   # user maxquant
   # If the user uploads the proteome data, show the option
   maxuserproaval <- reactive(is.null(input$upusermaxprodesign) | is.null(input$upusermaxpro))
@@ -2968,6 +4132,663 @@ server<-shinyServer(function(input, output, session){
     }
   })
   
+  # user max tmt
+  observeEvent(
+    input$usermaxtmtqcbt, {
+      if(is.null(input$upusermaxtmtphos)|is.null(input$updesign)) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please upload data",
+          type = "info"
+        )
+      } else {
+        tmt_df <- read.csv(input$upusermaxtmtphos$datapath,header=T,sep='\t')
+        filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+        
+        # Filter reverse and contaminant
+        tmt_df <- tmt_df[-which(tmt_df$Reverse=="+"),]
+        tmt_df <- tmt_df[-which(tmt_df$Potential.contaminant=="+"),]
+        tmt_df <- tmt_df[-which(tmt_df$Protein == "" | tmt_df$Gene.names == ""),]
+        
+        varnames <- c()
+        for(i in 1:nrow(filenames)){
+          varnames[i] <- paste0('Reporter.intensity.corrected.',filenames$Experiment_Code[i],'___1')
+        }
+        
+        myvar <- c('Proteins', 'Positions.within.proteins', 'Protein','Gene.names','Amino.acid', 
+                   'Localization.prob','Score', 'Phospho..STY..Probabilities', 
+                   'Position.in.peptide', varnames)
+        tmt_df <- tmt_df[myvar]
+        
+        # Filter by qc config
+        tmt_df <- tmt_df[which(tmt_df$Localization.prob >= input$maxtmtminqclocalizationprob & tmt_df$Score >= input$maxtmtminqcscore),]
+        
+        Protein <- apply(data.frame(tmt_df$Protein), 1, function(x){
+          x <- strsplit(x, split = ';')[[1]]
+          x[1]
+        })
+        Gene.names <- apply(data.frame(tmt_df$Gene.names), 1, function(x){
+          x <- strsplit(x, split = ';')[[1]]
+          x[1]
+        })
+        tmt_df$Protein <- Protein
+        tmt_df$Gene.names <- Gene.names
+        
+        get_combined <- function(protein, proteins, positions, Gene.names, psite) {
+          protein_index <- which(strsplit(proteins, ";")[[1]] == protein)
+          if (length(protein_index) > 0) {
+            positions <- strsplit(positions, ";")[[1]]
+            combined <- paste(protein, Gene.names, paste0(psite, positions[protein_index]), sep = "_")
+          } else {
+            combined <- NA
+          }
+          return(combined)
+        }
+        
+        # Retrive upsID
+        tmt_df$upsID <- mapply(get_combined, tmt_df$Protein, tmt_df$Proteins, 
+                               tmt_df$Positions.within.proteins, tmt_df$Gene.names, tmt_df$Amino.acid)
+        
+        # Retrive sequence
+        sequence <- gsub("\\(.*?\\)","",tmt_df$Phospho..STY..Probabilities)
+        Sequence <- c()
+        for (i in seq(length(sequence))) {
+          tmp <- unlist(str_split(sequence[i], pattern = ""))
+          index <- tmt_df$Position.in.peptide[i]
+          tmp[index] <- tolower(tmp[index])
+          
+          Sequence[i] <- paste(tmp, collapse = "")
+        }
+        
+        tmt_df$Sequence <- Sequence
+        
+        tmt_df <- tmt_df[c('upsID', 'Sequence', varnames)]
+        
+        # Filter by the number of NA
+        NAnumthre <- length(filenames$Experiment_Code) - input$maxtmtphosNAthre  # NA threshold
+        if(NAnumthre < 0) {NAnumthre = 0}
+        NAnumthresig <- c()
+        for (row in 1:nrow(tmt_df)) {
+          NAnumthresig[row] <- (sum(tmt_df[row,][-c(1, 2)] == 0) <= NAnumthre)
+        }
+        tmt_df_filter <- tmt_df[NAnumthresig,]
+        
+        # Change column names to match the design file
+        colnames(tmt_df_filter) <- sub("^Reporter\\.intensity\\.corrected\\.(.*)___1$", "\\1", colnames(tmt_df_filter), perl = TRUE)
+        
+        write.csv(tmt_df_filter, paste0(maxtmtuserpreloc, "PreQc.csv"), row.names = F)
+        output$usermaxtmtresult1 <- renderDataTable(({datatable(tmt_df_filter)}))
+        updateTabsetPanel(session, "usermaxtmtresultnav", selected = "usermaxtmtstep1val")
+        updateActionButton(session, "usermaxtmtqcbt", icon = icon("rotate-right"))
+        updateActionButton(session, "usermaxtmtnormbt", icon = icon("play"))
+        updateProgressBar(session = session, id = "usermaxtmtpreprobar", value = 50)
+      }
+    }
+  )
+  
+  observeEvent(
+    input$usermaxtmtnormbt, {
+      if(!file.exists(
+        paste0(maxtmtuserpreloc, "PreQc.csv")
+      )) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the buttons in order",
+          type = "info"
+        )
+      }
+      else{
+        design_file <- read.csv(input$updesign$datapath,header=T,sep = '\t')
+        newdata3out <- read.csv(paste0(maxtmtuserpreloc, "PreQc.csv"), check.names=F)
+        normmethod <- "global" # median
+        if(input$maxtmtphosnormmethod == "global") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,sum,na.rm=T),FUN="/")
+        }
+        if(input$maxtmtphosnormmethod == "median") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,median,na.rm=T),FUN="/")
+        }
+        newdata4 <- newdata4 *1e5
+        newdata4[newdata4==0]<-NA
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        
+        if (input$maxtmtdemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$maxtmtphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$maxtmtphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$maxtmtphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          }
+          
+        }
+        
+        if (!any(errorlabel_values)) {
+          df <- data.frame(newdata3out$upsID, newdata3out$Sequence, df)
+          colnames(df) <- colnames(newdata3out)
+          phospho_data_topX <- keep_psites_with_max_in_topX3(df, percent_of_kept_sites = input$maxtmttop/100)
+          output$usermaxtmtresult2 <- renderDataTable(phospho_data_topX)
+          write.csv(phospho_data_topX, paste0(maxtmtuserpreloc, "PreNormImputeSummary.csv"), row.names = FALSE)
+          
+          updateTabsetPanel(session, "usermaxtmtresultnav", selected = "usermaxtmtstep2val")
+          updateActionButton(session, "usermaxtmtnormbt", icon = icon("rotate-right"))
+          updateProgressBar(session = session, id = "usermaxtmtpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+      }
+    }
+  )
+  
+  # user sn
+  observeEvent(
+    input$usersnqcbt, {
+      if(is.null(input$upusersnphos)|is.null(input$updesign)) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please upload data",
+          type = "info"
+        )
+      } else {
+        old_filename <- input$upusersnphos$datapath
+        new_filename <- sub(".xls$", ".csv", old_filename)
+        file.rename(old_filename, new_filename)
+        sn_df <- read.csv(new_filename, sep = '\t', check.names=F)
+        file.rename(new_filename, old_filename)
+        
+        filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+        
+        colnames(sn_df) <- sub("\\[\\d+\\] (.*)\\.raw\\.PEP\\.MS2Quantity", "\\1", colnames(sn_df))
+        # varnames <- c()
+        # for(i in 1:nrow(filenames)){
+        #   varnames[i] <- paste0('[',i,']',' ', filenames$Experiment_Code[i],'.raw.PEP.MS2Quantity')
+        # }
+        # 
+        myvar <- c('PG.ProteinAccessions', 'PG.Genes', 'EG.ProteinPTMLocations', 'EG.ModifiedSequence', filenames$Experiment_Code)
+        sn_df <- sn_df[myvar]
+        
+        sn_df <- sn_df[-which(sn_df$PG.ProteinAccessions == "" | sn_df$PG.Genes == "" | sn_df$EG.ProteinPTMLocations == "" | sn_df$EG.ModifiedSequence == ""),]
+        
+        PG.ProteinAccessions <- apply(data.frame(sn_df$PG.ProteinAccessions), 1, function(x){
+          x <- strsplit(x, split = ';')[[1]]
+          x[1]
+        })
+        
+        PG.Genes <- apply(data.frame(sn_df$PG.Genes), 1, function(x){
+          x <- strsplit(x, split = ';')[[1]]
+          x[1]
+        })
+        
+        EG.ProteinPTMLocations <- apply(data.frame(sn_df$EG.ProteinPTMLocations), 1, function(x){
+          x <- strsplit(x, split = ';')[[1]]
+          x[1]
+        })
+        
+        sn_df$PG.ProteinAccessions <- PG.ProteinAccessions
+        sn_df$PG.Genes <- PG.Genes
+        sn_df$EG.ProteinPTMLocations <- EG.ProteinPTMLocations
+        
+        process_locations <- function(locations) {
+          
+          # Remove multiple bracket
+          if (grepl("\\(.*\\).*\\(.*\\)", locations)) {
+            return(NA)
+          }
+          # Remove bracket
+          locations <- gsub("[()]", "", locations)
+          
+          elements <- strsplit(locations, ",")[[1]]
+          
+          # S\T\Y
+          s_elements <- grep("S", elements, value = TRUE)
+          t_elements <- grep("T", elements, value = TRUE)
+          y_elements <- grep("Y", elements, value = TRUE)
+          
+          # Count
+          countS <- length(s_elements)
+          countT <- length(t_elements)
+          countY <- length(y_elements)
+          
+          if (countS + countT + countY == 1) {
+            if (countS == 1) {
+              locations <- gsub(".*?(S\\d+).*", "\\1", s_elements)
+            } else if (countT == 1) {
+              locations <- gsub(".*?(T\\d+).*", "\\1", t_elements)
+            } else {
+              locations <- gsub(".*?(Y\\d+).*", "\\1", y_elements)
+            }
+          } else {
+            # Remove multiple sites
+            locations <- NA
+          }
+          
+          return(locations)
+        }
+        
+        sn_df$test_EG.ProteinPTMLocations <- sapply(sn_df$EG.ProteinPTMLocations, process_locations)
+        sn_df <- sn_df[-which(is.na(sn_df$test_EG.ProteinPTMLocations)),]
+        
+        process_sequence <- function(sequence) {
+          # Remove _
+          sequence <- str_remove_all(sequence, "^_|_$")
+          
+          match <- str_locate(sequence, "\\[Phospho \\(STY\\)\\]")
+          
+          if (!is.na(match[1])) {
+            start <- match[1]
+            end <- match[2]
+            left <- tolower(str_sub(sequence, start - 1, start - 1))
+            sequence <- paste0(str_sub(sequence, 1, start - 2), left, str_sub(sequence, start, end), str_sub(sequence, end + 1))
+          }
+          sequence <- str_remove_all(sequence, "\\[.*?\\]")
+          return(sequence)
+        }
+        
+        sn_df$Sequence <- sapply(sn_df$EG.ModifiedSequence, process_sequence)
+        sn_df$upsID <- paste(sn_df$PG.ProteinAccessions, sn_df$PG.Genes, sn_df$test_EG.ProteinPTMLocations, sep = "_")
+        sn_df <- sn_df[c("upsID", "Sequence", filenames$Experiment_Code)]
+        
+        # colnames(sn_df) <- sub("\\[\\d+\\] (.*)\\.raw\\.PEP\\.MS2Quantity", "\\1", colnames(sn_df))
+        
+        # Filter by the number of NA
+        NAnumthre <- length(filenames$Experiment_Code) - input$snphosNAthre  # NA threshold
+        if(NAnumthre < 0) {NAnumthre = 0}
+        NAnumthresig <- c()
+        for (row in 1:nrow(sn_df)) {
+          NAnumthresig[row] <- (sum(is.na(sn_df[row,][-c(1, 2)])) <= NAnumthre)
+        }
+        sn_df_filter <- sn_df[NAnumthresig,]
+        
+        write.csv(sn_df_filter, paste0(snuserpreloc, "PreQc.csv"), row.names = F)
+        output$usersnresult1 <- renderDataTable(({datatable(sn_df_filter)}))
+        updateTabsetPanel(session, "usersnresultnav", selected = "usersnstep1val")
+        updateActionButton(session, "usersnqcbt", icon = icon("rotate-right"))
+        updateActionButton(session, "usersnnormbt", icon = icon("play"))
+        updateProgressBar(session = session, id = "usersnpreprobar", value = 50)
+      }
+    }
+  )
+  
+  observeEvent(
+    input$usersnnormbt, {
+      if(!file.exists(
+        paste0(snuserpreloc, "PreQc.csv")
+      )) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the buttons in order",
+          type = "info"
+        )
+      }
+      else{
+        design_file <- read.csv(input$updesign$datapath,header=T,sep = '\t')
+        newdata3out <- read.csv(paste0(snuserpreloc, "PreQc.csv"))
+        
+        newdata4 = newdata3out[-c(1,2)]
+        
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        
+        if (input$sndemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$snphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$snphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$snphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          }
+          
+        }
+        
+        if (!any(errorlabel_values)) {
+          df <- data.frame(newdata3out$upsID, newdata3out$Sequence, df)
+          colnames(df) <- colnames(newdata3out)
+          
+          value_cols <- names(df)[3:ncol(df)]
+          
+          df <- df %>%
+            group_by(upsID) %>%
+            summarize(Sequence = first(Sequence), across(all_of(value_cols), sum))
+          
+          phospho_data_topX <- keep_psites_with_max_in_topX3(df, percent_of_kept_sites = input$sntop/100)
+          output$usersnresult2 <- renderDataTable(phospho_data_topX)
+          write.csv(phospho_data_topX, paste0(snuserpreloc, "PreNormImputeSummary.csv"), row.names = FALSE)
+          
+          updateTabsetPanel(session, "usersnresultnav", selected = "usersnstep2val")
+          updateActionButton(session, "usersnnormbt", icon = icon("rotate-right"))
+          updateProgressBar(session = session, id = "usersnpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+      }
+    }
+  )
+  
+  # user diann
+  observeEvent(
+    input$userdiannqcbt, {
+      if(is.null(input$upuserdiannphos)|is.null(input$updesign)) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please upload data",
+          type = "info"
+        )
+      } else {
+        diann_df <- as.data.frame(fread(input$upuserdiannphos$datapath, stringsAsFactors = FALSE))
+        # diann_df <- read.csv("PhosMap_datasets/diann/mini_diann_report_modified.csv")
+        filenames <- read.csv(input$updesign$datapath,header = T,sep='\t')
+        
+        # Filter by filenames
+        diann_df <- diann_df %>% filter(Run %in% filenames$Experiment_Code)
+        
+        fasta_file = normalizePath('PhosMap_datasets\\fasta_library\\uniprot\\human\\human_uniprot_fasta.txt')
+        PHOSPHATE_LIB_FASTA_DATA = utils::read.table(file=fasta_file, header=TRUE, sep="\t")
+        
+        diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value")
+        diann_df <- diann_df[diann_df_var]
+        
+        diann_df <- diann_df[which(diann_df$PTM.Q.Value <= input$diannptmqvalue),]
+        
+        for (i in 1:nrow(diann_df)) {
+          if(!(i %% 5000)) {
+            showNotification(
+              paste0("Processing, please wait. Currently completed processing ", i, " out of ", nrow(diann_df), " rows of data."),
+              duration = 3  # second
+            )
+          }
+          diann_df_modified_seq <- diann_df[i, "Modified.Sequence"]
+          # Check Phospho
+          match_result <- regexpr("\\(UniMod:21\\)", diann_df_modified_seq)
+          if(match_result != -1) {
+            substring <- substr(diann_df_modified_seq, 1, match_result - 1)
+            updated_string <- gsub("\\([^()]+\\)", "", substring)
+            index_pep <- nchar(updated_string)
+            site_type <- substr(updated_string, index_pep, index_pep)
+          } else {
+            index_pep <- -1
+            site_type <- 'non-phos'
+          }
+          if(index_pep != -1) {
+            # Find peptide in whole protein
+            diann_df_seq <- diann_df[i, "Stripped.Sequence"]
+            source_seq <- PHOSPHATE_LIB_FASTA_DATA[PHOSPHATE_LIB_FASTA_DATA$ID == diann_df[i, "Protein.Group"],]$Sequence
+            matches <- gregexpr(diann_df_seq, source_seq)
+            if (length(matches) > 0 && any(matches[[1]] != -1)) {  # some protein not in fasta file
+              start_positions <- matches[[1]]
+              notfound <- 0  # found
+            } else {
+              start_positions <- -1
+              notfound <- 1  # dont find pep in protein, maybe need update fasta file.
+            }
+            if(length(start_positions) == 1) {
+              if(start_positions != -1) {
+                # Get index in protein
+                index <- start_positions[1] + index_pep - 1
+                phospho_site <- paste0(site_type, index)
+                upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+              } else {
+                index <- -1
+                phospho_site <- paste0(site_type, index)
+                upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+              }
+            } else {
+              index <- -2
+              phospho_site <- paste0(site_type, index)
+              upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+            }
+          } else {
+            index <- -3
+            notfound <- -1
+            phospho_site <- paste0(site_type, index)
+            upsID <- paste(diann_df[i, "Protein.Group"], diann_df[i, "Genes"], phospho_site, sep = "_")
+          }
+          # Modify p-site to lower case
+          if(notfound == 0 & index != -2) {
+            part1 <- substr(diann_df_seq, 1, index_pep - 1)
+            part2 <- tolower(substr(diann_df_seq, index_pep, index_pep))
+            part3 <- substr(diann_df_seq, index_pep + 1, nchar(diann_df_seq))
+            diann_df_seq <- paste0(part1, part2, part3)
+          } else {
+            diann_df_seq <- -1
+          }
+          diann_df[i, "upsID"] <- upsID
+          diann_df[i, "Sequence"] <- diann_df_seq
+          diann_df[i, "index"] <- index  # the index of phospho-site in corresponding protein. -1: not found,equal 'not found=1'; -2: multi phospho-site; -3: no phospho-site,equal 'not found=-1'
+          diann_df[i, "notfound"] <- notfound  # 0: found; 1: not found; -1: no phospho-site
+        }
+        # Following information maybe useful in future.
+        diann_df_notfound = diann_df[which(diann_df$notfound == 1),]
+        diann_df_other_modify = diann_df[which(diann_df$notfound == -1),]
+        diann_df_phos = diann_df[which(diann_df$notfound == 0),]
+        diann_df_phos_multi = diann_df_phos[which(diann_df_phos$index == -2),]
+        diann_df_phos_single = diann_df_phos[which(diann_df_phos$index != -2),]
+        final_diann_df_phos_single = diann_df_phos_single[c("upsID", "Sequence", "PG.MaxLFQ", "Run")]
+        grouped_df <- final_diann_df_phos_single %>%
+          group_by(upsID, Run) %>%
+          summarise(Sequence = first(Sequence), PG.MaxLFQ = sum(PG.MaxLFQ))
+        grouped_df <- grouped_df %>%
+          group_by(upsID) %>%
+          mutate(Sequence = first(Sequence))
+        final_df <- grouped_df %>%
+          pivot_wider(names_from = Run, values_from = PG.MaxLFQ, values_fill = 0)
+        final_df$upsID <- as.character(final_df$upsID)
+        # Filter by the number of NA
+        NAnumthre <- length(filenames$Experiment_Code) - input$diannphosNAthre
+        if(NAnumthre < 0) {NAnumthre = 0}
+        NAnumthresig <- c()
+        for (row in 1:nrow(final_df)) {
+          NAnumthresig[row] <- (sum(final_df[row,][-c(1:2)] == 0) <= NAnumthre)
+        }
+        final_df <- final_df[NAnumthresig,]
+        final_df <- final_df[c("upsID", "Sequence", filenames$Experiment_Code)]
+        
+        write.csv(final_df, paste0(diannuserpreloc, "PreQc.csv"), row.names = F)
+        output$userdiannresult1 <- renderDataTable(({datatable(final_df)}))
+        updateTabsetPanel(session, "userdiannresultnav", selected = "userdiannstep1val")
+        updateActionButton(session, "userdiannqcbt", icon = icon("rotate-right"))
+        updateActionButton(session, "userdiannnormbt", icon = icon("play"))
+        updateProgressBar(session = session, id = "userdiannpreprobar", value = 50)
+      }
+    }
+  )
+  
+  observeEvent(
+    input$userdiannnormbt, {
+      if(!file.exists(
+        paste0(diannuserpreloc, "PreQc.csv")
+      )) {
+        sendSweetAlert(
+          session = session,
+          title = "Tip",
+          text = "Please click the buttons in order",
+          type = "info"
+        )
+      }
+      else{
+        design_file <- read.csv(input$updesign$datapath,header=T,sep = '\t')
+        newdata3out <- read.csv(paste0(diannuserpreloc, "PreQc.csv"), check.names=F)
+        normmethod <- "global" # median
+        if(input$diannphosnormmethod == "global") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,sum,na.rm=T),FUN="/")
+        }
+        if(input$diannphosnormmethod == "median") {
+          newdata4 <- sweep(newdata3out[-c(1:2)],2,apply(newdata3out[-c(1:2)],2,median,na.rm=T),FUN="/")
+        }
+        newdata4 <- newdata4 *1e5
+        newdata4[newdata4==0]<-NA
+        # added by lja
+        errorlabel = FALSE
+        errorlabel_values <- c()
+        
+        if (input$dianndemocountbygroup == FALSE) {
+          df <- fill_missing_values(nadata = newdata4, method = input$diannphosimputemethod)
+        } else {
+          # 遍历每个分组
+          if (input$diannphosimputemethod %in% c('bpca', 'rowmedian', 'lls', 'knnmethod')) {
+            for (group in unique(design_file$Group)) {
+              samples <- design_file[design_file$Group == group,1]
+              group_data <- newdata4[, samples]
+              # Check if any row in group_data has missing values
+              if (any(rowSums(is.na(group_data)) > 0)) {
+                errorlabel <- TRUE
+              } else {
+                errorlabel <- FALSE
+              }
+              errorlabel_values <- c(errorlabel_values, errorlabel)
+            }
+          }
+          if (!any(errorlabel_values)) {
+            for (group in unique(design_file$Group)) {
+              # 选择该分组下的所有样本
+              # samples <- design_file$Experiment_code[design_file$Group == group]
+              samples <- design_file[design_file$Group == group,1]
+              
+              # 从原始数据框中提取该分组下的所有样本数据
+              group_data <- newdata4[, samples]
+              
+              # 对该分组下的样本进行缺失值填充
+              filled_group_data <- fill_missing_values(group_data, method = input$diannphosimputemethod)
+              
+              # 将填充后的数据框添加到结果列表中
+              if (exists('result_list')) {
+                result_list <- c(result_list, list(filled_group_data))
+              } else {
+                result_list <- list(filled_group_data)
+              }
+            }
+            
+            # 将所有填充后的数据框合并为一个数据框
+            df <- Reduce(cbind, result_list)
+          }
+          
+        }
+        
+        if (!any(errorlabel_values)) {
+          df <- data.frame(newdata3out$upsID, newdata3out$Sequence, df)
+          colnames(df) <- colnames(newdata3out)
+          phospho_data_topX <- keep_psites_with_max_in_topX3(df, percent_of_kept_sites = input$dianntop/100)
+          output$userdiannresult2 <- renderDataTable(phospho_data_topX)
+          write.csv(phospho_data_topX, paste0(diannuserpreloc, "PreNormImputeSummary.csv"), row.names = FALSE)
+          
+          updateTabsetPanel(session, "userdiannresultnav", selected = "userdiannstep2val")
+          updateActionButton(session, "userdiannnormbt", icon = icon("rotate-right"))
+          updateProgressBar(session = session, id = "userdiannpreprobar", value = 100)
+          sendSweetAlert(
+            session = session,
+            title = "All Done",
+            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            type = "success",
+            btn_labels = "OK"
+          )
+        } else {
+          sendSweetAlert(
+            session = session,
+            title = "Error...",
+            text = "Selecting ‘count by each group’ as TRUE may result in rows with all missing values for some groups, causing errors with certain imputation methods. Please consider choosing another imputation method, increasing the missing value filter threshold, or deselecting ‘count by each group’ to avoid this issue.",
+            type = "error",
+            btn_labels = "OK"
+          )
+        }
+      }
+    }
+  )
   
   #######################################
   #######     analysis tools      #######
@@ -3074,7 +4895,7 @@ server<-shinyServer(function(input, output, session){
           output$viewedfileanalysis <- renderDataTable(target4)
         }
       )
-    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==2){ # pipe、demo、mascot
+    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==2 & input$mstech==1){ # pipe、demo、mascot
       if(input$useprocheck1==1) {
         file1 = paste0(mascotdemopreloc, "DemoPreNormBasedProSummary.csv")
       } else {
@@ -3137,7 +4958,7 @@ server<-shinyServer(function(input, output, session){
         
       }
     }
-    else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==2){ # # pipe、user、mascot
+    else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==2 & input$mstech==1){ # # pipe、user、mascot
       if(is.null(input$useruseprocheck1)) {
         file1 = paste0(mascotuserpreloc, "NormImputeSummary.csv")
       } else if(input$useruseprocheck1==0) {
@@ -3219,7 +5040,7 @@ server<-shinyServer(function(input, output, session){
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
-    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==1){# pipe、demo、maxquant
+    }else if(input$analysisdatatype==2 & input$loaddatatype==1 & input$softwaretype==1 & input$mstech==1){# pipe、demo、maxquant
       if(input$maxuseprocheck1==1) {
         file1 = paste0(maxdemopreloc, "DemoPreNormBasedProSummary.csv")
       } else {
@@ -3279,7 +5100,7 @@ server<-shinyServer(function(input, output, session){
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
-    }else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==1){# pipe、user、maxquant
+    }else if(input$analysisdatatype==2 & input$loaddatatype==0 & input$softwaretype==1 & input$mstech==1){# pipe、user、maxquant
       if(is.null(input$maxuseruseprocheck)) {
         file1 = paste0(maxuserpreloc, "PreNormImputeSummary.csv")
       } else if(input$maxuseruseprocheck==0) {
@@ -3361,6 +5182,126 @@ server<-shinyServer(function(input, output, session){
         output$viewedfileanalysis <- renderDataTable(NULL)
         output$viewedfileanalysisui <- renderUI(NULL)
       }
+    }else if((input$analysisdatatype==2 & input$lddasoftwaretype==1 & input$mstech==2) |  # max tmt
+             (input$analysisdatatype==2 & input$diasoftwaretype==1 & input$mstech==3) |  # sn
+             (input$analysisdatatype==2 & input$diasoftwaretype==2 & input$mstech==3)){  # diann
+      if(input$loaddatatype==0){  # user
+        designfile <- input$updesign
+        if(input$lddasoftwaretype==1 & input$mstech==2) {file1 <- paste0(maxtmtuserpreloc, "PreNormImputeSummary.csv")}
+        if(input$diasoftwaretype==1 & input$mstech==3) {file1 <- paste0(snuserpreloc, "PreNormImputeSummary.csv")}
+        if(input$diasoftwaretype==2 & input$mstech==3) {file1 <- paste0(diannuserpreloc, "PreNormImputeSummary.csv")}
+      } else {  # demo
+        if(input$lddasoftwaretype==1 & input$mstech==2) {
+          designfile <- "examplefile/tmt/phosphorylation_exp_design_info.txt"
+          file1 <- paste0(maxtmtdemopreloc, "DemoPreNormImputeSummary.csv")
+        }
+        if(input$diasoftwaretype==1 & input$mstech==3) {
+          designfile <- "examplefile/diann/phosphorylation_exp_design_info.txt"
+          file1 <- paste0(sndemopreloc, "DemoPreNormImputeSummary.csv")
+        }
+        if(input$diasoftwaretype==2 & input$mstech==3) {
+          designfile <- "examplefile/diann/phosphorylation_exp_design_info.txt"
+          file1 <- paste0(dianndemopreloc, "DemoPreNormImputeSummary.csv")
+        }
+      }
+      
+      if((input$loaddatatype==0 & file.exists(file1) & !(is.null(designfile))) | (input$loaddatatype==1 & file.exists(file1))){
+        if(input$loaddatatype==0 & input$lddasoftwaretype==1 & input$mstech==2) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[MaxQuant-tmt]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if (input$loaddatatype==1 & input$lddasoftwaretype==1 & input$mstech==2) {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[MaxQuant-tmt]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if(input$loaddatatype==0 & input$diasoftwaretype==1 & input$mstech==3) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[Spectronaut-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if (input$loaddatatype==1 & input$diasoftwaretype==1 & input$mstech==3) {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[Spectronaut-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if(input$loaddatatype==0 & input$diasoftwaretype==2 & input$mstech==3) {
+          message <- 'PhosMap detects pipeline data comes from [your data]-[DiaNN-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if (input$loaddatatype==1 & input$diasoftwaretype==2 & input$mstech==3) {
+          message <- 'PhosMap detects pipeline data comes from [example data]-[DiaNN-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        }
+        summarydf <- read.csv(file1, check.names=F)
+        summarydf_v <- summarydf
+        
+        if(input$loaddatatype==0) {
+          target1 <- read.csv(designfile$datapath, header=T, sep="\t")
+        } else {
+          target1 <- read.csv(designfile, header=T, sep="\t")
+        }
+        
+        upsID_parts <- as.data.frame(do.call(rbind, strsplit(as.character(summarydf$upsID), "_")))
+        colnames(upsID_parts) <- c("ID", "Position", "AA_in_protein")
+        upsID_parts$Position <- paste(upsID_parts[,2], upsID_parts[,3], sep = '_')
+        rownames(summarydf) <- summarydf$upsID
+        summarydf <- subset(summarydf, select = -upsID)
+        summarydf <- cbind(upsID_parts[,c(2,3)],summarydf$Sequence, upsID_parts[,1],summarydf[,2:ncol(summarydf)])
+        colnames(summarydf)[1:4] <- c("Position", "AA_in_protein", "Sequence", "ID")
+        
+        target2 <- summarydf[, c(-2, -3, -4)]
+        colnames(target2)[1] <- "ID"
+        target3 <- summarydf[, -1]
+        # avoid isoform
+        target2 <- target2[!duplicated(target2$ID), ]
+        clinicalfile = input$annalysisupload24
+        
+        if(is.null(clinicalfile)){
+          target4 <- NULL
+        }else {
+          target4 <- read.csv(clinicalfile$datapath)
+        }
+        
+        output$viewedfileanalysis <- renderDataTable(target1)
+        output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+        
+        observeEvent(
+          input$viewanalysispipedesign, {
+            output$viewedfileanalysis <- renderDataTable(target1)
+            output$viewedfileanalysisui <- renderUI({h4("1. Experimental design file:")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipedf, {
+            output$viewedfileanalysis <- renderDataTable(summarydf_v)
+            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+          }
+        )
+        observeEvent(
+          input$annalysisupload24, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+            output$viewanalysispipeclinui <- renderUI({actionButton("viewanalysispipeclinuibt2", "view")})
+          }
+        )
+        observeEvent(
+          input$viewanalysispipeclinuibt2, {
+            output$viewedfileanalysis <- renderDataTable(target4)
+            output$viewedfileanalysisui <- renderUI({h4("3. Clinical data file:")})
+          }
+        )
+      } else {
+        if(input$loaddatatype==0 & input$lddasoftwaretype==1 & input$mstech==2) {
+          message <- 'PhosMap does not detect pipeline data comes from [your data]-[MaxQuant-tmt]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if (input$loaddatatype==1 & input$lddasoftwaretype==1 & input$mstech==2) {
+          message <- 'PhosMap does not detect pipeline data comes from [example data]-[MaxQuant-tmt]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if(input$loaddatatype==0 & input$diasoftwaretype==1 & input$mstech==3) {
+          message <- 'PhosMap does not detect pipeline data comes from [your data]-[Spectronaut-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if (input$loaddatatype==1 & input$diasoftwaretype==1 & input$mstech==3) {
+          message <- 'PhosMap does not detect pipeline data comes from [example data]-[Spectronaut-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if(input$loaddatatype==0 & input$diasoftwaretype==2 & input$mstech==3) {
+          message <- 'PhosMap does not detect pipeline data comes from [your data]-[DiaNN-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        } else if (input$loaddatatype==1 & input$diasoftwaretype==2 & input$mstech==3) {
+          message <- 'PhosMap does not detect pipeline data comes from [example data]-[DiaNN-DIA]. Please make sure this is correct. Otherwise, choose to upload "your data"'
+        }
+        target1 <- NULL
+        target2 <- NULL
+        target3 <- NULL
+        target4 <- NULL
+        output$viewedfileanalysis <- renderDataTable(NULL)
+        output$viewedfileanalysisui <- renderUI(NULL)
+      }
+    }else if(input$analysisdatatype==2 & input$diasoftwaretype==1 & input$mstech==3){  # sn
+      
+    }else if(input$analysisdatatype==2 & input$diasoftwaretype==2 & input$mstech==3){  # diann
+      
     }else if(input$analysisdatatype==1){
       message <- "Data Overview"
       target1 <- NULL
@@ -3428,7 +5369,7 @@ server<-shinyServer(function(input, output, session){
     if(is.null(files)){
       dataread <- NULL
     }else{
-      dataread <- read.csv(files$datapath)
+      dataread <- read.csv(files$datapath, check.names=F)
     }
     dataread
   })
@@ -3812,7 +5753,9 @@ server<-shinyServer(function(input, output, session){
                            
                            phosphorylation_experiment_design_file <- fileset()[[1]]
                            data_frame_normalization_with_control_no_pair <- fileset()[[2]]
+                           
                            expr_data_frame = data_frame_normalization_with_control_no_pair[,c(1,which(phosphorylation_experiment_design_file$Group==input$limmagroup1)+1,which(phosphorylation_experiment_design_file$Group==input$limmagroup2)+1)]
+                           
                            phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==input$limmagroup1),which(phosphorylation_experiment_design_file$Group==input$limmagroup2)),]
                            # select phosphorylation sites with greater variation
                            expr_data_frame_var = apply(expr_data_frame, 1, function(x){
@@ -3820,6 +5763,7 @@ server<-shinyServer(function(input, output, session){
                            })
                            index_of_kept = which(expr_data_frame_var>1)
                            expr_data_frame = expr_data_frame[index_of_kept,]
+                           
                            phosphorylation_groups_labels = unique(phosphorylation_experiment_design_file$Group)
                            phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
                            # group information
@@ -3843,16 +5787,20 @@ server<-shinyServer(function(input, output, session){
                            symbol_of_deps = as.vector(limma_results_df[,1:3]$ID[index_of_deps])
                            index_of_match = match(symbol_of_deps, expr_data_frame$ID)
                            index_of_match_pv = match(symbol_of_deps, limma_results_df$ID)
-                           limmaph_df = data.frame(limma_results_df[index_of_match_pv,]$logFC, expr_data_frame[index_of_match,])
+                           
+                           # check.names = F, to ensure not x
+                           limmaph_df = data.frame(limma_results_df[index_of_match_pv,]$logFC, expr_data_frame[index_of_match,], check.names = F)
+                           
                            colnames(limmaph_df)[1] <- "logFC"
                            
-                           group_test <- data.frame(as.character(phosphorylation_experiment_design_file[,2]), row.names = phosphorylation_experiment_design_file[,1])
+                           group_test <- data.frame(as.character(phosphorylation_experiment_design_file[,2]), row.names = phosphorylation_experiment_design_file[,1], check.names = F)
                            colnames(group_test) <- "Group"
                            test_change <- ifelse(limmaph_df$logFC < 0, 'DOWN','UP')
-                           rowname_test <- data.frame(test_change, row.names = limmaph_df$ID)
+                           rowname_test <- data.frame(test_change, row.names = limmaph_df$ID, check.names = F)
                            colnames(rowname_test) <- 'Change'
                            
-                           test_data_plot <- data.frame(limmaph_df[,-c(1,2)])
+                           test_data_plot <- data.frame(limmaph_df[,-c(1,2)], check.names = F)
+                           
                            rownames(test_data_plot) <- limmaph_df$ID
                            click_counter$limma_count = 1
                            list(test_data_plot, group_test, rowname_test, limma_results_df)
@@ -3865,6 +5813,7 @@ server<-shinyServer(function(input, output, session){
       if(click_counter$limma_count) {
         if(nrow(limma()[[1]] > 0)){
           limma_for_ph <- isolate(limma()[[1]])
+
           ph <- pheatmap(limma_for_ph,
                          scale = input$limmaphscale,
                          cluster_rows = input$limmaphcluster,
@@ -3881,7 +5830,7 @@ server<-shinyServer(function(input, output, session){
             output$limmainterph <- renderPlotly({
               p <- plot_ly() %>%
                 add_annotations(
-                  text = "Differential phosphorylation sites exceed 500. 
+                  text = "Differential phosphorylation sites exceed 500.
                 Please use the local version to view the interactive heatmap.",
                   xref = "paper", yref = "paper",
                   x = 0.5, y = 0.1,
@@ -4772,7 +6721,7 @@ server<-shinyServer(function(input, output, session){
     } else {
       
       if(!is.null(ksea1()[[1]])) {
-        summary_df_list_from_ksea_cluster = get_summary_from_ksea2(ksea1()[[1]], species = input$kseaspecies, log2_label = FALSE, ratio_cutoff = 3) # species参数
+        summary_df_list_from_ksea_cluster = get_summary_from_ksea2(ksea1()[[1]], species = input$kseaspecies, log2_label = FALSE, ratio_cutoff = 3)
         ksea_regulons_activity_df_cluster = summary_df_list_from_ksea_cluster$ksea_regulons_activity_df
         med <- apply(abs(ksea_regulons_activity_df_cluster[, 2:ncol(ksea_regulons_activity_df_cluster)]), 1, median) # 增加排序方式选项
         ksea_regulons_activity_df_cluster$median <- med
