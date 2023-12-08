@@ -40,7 +40,6 @@ library(ggdendro)
 
 # new
 library(data.table)
-library(dplyr)
 library(tidyr)
 
 
