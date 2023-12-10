@@ -4,4 +4,4 @@ if (!require("BiocManager", quietly = TRUE)){install.packages("BiocManager")}
 
 BiocManager::install(c("pcaMethods", "impute"))
 
-install.packages(c("data.table","tidyr","shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png","svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply", "ggdendro"))
+install.packages(c("FactoMineR","factoextra","data.table","tidyr","shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly","colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png","svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply", "ggdendro"))

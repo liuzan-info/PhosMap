@@ -37,11 +37,10 @@ library(impute)
 library(e1071)
 library(heatmaply)
 library(ggdendro)
-
-# new
 library(data.table)
 library(tidyr)
-
+library(FactoMineR)
+library(factoextra)
 
 ui <- renderUI(
   fluidPage(
@@ -159,6 +158,10 @@ ui <- renderUI(
               "",
               heading = "Update Log",
               status = "warning",
+              h4("PhosMap 1.2.0 was released in December 2023."),
+              h5("Key features: "),
+              h5("- Support the processing of dia and tmt data."),
+              h5("- Introduce a sample quality checker to filter files for obtaining high-quality data."),
               h4("PhosMap 1.1.0 was released in August 2023."),
               h5("Key features: Introduce a quality inspector to facilitate iterative preprocessing for obtaining high-quality data."),
               h4("PhosMap 1.0.0 was released in July 2023.")
@@ -187,7 +190,7 @@ ui <- renderUI(
   </tr>
   <tr>
     <td>Online</td>
-    <td>MaxQuant:&#x2714; Firmiana:&#x2714; </td>
+    <td>&#x2714; </td>
     <td>&#x2714;</td>
     <td>&#x2716;</td>
   </tr>
@@ -1595,20 +1598,21 @@ ui <- renderUI(
                   placement = "right",
                   options = list(container = "body")
                 ),
-                numericInput(
-                  "dianncorenum",
-                  "thread num:",
-                  2,
-                  min = 1,
-                  step = 1
-                ),
-                bsTooltip(
-                  "dianncorenum",
-                  # "xxxx",
-                  "To speed up the data processing, you can increase the number of threads based on the available resources.",
-                  placement = "right",
-                  options = list(container = "body")
-                ),
+                selectInput("diannspecies", "species:", choices = c("human", "mouse", "rattus")),
+                # numericInput(
+                #   "dianncorenum",
+                #   "thread num:",
+                #   2,
+                #   min = 1,
+                #   step = 1
+                # ),
+                # bsTooltip(
+                #   "dianncorenum",
+                #   # "xxxx",
+                #   "To speed up the data processing, you can increase the number of threads based on the available resources.",
+                #   placement = "right",
+                #   options = list(container = "body")
+                # ),
                 conditionalPanel(
                   condition = "input.loaddatatype == true",
                   div(
@@ -1796,7 +1800,7 @@ ui <- renderUI(
                 numericInput(
                   "snphosNAthre",
                   "minimum detection frequency:",
-                  1,
+                  8,
                   min = 0,
                   step = 1
                 ),
@@ -2113,6 +2117,30 @@ ui <- renderUI(
                 "",
                 heading = "Parameters Setting",
                 status = "info",
+                column(
+                  12,
+                  prettyToggle(
+                    inputId = "proteinselectionornot",
+                    label_on = "p-sites selection", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "p-sites selection",
+                    icon_off = icon("xmark"),
+                    value = F
+                  ),
+                  bsTooltip(
+                    "proteinselectionornot", 
+                    "Select specific p-sites and observe whether they can differentiate different sample conditions.",
+                    placement = "right", 
+                    options = list(container = "body")
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.proteinselectionornot == true",
+                  column(12, uiOutput("dimensionproteinui")),
+                ),
+                column(12, hr(style = "border-style: dashed;border-color: grey;")),
                 column(12, h4("PCA:")),
                 column(6, textInput("pcamain", "main", "PCA")),
                 column(6, textInput("pcalegend", "legend title", "Hour")),
@@ -2127,25 +2155,31 @@ ui <- renderUI(
                     label_off = "group mean",
                     icon_off = icon("xmark"),
                     value = F
+                  ),
+                  bsTooltip(
+                    "pcamean", 
+                    "Calculate the mean by group",
+                    placement = "right", 
+                    options = list(container = "body")
                   )
                 ),
+                column(12, hr(style = "border-style: dashed;border-color: grey;")),
                 column(12, h4("t-SNE:")),
                 column(6, textInput("tsnemain", "main", "t-SNE")),
                 column(6, textInput("tsnelegend", "legend title", "Hour")),
                 column(6,numericInput("tsneseed", "random seed", 42)),
                 column(6, numericInput('tsneperplexity','perplexity',2,min = 1,step = 1)),
+                column(12, hr(style = "border-style: dashed;border-color: grey;")),
                 column(12, h4("UMAP:")),
                 column(6, textInput("umapmain", "main", "UMAP")),
                 column(6, textInput("umaplegend", "legend title", "Hour")),
-                column(6, numericInput('umapneighbors','neighbors',5,min = 1,step = 1)),
+                column(6, numericInput('umapneighbors','neighbors',5,min = 2,step = 1)),
                 column(12, div(actionButton("drbt", "Analysis", icon("magnifying-glass-chart"), class='analysisbutton'), style = "display:flex; justify-content:center; align-item:center;"))
               )
             ),
             column(
               8,
               column(5, plotOutput("pca2")),
-              column(1, NULL),
-              column(5, plotOutput("pca1")),
               column(
                 1,
                 downloadBttn(
@@ -2154,8 +2188,7 @@ ui <- renderUI(
                   style = "material-flat",
                   color = "default",
                   size = "sm"
-                ),
-                actionButton("viewpcaresult", "score matrix", icon("eye"), class = "viewbutton"),
+                )
               ),
               column(5, plotOutput("tsne")),
               column(1, downloadBttn(
@@ -2165,6 +2198,26 @@ ui <- renderUI(
                 color = "default",
                 size = "sm"
               )),
+              column(
+                12,
+                radioGroupButtons(
+                  inputId = "pcaplus",
+                  label = NULL,
+                  choices = c("Squared Cosines Plot", "Variable Contribution Table"),
+                  status = "primary",
+                  individual = TRUE,
+                  checkIcon = list(yes = icon("check"))
+                )
+              ),
+              conditionalPanel(
+                condition = "input.pcaplus == 'Squared Cosines Plot'",
+                column(6, plotOutput("pca1"))
+              ),
+              conditionalPanel(
+                condition = "input.pcaplus == 'Variable Contribution Table'",
+                column(6, dataTableOutput("pcaplustable"))
+              ),
+              
               column(5, plotOutput("umap")),
               column(1, downloadBttn(
                 outputId = "umapplotdl",
@@ -2781,7 +2834,7 @@ ui <- renderUI(
                 heading = "Parameters Setting",
                 status = "info",
                 column(6, selectInput("motifspecies", h5("species:"), choices = c("human", "mouse", "rattus"))),
-                column(6, selectInput("motiffastatype", h5("fasta type:"), choices = c("refseq", "uniprot"))),
+                column(6, selectInput("motiffastatype", h5("fasta type:"), choices = c("uniprot", "refseq"))),
                 column(6, numericInput("motifpvalue", h5("pvalue threshold:"), 0.01, max = 0.05, min = 0.0000001, step = 0.0000001)),
                 column(12, div(
                   dropdownButton(
