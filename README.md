@@ -99,7 +99,7 @@ This tool is developed with R, so if you want to run it locally, you may do some
 
   BiocManager::install(c("pcaMethods", "impute"))
 
-  install.packages(c("shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply", "ggdendro))
+  install.packages(c("FactoMineR","factoextra","data.table","tidyr","shiny","shinyjs","shinyBS","shinyWidgets","ggplot2","ggrepel","plotly", "colourpicker","ggseqlogo","pheatmap","survminer","survival","zip","stringr","dplyr","DT","png", "svglite","ggplotify","bslib","qpdf", "rrcovNA", "e1071", "heatmaply", "ggdendro))
 
   install.packages('devtools')
   require(devtools)
