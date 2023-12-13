@@ -1088,12 +1088,13 @@ server<-shinyServer(function(input, output, session){
           
           if(!is.null(filenames)) {
             diann_df <- diann_df %>% filter(Run %in% filenames$Experiment_Code)
-            
             fasta_file = 'PhosMap_datasets/fasta_library/uniprot/human/human_uniprot_fasta.txt'
             PHOSPHATE_LIB_FASTA_DATA = utils::read.table(file=fasta_file, header=TRUE, sep="\t")
-            
-            diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value")
+            diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value", "PTM.Site.Confidence")
             diann_df <- diann_df[diann_df_var]
+            
+            diann_df <- diann_df[which((diann_df$PTM.Q.Value <= input$diannptmqvalue)&(diann_df$PTM.Site.Confidence >= input$diannconfidence)),]
+            # diann_df <- diann_df[diann_df_var]
             
             # Dont filter in module 'sample check'
             # diann_df <- diann_df[which(diann_df$PTM.Q.Value <= input$diannptmqvalue),]
@@ -1467,14 +1468,14 @@ server<-shinyServer(function(input, output, session){
             sendSweetAlert(
               session = session,
               title = "All Done",
-              text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+              text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
               type = "success",
               btn_labels = "OK"
             )
             sendSweetAlert(
               session = session,
               title = "All Done",
-              text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+              text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
               type = "success",
               btn_labels = "OK"
             )
@@ -1595,7 +1596,7 @@ server<-shinyServer(function(input, output, session){
         sendSweetAlert(
           session = session,
           title = "All Done",
-          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
           type = "success",
           btn_labels = "OK"
         )
@@ -2053,7 +2054,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -2126,7 +2127,7 @@ server<-shinyServer(function(input, output, session){
             sendSweetAlert(
               session = session,
               title = "All Done",
-              text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+              text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
               type = "success",
               btn_labels = "OK"
             )
@@ -2200,7 +2201,7 @@ server<-shinyServer(function(input, output, session){
       sendSweetAlert(
         session = session,
         title = "All Done",
-        text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+        text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
         type = "success",
         btn_labels = "OK"
       )
@@ -2394,7 +2395,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -2424,10 +2425,10 @@ server<-shinyServer(function(input, output, session){
       fasta_file = 'PhosMap_datasets/fasta_library/uniprot/human/human_uniprot_fasta.txt'
       PHOSPHATE_LIB_FASTA_DATA = utils::read.table(file=fasta_file, header=TRUE, sep="\t")
       
-      diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value")
+      diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value", "PTM.Site.Confidence")
       diann_df <- diann_df[diann_df_var]
       
-      diann_df <- diann_df[which(diann_df$PTM.Q.Value <= input$diannptmqvalue),]
+      diann_df <- diann_df[which((diann_df$PTM.Q.Value <= input$diannptmqvalue)&(diann_df$PTM.Site.Confidence >= input$diannconfidence)),]
       
       for (i in 1:nrow(diann_df)) {
         if(!(i %% 5000)) {
@@ -2621,7 +2622,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -2840,7 +2841,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -2964,7 +2965,7 @@ server<-shinyServer(function(input, output, session){
           tabPanel(
             "Step 2",
             value = "usermaxnoprostep2val",
-            h4("Phosphorylation data frame: "),
+            h4("PhosMap Matrix: "),
             dataTableOutput("usermaxnoproresult2motif"),
             column(11,dataTableOutput("usermaxnoproresult2")),
             column(1,downloadBttn(
@@ -3000,7 +3001,7 @@ server<-shinyServer(function(input, output, session){
             tabPanel(
               "Step 2",
               value = "usermaxstep2val",
-              h4("Phosphorylation data frame: "),
+              h4("PhosMap Matrix: "),
               column(11,dataTableOutput("usermaxresult2")),
               column(1,downloadBttn(
                 outputId = "usermaxresult2_dl",
@@ -3013,7 +3014,7 @@ server<-shinyServer(function(input, output, session){
             tabPanel(
               "Step 3",
               value = "usermaxstep3val",
-              h4("Phosphorylation data frame: "),
+              h4("PhosMap Matrix: "),
               column(11,dataTableOutput("usermaxresult3")),
               column(1,downloadBttn(
                 outputId = "usermaxresult3_dl",
@@ -3057,7 +3058,7 @@ server<-shinyServer(function(input, output, session){
             tabPanel(
               "Step 2",
               value = "usermaxdropprostep2val",
-              h4("Phosphorylation data frame: "),
+              h4("PhosMap Matrix: "),
               column(11,dataTableOutput("usermaxdropproresult2")),
               column(1,downloadBttn(
                 outputId = "usermaxdropproresult2_dl",
@@ -3295,7 +3296,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -3306,7 +3307,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -3429,7 +3430,7 @@ server<-shinyServer(function(input, output, session){
         sendSweetAlert(
           session = session,
           title = "All Done",
-          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
           type = "success",
           btn_labels = "OK"
         )
@@ -3801,7 +3802,7 @@ server<-shinyServer(function(input, output, session){
         sendSweetAlert(
           session = session,
           title = "All Done",
-          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
           type = "success",
           btn_labels = "OK"
         )
@@ -3812,7 +3813,7 @@ server<-shinyServer(function(input, output, session){
         sendSweetAlert(
           session = session,
           title = "All Done",
-          text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+          text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
           type = "success",
           btn_labels = "OK"
         )
@@ -3926,7 +3927,7 @@ server<-shinyServer(function(input, output, session){
           tabPanel(
             "Step 4",#normalization1
             value = "usermascotnoprostep4val",
-            h4("Phosphorylation data frame:"),
+            h4("PhosMap Matrix:"),
             column(11,dataTableOutput("viewednorm14nopro")),
             column(1,downloadBttn(
               outputId = "viewednorm14nopro_dl",
@@ -3980,7 +3981,7 @@ server<-shinyServer(function(input, output, session){
             tabPanel(
               "Step 4",
               value = "usermascotstep4val",
-              h4("Phosphorylation data frame:"),
+              h4("PhosMap Matrix:"),
               column(11,dataTableOutput("viewednorm14")),
               column(1,downloadBttn(
                 outputId = "viewednorm14_dl",
@@ -3993,7 +3994,7 @@ server<-shinyServer(function(input, output, session){
             tabPanel(
               "Step 5",
               value = "usermascotstep5val",
-              h4("Phosphorylation data frame:"),
+              h4("PhosMap Matrix:"),
               column(11,dataTableOutput("viewednorm15")),
               column(1,downloadBttn(
                 outputId = "viewednorm15_dl",
@@ -4055,7 +4056,7 @@ server<-shinyServer(function(input, output, session){
             tabPanel(#normalization 1
               "Step 4",
               value = "usermascotdropprostep4val",
-              h4("Phosphorylation data frame:"),
+              h4("PhosMap Matrix:"),
               column(11,dataTableOutput("viewednorm14droppro")),
               column(1,downloadBttn(
                 outputId = "viewednorm14droppro_dl",
@@ -4133,7 +4134,7 @@ server<-shinyServer(function(input, output, session){
       sendSweetAlert(
         session = session,
         title = "All Done",
-        text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+        text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
         type = "success",
         btn_labels = "OK"
       )
@@ -4319,7 +4320,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -4551,7 +4552,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -4589,10 +4590,11 @@ server<-shinyServer(function(input, output, session){
         fasta_file = paste0('PhosMap_datasets/fasta_library/uniprot/', input$diannspecies, '/', input$diannspecies, '_uniprot_fasta.txt')
         PHOSPHATE_LIB_FASTA_DATA = utils::read.table(file=fasta_file, header=TRUE, sep="\t")
         
-        diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value")
+        diann_df_var <- c("Run", "Protein.Group", "Genes", "PG.MaxLFQ", "Modified.Sequence", "Stripped.Sequence", "PTM.Q.Value", "PTM.Site.Confidence")
         diann_df <- diann_df[diann_df_var]
         
-        diann_df <- diann_df[which(diann_df$PTM.Q.Value <= input$diannptmqvalue),]
+        diann_df <- diann_df[which((diann_df$PTM.Q.Value <= input$diannptmqvalue)&(diann_df$PTM.Site.Confidence >= input$diannconfidence)),]
+        
         
         for (i in 1:nrow(diann_df)) {
           if(!(i %% 5000)) {
@@ -4781,7 +4783,7 @@ server<-shinyServer(function(input, output, session){
           sendSweetAlert(
             session = session,
             title = "All Done",
-            text = "You can now download the ‘Phosphorylation data frame’ for further analysis.",
+            text = "You can now download the ‘PhosMap Matrix’ for further analysis.",
             type = "success",
             btn_labels = "OK"
           )
@@ -4839,7 +4841,7 @@ server<-shinyServer(function(input, output, session){
         session = session,
         title = "Tip",
         text = HTML("Due to the fact that there are only <u>two sample groups</u> in the data 
-        and the 'Phosphorylation data frame' does <u>not contain sequence information</u>, 
+        and the 'PhosMap Matrix' does <u>not contain sequence information</u>, 
         <br><span style='color:red'>some of the tools have been disabled</span>."),
         type = "info",
         html = TRUE
@@ -4935,7 +4937,7 @@ server<-shinyServer(function(input, output, session){
       )
       observeEvent(
         input$viewanalysisexamdf,{
-          output$viewedfileanalysisui <- renderUI(h4("2. Phosphorylation data frame:"))
+          output$viewedfileanalysisui <- renderUI(h4("2. PhosMap Matrix:"))
           output$viewedfileanalysis <- renderDataTable(summarydf)
         }
       )
@@ -4984,7 +4986,7 @@ server<-shinyServer(function(input, output, session){
               file1_v = paste0(mascotdemopreloc, "DemoPreNormImputeSummary_v.csv")
             }
             output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+            output$viewedfileanalysisui <- renderUI({h4("2. PhosMap Matrix:")})
           }
         )
         observeEvent(
@@ -5057,7 +5059,7 @@ server<-shinyServer(function(input, output, session){
               file1_v = paste0(mascotuserpreloc, "PreNormBasedProSummary_v.csv")
             }
             output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+            output$viewedfileanalysisui <- renderUI({h4("2. PhosMap Matrix:")})
           }
         )
         
@@ -5128,7 +5130,7 @@ server<-shinyServer(function(input, output, session){
               file1_v = paste0(maxdemopreloc, "DemoPreNormImputeSummary_v.csv")
             }
             output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+            output$viewedfileanalysisui <- renderUI({h4("2. PhosMap Matrix:")})
           }
         )
         observeEvent(
@@ -5200,7 +5202,7 @@ server<-shinyServer(function(input, output, session){
               file1_v = paste0(maxuserpreloc, "PreNormBasedProSummary_v.csv")
             }
             output$viewedfileanalysis <- renderDataTable(df <- read.csv(file1_v))
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+            output$viewedfileanalysisui <- renderUI({h4("2. PhosMap Matrix:")})
           }
         )
         observeEvent(
@@ -5311,7 +5313,7 @@ server<-shinyServer(function(input, output, session){
         observeEvent(
           input$viewanalysispipedf, {
             output$viewedfileanalysis <- renderDataTable(summarydf_v)
-            output$viewedfileanalysisui <- renderUI({h4("2. Phosphorylation data frame:")})
+            output$viewedfileanalysisui <- renderUI({h4("2. PhosMap Matrix:")})
           }
         )
         observeEvent(
@@ -5427,7 +5429,7 @@ server<-shinyServer(function(input, output, session){
   # display profilingfile by dataframe in main
   observeEvent(
     input$analysisupload12,{
-      output$viewedfileanalysisuiuser <- renderUI(h4("2. Phosphorylation data frame:"))
+      output$viewedfileanalysisuiuser <- renderUI(h4("2. PhosMap Matrix:"))
       output$viewanalysisyourexpre <- renderUI({actionButton("viewanalysisyourdfbt", "view")})
       output$viewedfileanalysisuser <- renderDataTable({profilingfile_analysis()})
     }
@@ -5435,7 +5437,7 @@ server<-shinyServer(function(input, output, session){
   
   observeEvent(
     input$viewanalysisyourdfbt, {
-      output$viewedfileanalysisuiuser <- renderUI(h4("2. Phosphorylation data frame:"))
+      output$viewedfileanalysisuiuser <- renderUI(h4("2. PhosMap Matrix:"))
       output$viewedfileanalysisuser <- renderDataTable({profilingfile_analysis()})
     }
   )
@@ -5647,7 +5649,7 @@ server<-shinyServer(function(input, output, session){
                    col.ind = as.factor(pca()[[2]]),
                    pointshape  = 16, 
                    # config color
-                   palette = "aaas",
+                   palette = 'lancet',
                    # palette = grDevices::rainbow(length(pca()[[2]])),
                    # Concentration ellipses
                    addEllipses = FALSE,
