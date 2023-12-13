@@ -938,7 +938,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 4",
                     value = "demomascotstep4val",
-                    h4("Phosphorylation data frame:"),
+                    h4("PhosMap Matrix:"),
                     column(11,dataTableOutput("viewednorm01")),
                     column(1,downloadBttn(
                       outputId = "viewednorm01_dl",
@@ -951,7 +951,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 5",
                     value = "demomascotstep5val",
-                    h4("Phosphorylation data frame:"),
+                    h4("PhosMap Matrix:"),
                     column(11,dataTableOutput("viewednorm02")),
                     column(1,downloadBttn(
                       outputId = "viewednorm02_dl",
@@ -1013,7 +1013,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 4",
                     value = "demomascotdropprostep4val",
-                    h4("Phosphorylation data frame:"),
+                    h4("PhosMap Matrix:"),
                     column(11,dataTableOutput("viewednorm01droppro")),
                     column(1,downloadBttn(
                       outputId = "viewednorm01droppro_dl",
@@ -1270,7 +1270,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "demomaxstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("demomaxresult2")),
                     column(1,downloadBttn(
                       outputId = "demomaxresult2_dl",
@@ -1283,7 +1283,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 3",
                     value = "demomaxstep3val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("demomaxresult3")),
                     column(1,downloadBttn(
                       outputId = "demomaxresult3_dl",
@@ -1326,7 +1326,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "demomaxdropprostep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("demomaxdropproresult2")),
                     column(1,downloadBttn(
                       outputId = "demomaxdropproresult2_dl",
@@ -1510,7 +1510,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "demomaxtmtstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("demomaxtmtresult2")),
                     column(1,downloadBttn(
                       outputId = "demomaxtmtresult2_dl",
@@ -1544,7 +1544,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "usermaxtmtstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("usermaxtmtresult2")),
                     column(1,downloadBttn(
                       outputId = "usermaxtmtresult2_dl",
@@ -1576,6 +1576,14 @@ ui <- renderUI(
               panel(
                 heading = "Step1: Parser & p-site Quality Control",
                 status = "primary",
+                numericInput(
+                  "diannconfidence",
+                  "PTM.Site.Confidence threshold:",
+                  0.75,
+                  max = 1,
+                  min = 0,
+                  step = 0.01
+                ),
                 numericInput(
                   "diannptmqvalue",
                   "PTM.Q.Value threshold:",
@@ -1731,7 +1739,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "demodiannstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("demodiannresult2")),
                     column(1,downloadBttn(
                       outputId = "demodiannresult2_dl",
@@ -1765,7 +1773,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "userdiannstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("userdiannresult2")),
                     column(1,downloadBttn(
                       outputId = "userdiannresult2_dl",
@@ -1929,7 +1937,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "demosnstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("demosnresult2")),
                     column(1,downloadBttn(
                       outputId = "demosnresult2_dl",
@@ -1963,7 +1971,7 @@ ui <- renderUI(
                   tabPanel(
                     "Step 2",
                     value = "usersnstep2val",
-                    h4("Phosphorylation data frame: "),
+                    h4("PhosMap Matrix: "),
                     column(11,dataTableOutput("usersnresult2")),
                     column(1,downloadBttn(
                       outputId = "usersnresult2_dl",
@@ -2025,7 +2033,7 @@ ui <- renderUI(
                 h4("1. Experimental design file: "),
                 actionButton("viewanalysisexamdesign", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
-                h4("2. Phosphorylation data frame: "),
+                h4("2. PhosMap Matrix: "),
                 actionButton("viewanalysisexamdf", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
                 h4("3. Clinical data file[optional]: "),
@@ -2038,7 +2046,7 @@ ui <- renderUI(
                 h4("1. Experimental design file: "),
                 actionButton("viewanalysispipedesign", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
-                h4("2. Phosphorylation data frame: "),
+                h4("2. PhosMap Matrix: "),
                 actionButton("viewanalysispipedf", "view", icon("eye")),
                 hr(style = "border-style: dashed;border-color: grey;"),
                 h4("3. Clinical data file[optional]: "),
@@ -2068,7 +2076,7 @@ ui <- renderUI(
                 ),
                 uiOutput("viewanalysisyourdesign"),
                 hr(style = "border-style: dashed;border-color: grey;"),
-                h4("2. Phosphorylation data frame: "),
+                h4("2. PhosMap Matrix: "),
                 fileInput(
                   inputId = "analysisupload12",
                   label = NULL,
