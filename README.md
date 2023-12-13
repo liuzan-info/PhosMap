@@ -104,6 +104,7 @@ This tool is developed with R, so if you want to run it locally, you may do some
   install.packages('devtools')
   require(devtools)
 
+  install_version('Matrix', version = '1.5-3')
   install_github('evocellnet/ksea')
   install_github('ecnuzdd/PhosMap')
   ```
