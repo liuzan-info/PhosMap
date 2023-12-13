@@ -104,9 +104,12 @@ This tool is developed with R, so if you want to run it locally, you may do some
   install.packages('devtools')
   require(devtools)
 
-  install_version('Matrix', version = '1.5-3')
   install_github('evocellnet/ksea')
   install_github('ecnuzdd/PhosMap')
+
+  remove.packages('uwot')
+  remove.packages('Matrix')
+  devtools::install_version('uwot', version='0.1.14')
   ```
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
 
