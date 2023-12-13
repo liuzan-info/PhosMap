@@ -40,7 +40,11 @@
 
 ## Brief Description
 
-PhosMap emerges as an all-encompassing bioinformatic framework meticulously architected to bestow researchers with a harmonious and interactive data analysis experience within the domain of MS-based phosphoproteomics. Its core essence revolves around catering to label-free phosphoproteomics data procured through data-dependent acquisition (DDA) mass spectrometry. Notably, PhosMap seamlessly accommodates preprocessed data originating from either Mascot integrated in Firmiana or Andromeda derived from MaxQuant. Serving as a versatile and user-friendly platform, PhosMap extends its prowess through a trifecta of deployment options: a web server, a local graphical interface, and an R package. For users without bioinformatics skills, the web server is suitable for analyzing small data volumes. When dealing with larger data volumes, it is recommended to utilize the local graphical interface of PhosMap. Meanwhile, for users with programming skills, the locally installed graphical interface allows for convenient customization and expansion. Moreover, the PhosMap R package offers a highly flexible platform for advanced analysis.
+PhosMap emerges as an all-encompassing bioinformatic framework meticulously architected to bestow researchers with a harmonious and interactive data analysis experience within the domain of MS-based phosphoproteomics. 
+
+PhosMap is capable to handle both label-free and label-based phosphoproteomics. Moreover, PhosMap supports both the DDA- or DIA-MS phosphoproteomics data preprocessed by various types of commonly used softwares, including MaxQuant, Firmiana, Spectronaut and DIA-NN.
+
+Notably, PhosMap seamlessly accommodates preprocessed data originating from either Mascot integrated in Firmiana or Andromeda derived from MaxQuant. Serving as a versatile and user-friendly platform, PhosMap extends its prowess through a trifecta of deployment options: a web server, a local graphical interface, and an R package. For users without bioinformatics skills, the web server is suitable for analyzing small data volumes. When dealing with larger data volumes, it is recommended to utilize the local graphical interface of PhosMap. Meanwhile, for users with programming skills, the locally installed graphical interface allows for convenient customization and expansion. Moreover, the PhosMap R package offers a highly flexible platform for advanced analysis.
 
 
 The PhosMap web server can be accessed at the following URL: https://huggingface.co/spaces/Bio-Add/PhosMap.
@@ -107,9 +111,8 @@ This tool is developed with R, so if you want to run it locally, you may do some
   install_github('evocellnet/ksea')
   install_github('ecnuzdd/PhosMap')
 
-  remove.packages('uwot')
   remove.packages('Matrix')
-  devtools::install_version('uwot', version='0.1.14')
+  install_version('Matrix', version='1.5-3')
   ```
 - [6] **click "Run App".** View the file ui.R, then just click button "Run App", Phosmap will start.
 
