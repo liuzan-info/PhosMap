@@ -16,7 +16,9 @@ RUN unset ALI_TOKEN
 
 # Install dependencies
 RUN R -e "devtools::install_github(c('evocellnet/ksea', 'omarwagih/rmotifx', 'ecnuzdd/PhosMap'))"
-RUN R -e "devtools::install_version('Matrix', version='1.5-3')"
+RUN R -e "remove.packages('uwot')"
+RUN R -e "remove.packages('Matrix')"
+RUN R -e "devtools::install_version('uwot', version='0.1.14')"
 RUN sudo apt-get install -y libgtk-3-dev cmake build-essential libcurl4-gnutls-dev libxml2 libxml2-dev libodbc1 libssl-dev libv8-dev libsodium-dev&& apt-get clean
 RUN Rscript /srv/shiny-server/r_packages_install.R
 
