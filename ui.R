@@ -2695,7 +2695,7 @@ ui <- renderUI(
                   column(6,uiOutput('kseaselect2')),
                   conditionalPanel(
                     condition = "input.kseapair == 0",
-                    column(6, numericInput("kseafc", h5("FC threshold:"), 4, min = 1, step = 0.5))
+                    column(6, numericInput("kseafc", h5("FC threshold:"), 12, min = 1, step = 0.5))
                   ),
                   column(12, div(actionButton("kseaanalysisbt1", "Analysis", icon("magnifying-glass-chart"), class="analysisbutton")), style = "display:flex; justify-content:center; align-item:center;"),
                 ),

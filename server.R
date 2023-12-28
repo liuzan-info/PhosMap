@@ -4869,7 +4869,7 @@ server<-shinyServer(function(input, output, session){
       enable("sambt")
       enable("tcanalysis")
       enable("kapanalysisbt1")
-      updateNumericInput(session, "kseafc", value = 2)
+      updateNumericInput(session, "kseafc", value = 12)
       updateNumericInput(session, "tsneperplexity", value = 2)
       updateNumericInput(session, "umapneighbors", value = 5)
       enable("motifanalysisbt")
