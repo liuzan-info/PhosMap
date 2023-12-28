@@ -6888,13 +6888,7 @@ server<-shinyServer(function(input, output, session){
           annotation_col = data.frame(
             group =  ksea1()[[2]]
           )
-          print(6888)
-          print('annotation_col')
-          print(annotation_col)
-          print('ksea_value_cluster')
-          print(ksea_value_cluster)
           rownames(annotation_col) = colnames(ksea_value_cluster)
-          print(6890)
         } else {
           annotation_col = NULL
         }
