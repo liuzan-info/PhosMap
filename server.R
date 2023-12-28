@@ -6806,6 +6806,9 @@ server<-shinyServer(function(input, output, session){
       group_P_codes <- phosphorylation_experiment_design_file$Experiment_Code[phosphorylation_experiment_design_file$Group == input$kseagroup1]
       expr_data_frame1 <- expr_data_frame[c("ID", group_P_codes)]
       
+      phosphorylation_experiment_design_file = phosphorylation_experiment_design_file[c(which(phosphorylation_experiment_design_file$Group==input$kseagroup1),
+                                                                                        which(phosphorylation_experiment_design_file$Group==input$kseagroup2)),]
+      
       phosphorylation_groups_labels = unique(phosphorylation_experiment_design_file$Group)
       phosphorylation_groups = factor(phosphorylation_experiment_design_file$Group, levels = phosphorylation_groups_labels)
       # group information
@@ -6840,11 +6843,11 @@ server<-shinyServer(function(input, output, session){
           result <- data.frame(ID = id_col, df_without_id)
         }
       } else {
-        dfmean1 <- apply(expr_data_frame1, 1, mean)
-        dfmean2 <- apply(expr_data_frame2, 1, mean)
+        dfmean1 <- apply(expr_data_frame1[, -1], 1, mean)
+        dfmean2 <- apply(expr_data_frame2[, -1], 1, mean)
         FC <- dfmean2/dfmean1
         kseafc <- isolate(input$kseafc)
-        result <- expr_data_frame[(FC >= kseafc)|(FC <= 1/kseafc),]
+        result <- expr_data_frame[(FC >= kseafc)|(FC <= 1/kseafc), c("ID", group_P_codes, group_T_codes)]
       }
       list(result, group)
     }
@@ -6885,7 +6888,13 @@ server<-shinyServer(function(input, output, session){
           annotation_col = data.frame(
             group =  ksea1()[[2]]
           )
+          print(6888)
+          print('annotation_col')
+          print(annotation_col)
+          print('ksea_value_cluster')
+          print(ksea_value_cluster)
           rownames(annotation_col) = colnames(ksea_value_cluster)
+          print(6890)
         } else {
           annotation_col = NULL
         }
