@@ -2282,6 +2282,38 @@ ui <- renderUI(
                     column(12, textAreaInput("limmalabelspec", h5("specified points:"), placeholder = "NUP35_S279\nPCNP_T139\nSEPTIN9_S30\n"))
                   ),
                   column(12, div(actionButton("limmabt", "Analysis", icon("magnifying-glass-chart"), class='analysisbutton'), style = "display:flex; justify-content:center; align-item:center;"))
+                ),
+                panel(
+                  "",
+                  heading = "Heatmap Parameters Setting",
+                  status = "warning",
+                  column(12, selectInput("limmaphscale", h5("scale:"), choices = c("none", "row", "column"), selected = "row")),
+                  column(6, prettyToggle(
+                    inputId = "limmaphcluster",
+                    label_on = "cluster by row", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "no cluster",
+                    icon_off = icon("xmark"),
+                    value = TRUE
+                  )),
+                  column(6, prettyToggle(
+                    inputId = "limmaphrowname",
+                    label_on = "display row name", 
+                    icon_on = icon("check"),
+                    status_on = "info",
+                    status_off = "warning", 
+                    label_off = "miss row name",
+                    icon_off = icon("xmark"),
+                    value = F
+                  )),
+                  conditionalPanel(
+                    condition = "input.limmaphcluster == 1",
+                    column(6, selectInput("limmaphdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
+                    column(6, selectInput("limmaphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
+                  ),
+                  column(12, div(actionButton("limmaphbt", "Plot Heatmap", icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
                 )
               ),
               column(
@@ -2324,41 +2356,9 @@ ui <- renderUI(
                 )
               ),
               column(2, NULL),
-              column(12, NULL),
               column(
                 4,
-                panel(
-                  "",
-                  heading = "Heatmap Parameters Setting",
-                  status = "warning",
-                  column(12, selectInput("limmaphscale", h5("scale:"), choices = c("none", "row", "column"), selected = "row")),
-                  column(6, prettyToggle(
-                    inputId = "limmaphcluster",
-                    label_on = "cluster by row", 
-                    icon_on = icon("check"),
-                    status_on = "info",
-                    status_off = "warning", 
-                    label_off = "no cluster",
-                    icon_off = icon("xmark"),
-                    value = TRUE
-                  )),
-                  column(6, prettyToggle(
-                    inputId = "limmaphrowname",
-                    label_on = "display row name", 
-                    icon_on = icon("check"),
-                    status_on = "info",
-                    status_off = "warning", 
-                    label_off = "miss row name",
-                    icon_off = icon("xmark"),
-                    value = F
-                  )),
-                  conditionalPanel(
-                    condition = "input.limmaphcluster == 1",
-                    column(6, selectInput("limmaphdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
-                    column(6, selectInput("limmaphclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
-                  ),
-                  column(12, div(actionButton("limmaphbt", "Plot Heatmap", icon("palette"), class="plotbutton")), style = "display:flex; justify-content:center; align-item:center;")
-                )
+                NULL
               ),
               column(
                 8,
