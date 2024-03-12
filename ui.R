@@ -2967,7 +2967,50 @@ ui <- renderUI(
               ))
             )
           )
-        )
+        ),
+        # If you want to expand the software's functionality, 
+        # please uncomment the code below. 
+        # Tip: You can use the Ctrl+Shift+C shortcut to uncomment or comment the selected code.
+        # tabPanel(
+        #   "Customization",
+        #   h2("User-defined Tool", class = "tooltitle"),
+        #   h4("This module is designed for implementing user-defined functionalities. 
+        #      If you have any questions, please submit an issue on Github.", class = "toolsubtitle"),
+        #   fluidRow(
+        #     column(
+        #       4,
+        #       panel(
+        #         "",
+        #         heading = "Parameters Setting",
+        #         numericInput(
+        #           inputId = "user_num1",  # id to be used in server.R, must be unique, is not recommended to change.
+        #           label = "user_num1",  # label to show that can be changed.
+        #           value = 1,  # default number that can be changed.
+        #         ),
+        #         numericInput(
+        #           inputId = "user_num2",  # id to be used in server.R, must be unique, is not recommended to change.
+        #           label = "user_num2",  # label to show that can be changed.
+        #           value = 1,  # default number that can be changed.
+        #         ),
+        #         actionButton(
+        #           inputId = "user_button",  # id to be used in server.R, must be unique, is not recommended to change.
+        #           label = "Run", # label to show that can be changed.
+        #         )
+        #       )
+        #     ),
+        #     column(
+        #       8,
+        #       h4("Result--Table:"),  # instruction, not recommended to change.
+        #       dataTableOutput(
+        #         outputId = "user_table",  # id to be used in server.R, must be unique, is not recommended to change.
+        #       ),
+        #       h4("Result--Plot:"),  # instruction, not recommended to change.
+        #       plotOutput(
+        #         outputId = "user_plot",  # id to be used in server.R, must be unique, is not recommended to change.
+        #       )
+        #     )
+        #   )
+        # )
       ),
       tabPanel(
         "Tutorial",

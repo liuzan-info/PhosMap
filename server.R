@@ -106,6 +106,50 @@ server<-shinyServer(function(input, output, session){
   )
   
   #######################################
+  #######      Customization      #######
+  #######################################
+  # If you want to expand the software's functionality, 
+  # please uncomment the code below. 
+  # Tip: You can use the Ctrl+Shift+C shortcut to uncomment or comment the selected code.
+  # observeEvent(
+  #   input$user_button, {
+  #     # you can directly work with the data on the data upload interface, whether it is "pipeline data" or "your data".
+  #     # a total of four datasets are as follows:
+  #     # (To facilitate user understanding of the data, we have defined the functionality to display different data based on the input in the 'define operation logic' section)
+  #     ## fileset()[[1]]: experimental design dataframe
+  #     ## fileset()[[2]]: expression dataframe, the partial of PhosMap matrix
+  #     ## fileset()[[3]]: dataframe including peptide sequences, the partial of PhosMap matrix
+  #     ## fileset()[[4]]: clinical dataframe
+  #     
+  #     # define operation logic
+  #     ## load dependency
+  #     library(ggplot2)
+  #     ## retrieve input data
+  #     user_num1 = input$user_num1  # retrieve the value of the corresponding input box with id using input$id
+  #     user_num2 = input$user_num2
+  #     ## write core code to perform any operation that can be tested in advance in a normal R environment
+  #     inter_value = user_num2 + 1 - 1
+  #     plot_data <- data.frame(
+  #       x = c(1, 2, 3, 4, 5),
+  #       y = c(2, 4, 6, 8, 10)
+  #     )
+  #     
+  #     if(user_num1 == 1){
+  #       # output a table to UI
+  #       output$user_table <- renderDataTable(fileset()[[1]])  # show data
+  #     } else{
+  #       output$user_table <- renderDataTable(fileset()[[inter_value]])  # show data
+  #       
+  #       p <- ggplot(plot_data, aes(x, y)) +
+  #         geom_point()
+  #       # output a plot to UI
+  #       output$user_plot <- renderPlot(p)  # show plot
+  #     }
+  #   }
+  # )
+  
+  
+  #######################################
   #######     import data ex      #######
   #######################################
   #1.phosphoproteomics experimental design file

@@ -30,6 +30,7 @@
   - [1. Docker-based installation](#1-docker-based-installation)
   - [2. R-based installation](#2-r-based-installation)
 - [How to use](#how-to-use)
+- [How to extend](#how-to-extend)
 - [Detail of R package "PhosMap"](#detail-of-r-package-phosmap)
 - [Friendly suggestion](#friendly-suggestion)
 - [Reporting issues](#reporting-issues)
@@ -122,6 +123,100 @@ This tool is developed with R, so if you want to run it locally, you may do some
 You can find comprehensive documentation and an in-depth video tutorial on this website. https://github.com/liuzan-info/PhosMap
 
 <p id="rpackage"></p>
+
+## How to extend
+Due to its clear design and reliance solely on the _R_ language, PhosMap allows for easy customization of user-defined features. Basic knowledge of _R_ is sufficient, without the need to understand the shiny framework. We provide a step-by-step tutorial available here.
+
+1. Follow the instructions in `How to install --> R-based installation` for installation. Additionally, install the packages required for your customized functionalities.
+2. Open the `ui.R` file inside the PhosMap folder and search for the term '**Customization**.' You will then see a template with detailed annotations. You only need to **selectively** modify **the lines with annotations** according to the instructions. These codes determine the display of the graphical interface.
+   ```R
+   # If you want to expand the software's functionality, 
+   # please uncomment the code below. 
+   # Tip: You can use the Ctrl+Shift+C shortcut to uncomment or comment the selectedcode.
+   tabPanel(
+     "Customization",
+     h2("User-defined Tool", class = "tooltitle"),
+     h4("This module is designed for implementing user-defined functionalities. 
+        If you have any questions, please submit an issue on Github.", class = "toolsubtitle"),
+     fluidRow(
+       column(
+         4,
+         panel(
+           "",
+           heading = "Parameters Setting",
+           numericInput(
+             inputId = "user_num1",  # id to be used in server.R, must be unique, is not recommended to change.
+             label = "user_num1",  # label to show that can be changed.
+             value = 1,  # default number that can be changed.
+           ),
+           numericInput(
+             inputId = "user_num2",  # id to be used in server.R, must be unique, is not recommended to change.
+             label = "user_num2",  # label to show that can be changed.
+             value = 1,  # default number that can be changed.
+           ),
+           actionButton(
+             inputId = "user_button",  # id to be used in server.R, must be unique, is not recommended to change.
+             label = "Run", # label to show that can be changed.
+           )
+         )
+       ),
+       column(
+         8,
+         h4("Result--Table:"),  # instruction, not recommended to change.
+         dataTableOutput(
+           outputId = "user_table",  # id to be used in server.R, must be unique, is not recommended to change.
+         ),
+         h4("Result--Plot:"),  # instruction, not recommended to change.
+         plotOutput(
+           outputId = "user_plot",  # id to be used in server.R, must be unique, is not recommended to change.
+         )
+       )
+     )
+   )
+   ```
+3. Open the `server.R` file inside the PhosMap folder and search for the term '**Customization**.' You will then see a template with detailed annotations. We demonstrate the **data retrieval** and utilization, along with the computational core code that you can modify as desired, and how to ultimately **display data frames and images** in the UI interface. These codes determine how the calculations are performed.
+   ```R
+   # If you want to expand the software's functionality, 
+   # please uncomment the code below. 
+   # Tip: You can use the Ctrl+Shift+C shortcut to uncomment or comment the selected code.
+   observeEvent(
+     input$user_button, {
+       # you can directly work with the data on the data upload interface, whether it is   "pipeline data" or "your data".
+       # a total of four datasets are as follows:
+       # (To facilitate user understanding of the data, we have defined the functionality to   display different data based on the input in the 'define operation logic' section)
+       ## fileset()[[1]]: experimental design dataframe
+       ## fileset()[[2]]: expression dataframe, the partial of PhosMap matrix
+       ## fileset()[[3]]: dataframe including peptide sequences, the partial of PhosMap matrix
+       ## fileset()[[4]]: clinical dataframe
+       
+       # define operation logic
+       ## load dependency
+       library(ggplot2)
+       ## retrieve input data
+       user_num1 = input$user_num1  # retrieve the value of the corresponding input box with   id using input$id
+       user_num2 = input$user_num2
+       ## write core code to perform any operation that can be tested in advance in a normal   R environment
+       inter_value = user_num2 + 1 - 1
+       plot_data <- data.frame(
+         x = c(1, 2, 3, 4, 5),
+         y = c(2, 4, 6, 8, 10)
+       )
+       
+       if(user_num1 == 1){
+         # output a table to UI
+         output$user_table <- renderDataTable(fileset()[[1]])  # show data
+       } else{
+         output$user_table <- renderDataTable(fileset()[[inter_value]])  # show data
+         
+         p <- ggplot(plot_data, aes(x, y)) +
+           geom_point()
+         # output a plot to UI
+         output$user_plot <- renderPlot(p)  # show plot
+       }
+     }
+   )
+   ```
+It's straightforward, give it a try. Feel free to submit any questions as issues or contribute interesting features through pull requests. :)
 
 ## Detail of R package "PhosMap"
 https://github.com/ecnuzdd/PhosMap
