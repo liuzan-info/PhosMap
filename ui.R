@@ -2518,6 +2518,12 @@ ui <- renderUI(
                 heading = "ANOVA Parameters Setting",
                 status = "info",
                 column(6, numericInput("anovafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
+                bsTooltip(
+                  "anovafc", 
+                  "Calculation method for Fold Change (FC): Based on the experimental design file, the average of the same experimental group is calculated for each upsID, and the FC is determined as the quotient of the maximum and minimum values.",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
                 column(
                   6,
                   selectInput("anovaadjust", h5("p-values adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"), selected = "BH")
@@ -2640,7 +2646,9 @@ ui <- renderUI(
         tabPanel(
           "Kinase-Substrate Enrichment Analysis",
           h2("Kinase-Substrate Enrichment Analysis", class = "tooltitle"),
-          h4("This module is used to predict kinase activity.", class = "toolsubtitle"),
+          column(3, NULL),
+          column(6, h4("This module is used to predict kinase activity.", class = "toolsubtitle")),
+          column(3, downloadButton("dlsubkinase", HTML("<span style='color:red;'>Kinase</span>-Substrate Regulatory Relation"))),
           fluidRow(
             column(
               4,
@@ -2672,7 +2680,7 @@ ui <- renderUI(
                   heading = "KSEA Parameters Setting [Step 2]",
                   status = "warning",
                   column(6, uiOutput("kapstep2cluster")),
-                  column(6, selectInput("kapspecies", h5("species:"), choices = c("human", "mouse", "rattus"))),
+                  column(6, selectInput("kapspecies", h5("species:"), choices = c("human", "mouse", "ratttus"))),
                   column(6, selectInput("kapscale", h5("scale:"), choices = c("none", "row", "column"), selected = "none")),
                   column(6, selectInput("kapdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
                   column(6, selectInput("kapclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
@@ -2832,6 +2840,10 @@ ui <- renderUI(
           column(3, NULL),
           column(6, h4("This module is used to find and visualize enriched motifs.", class = "toolsubtitle")),
           column(3, downloadButton("dlmotifkinase", HTML("Motif-<span style='color:red;'>Kinase</span> Relation"))),
+          bsTooltip(
+            "dlmotifkinase",
+            "When you are interested in upstream kinases binding to specific motifs, you can refer to the provided Motif-Kinase Relation table to identify potential regulatory kinases."
+          ),
           # column(3, actionLink("infoLink", "Motif-Kinase Relation", class = "btn-info")),
           
           fluidRow(
