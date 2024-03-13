@@ -2840,6 +2840,10 @@ ui <- renderUI(
           column(3, NULL),
           column(6, h4("This module is used to find and visualize enriched motifs.", class = "toolsubtitle")),
           column(3, downloadButton("dlmotifkinase", HTML("Motif-<span style='color:red;'>Kinase</span> Relation"))),
+          bsTooltip(
+            "dlmotifkinase",
+            "When you are interested in upstream kinases binding to specific motifs, you can refer to the provided Motif-Kinase Relation table to identify potential regulatory kinases."
+          ),
           # column(3, actionLink("infoLink", "Motif-Kinase Relation", class = "btn-info")),
           
           fluidRow(
