@@ -7654,6 +7654,11 @@ server<-shinyServer(function(input, output, session){
     content = function(file) {file.copy("examplefile/download/motif_kinase_relation.xlsx", file)}
   )
   
+  output$dlsubkinase <- downloadHandler(
+    filename = paste0("kinase_substrate_relation_species.csv"),
+    content = function(file) {file.copy(paste0("PhosMap_datasets/kinase_substrate_regulation_relationship_table/", input$kapspecies, "/", input$kapspecies, "_ksrr.csv"), file)}
+  )
+  
   ###download###
   #maxquant label-free
   output$demomaxresult1_dl <- downloadHandler(filename = function(){paste("quality_control_result", userID,".csv",sep="")},content = function(file){file.copy(paste0(maxdemopreloc, "DemoPreQc.csv"), file)})

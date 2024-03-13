@@ -2646,7 +2646,9 @@ ui <- renderUI(
         tabPanel(
           "Kinase-Substrate Enrichment Analysis",
           h2("Kinase-Substrate Enrichment Analysis", class = "tooltitle"),
-          h4("This module is used to predict kinase activity.", class = "toolsubtitle"),
+          column(3, NULL),
+          column(6, h4("This module is used to predict kinase activity.", class = "toolsubtitle")),
+          column(3, downloadButton("dlsubkinase", HTML("<span style='color:red;'>Kinase</span>-Substrate Regulatory Relation"))),
           fluidRow(
             column(
               4,
@@ -2678,7 +2680,7 @@ ui <- renderUI(
                   heading = "KSEA Parameters Setting [Step 2]",
                   status = "warning",
                   column(6, uiOutput("kapstep2cluster")),
-                  column(6, selectInput("kapspecies", h5("species:"), choices = c("human", "mouse", "rattus"))),
+                  column(6, selectInput("kapspecies", h5("species:"), choices = c("human", "mouse", "ratttus"))),
                   column(6, selectInput("kapscale", h5("scale:"), choices = c("none", "row", "column"), selected = "none")),
                   column(6, selectInput("kapdistance", h5("clustering distance rows:"), choices = c("euclidean", "correlation"), selected = "euclidean")),
                   column(6, selectInput("kapclusmethod", h5("clustering method:"), choices = c("ward.D2", "ward.D", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "ward.D2")),
