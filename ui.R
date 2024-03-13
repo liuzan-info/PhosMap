@@ -2518,6 +2518,12 @@ ui <- renderUI(
                 heading = "ANOVA Parameters Setting",
                 status = "info",
                 column(6, numericInput("anovafc", h5("FC threshold:"), 2, min = 1, step = 0.5)),
+                bsTooltip(
+                  "anovafc", 
+                  "Calculation method for Fold Change (FC): Based on the experimental design file, the average of the same experimental group is calculated for each upsID, and the FC is determined as the quotient of the maximum and minimum values.",
+                  placement = "right", 
+                  options = list(container = "body")
+                ),
                 column(
                   6,
                   selectInput("anovaadjust", h5("p-values adjust method:"), choices = c("none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"), selected = "BH")
