@@ -1,0 +1,121 @@
+{
+    "configVer": "1.0",
+    "activeUID": "4746035f70bf415aa9e9b0777e93671d",
+    "userList": [
+     {
+      "userId": "4746035f70bf415aa9e9b0777e93671d",
+      "nickname": "177***418",
+      "accountName": "177***418",
+      "workdir": "/",
+      "workdirFileEntity": {
+       "driveId": "",
+       "domainId": "",
+       "fileId": "root",
+       "fileName": "/",
+       "fileSize": 0,
+       "fileType": "folder",
+       "createdAt": "",
+       "updatedAt": "",
+       "fileExtension": "",
+       "uploadId": "",
+       "parentFileId": "",
+       "crc64Hash": "",
+       "contentHash": "",
+       "contentHashName": "",
+       "path": "/",
+       "category": "",
+       "syncFlag": false,
+       "syncMeta": ""
+      },
+      "resourceWorkdir": "",
+      "resourceWorkdirFileEntity": {
+       "driveId": "",
+       "domainId": "",
+       "fileId": "",
+       "fileName": "",
+       "fileSize": 0,
+       "fileType": "",
+       "createdAt": "",
+       "updatedAt": "",
+       "fileExtension": "",
+       "uploadId": "",
+       "parentFileId": "",
+       "crc64Hash": "",
+       "contentHash": "",
+       "contentHashName": "",
+       "path": "",
+       "category": "",
+       "syncFlag": false,
+       "syncMeta": ""
+      },
+      "albumWorkdir": "",
+      "albumWorkdirFileEntity": {
+       "driveId": "",
+       "domainId": "",
+       "fileId": "",
+       "fileName": "",
+       "fileSize": 0,
+       "fileType": "",
+       "createdAt": "",
+       "updatedAt": "",
+       "fileExtension": "",
+       "uploadId": "",
+       "parentFileId": "",
+       "crc64Hash": "",
+       "contentHash": "",
+       "contentHashName": "",
+       "path": "",
+       "category": "",
+       "syncFlag": false,
+       "syncMeta": ""
+      },
+      "activeDriveId": "1601734720",
+      "driveList": [
+       {
+        "driveId": "1601734720",
+        "driveName": "备份盘",
+        "driveTag": "File"
+       },
+       {
+        "driveId": "",
+        "driveName": "资源库",
+        "driveTag": "Resource"
+       },
+       {
+        "driveId": "576163472",
+        "driveName": "相册",
+        "driveTag": "Album"
+       }
+      ],
+      "ticketId": "88c7d842e5ae4c038132fdc98dde0bce",
+      "webapiToken": {
+       "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0NzQ2MDM1ZjcwYmY0MTVhYTllOWIwNzc3ZTkzNjcxZCIsImN1c3RvbUpzb24iOiJ7XCJjbGllbnRJZFwiOlwicEpaSW5OSE4yZFpXazhxZ1wiLFwiZG9tYWluSWRcIjpcImJqMjlcIixcInNjb3BlXCI6W1wiRFJJVkUuQUxMXCIsXCJGSUxFLkFMTFwiLFwiVklFVy5BTExcIixcIlNIQVJFLkFMTFwiLFwiU1RPUkFHRS5BTExcIixcIlNUT1JBR0VGSUxFLkxJU1RcIixcIlVTRVIuQUxMXCIsXCJCQVRDSFwiLFwiQUNDT1VOVC5BTExcIixcIklNQUdFLkFMTFwiLFwiSU5WSVRFLkFMTFwiLFwiU1lOQ01BUFBJTkcuTElTVFwiXSxcInJvbGVcIjpcInVzZXJcIixcInJlZlwiOlwiXCIsXCJkZXZpY2VfaWRcIjpcIjdkNDZmZWM4MTJjNTQ5MTVhYTllMzFkZTg0Mzg5MzIwXCJ9IiwiZXhwIjoxNzEwODIzNDgyLCJpYXQiOjE3MTA4MTYyMjJ9.Qho_As5hx4cGQDaNT58rzXhbVIOdVydR8j5UR2JmkGi5uQOnA9Yp6OGpM3_9TNPwoeXzKQDJvp8MUVutLR-IBop69r4Akp7R9grprvZicknBtj8l2gBXRNQ8D0gHIX-_mHNurS5L9xzbG0xhF81YtZXoZeCgCsUQI8rN4iJ4SYo",
+       "expired": 1710823482
+      },
+      "openapiToken": {
+       "accessToken": "eyJraWQiOiJLcU8iLCJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NzQ2MDM1ZjcwYmY0MTVhYTllOWIwNzc3ZTkzNjcxZCIsImF1ZCI6ImNmOWY3MGU4ZmM2MTQzMGY4ZWM1YWI1Y2FkZjMxMzc1IiwicyI6ImNkYSIsImQiOiIxNjAxNzM0NzIwIiwiaXNzIjoiYWxpcGFuIiwiZXhwIjoxNzEwODIzNDY5LCJpYXQiOjE3MTA4MTYyNjYsImp0aSI6IjM3ZjMwODg4NGIyYjRhN2Q4NjE2NmU0OGJiZGYxYzQyIn0.twISqYzM1rhjgZwTaqfxz74dV1IO1ycAkZy2xkwwGoQ",
+       "expired": 1710823466
+      }
+     }
+    ],
+    "cacheSize": 0,
+    "maxDownloadParallel": 0,
+    "maxUploadParallel": 0,
+    "maxDownloadRate": 0,
+    "maxUploadRate": 0,
+    "saveDir": "/data/home/lz/Downloads",
+    "proxy": "",
+    "localAddrs": "",
+    "preferIPType": "ipv4",
+    "updateCheckInfo": {
+     "preferUpdateSrv": "",
+     "latestVer": "v0.3.0",
+     "checkTime": 1710814819
+    },
+    "videoFileExtensions": "mp4,flv,mkv,mov,rm,rmvb,wmv,wma,mv,asf,asx,mpg,mpeg,mpe,3gp,m4v,avi,vob",
+    "fileRecordConfig": "2",
+    "deviceId": "ZkxkSZxRmHyYwAvrjtX3kD9m",
+    "deviceName": "Chrome浏览器",
+    "clientId": "cf9f70e8fc61430f8ec5ab5cadf31375",
+    "clientSecret": ""
+   }

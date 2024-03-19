@@ -35,4 +35,3 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/phosmap:1.0.0
           build-args: |
             GITHUB_TOKEN=${{ secrets.BYPY_PAT_GITHUB }}
-            ALI_TOKEN=${{ secrets.ALIYUN_TOKEN }}
