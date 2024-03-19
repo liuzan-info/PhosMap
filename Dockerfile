@@ -2,7 +2,7 @@ FROM rocker/shiny-verse:4.2.3
 COPY . /srv/shiny-server
 RUN chown -R shiny:shiny /srv/shiny-server
 WORKDIR /srv/shiny-server
-
+RUN ls /srv/shiny-server
 # Config aliyunpan for download PhosMap datasets
 ARG GITHUB_TOKEN
 ENV GITHUB_TOKEN=${GITHUB_TOKEN}
