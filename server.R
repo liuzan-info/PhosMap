@@ -3327,7 +3327,7 @@ server<-shinyServer(function(input, output, session){
         output$usermaxnoproresult2 <- renderDataTable(summarydf_view)
         output$usermaxdropproresult2 <- renderDataTable(summarydf_view)
         
-        write.csv(summarydf_view, paste0(maxuserpreloc, "PreNormImputeSummary.csv"), row.names = F)
+        write.csv(summarydf_view, paste0(maxuserpreloc, "PreNormImputeSummary_v.csv"), row.names = F)
         write.csv(summarydf, paste0(maxuserpreloc, "PreNormImputeSummary.csv"))
 
         updateTabsetPanel(session, "usermaxresultnav", selected = "usermaxstep2val")
