@@ -2,7 +2,7 @@
 <div align="center">
   <img src="www/logo.svg" width="200"/>
   <div>&nbsp;</div>
-  <b>An Ensemble Bioinformatic Platform to Empower One-stop Interactive Analysis of Quantitative Phosphoproteomics.</b>
+  <b>An Ensemble Bioinformatic Platform to Empower Interactive Analysis of Quantitative Phosphoproteomics.</b>
   <div>&nbsp;</div>
 
 [![Docker Image CI](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/liuzan-info/PhosMap/actions/workflows/docker-image.yml)
@@ -242,7 +242,14 @@ Please feel free to submit a pull request, and we will respond promptly to revie
 <p id="citation"></p>
 
 ## Citation
-If you find this project useful in your research, please consider cite:
-```
-Forthcoming...
-```
+<b>If you find this project useful in your research, please consider cite:</b>
+
+Mengsha Tong, Zan Liu, Jiaao Li, Xin Wei, Wenhao Shi, Chenyu Liang, Chunyu Yu, Rongting Huang, Yuxiang Lin, Xinkang Wang, Shun Wang, Yi Wang, Jialiang Huang, Yini Wang, Tingting Li, Jun Qin, Dongdong Zhan, Zhi-Liang Ji,
+PhosMap: An ensemble bioinformatic platform to empower interactive analysis of quantitative phosphoproteomics,
+Computers in Biology and Medicine,
+2024,
+108391,
+ISSN 0010-4825,
+https://doi.org/10.1016/j.compbiomed.2024.108391.
+(https://www.sciencedirect.com/science/article/pii/S001048252400475X)
+
